@@ -21,27 +21,27 @@ typedef enum {
 } Rank;
 
 typedef struct card {
-	int rank;
-	int suit;
+	Rank rank;
+	Suit suit;
 	struct card *next;
 } card;
 
-typedef struct card_node {
-	card *value;
-	struct card_node *next_card;
-} card_node;
 
 typedef struct pile {
-	card_node *head;
+	card *head;
 	int num_cards;
 } pile;
 
 int is_black(card *c);
 
+
+int is_red(card *c);
+
 int is_alternate_color(card *first, card *second);
 
 int is_in_sequence(card *higher, card *lower);
 
+int can_be_placed_bottom(card *parent, card *child);
 int is_same_suit(card *first, card *second);
 
 

@@ -1,6 +1,6 @@
 #include "cards.h"
 
-pile *make_pile(int num, card_node *head);
+pile *make_pile(int num, card *head);
 
 void push(pile *pile, card *card);
 
@@ -16,4 +16,4 @@ card *peek(pile *pile);
 
 card *peek_last(pile *pile);
 
-void delete1(pile *pile, card *card);
+void remove_card(pile *pile, card *card);
