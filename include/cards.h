@@ -1,3 +1,6 @@
+#ifndef CARDS_H
+#define CARDS_H
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,3 +51,4 @@ int is_same_suit(Card *first, Card *second);
 
 
 Card *make_card(Suit x, Rank y);
+#endif

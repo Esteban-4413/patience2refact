@@ -1,3 +1,6 @@
+#ifndef STACK_H
+#define STACK_H
+
 #include "cards.h"
 
 Pile *make_pile(int num, Card *head);
@@ -17,3 +20,5 @@ Card *peek(Pile *pile);
 Card *peek_last(Pile *pile);
 
 void remove_card(Pile *pile, Card *card);
+
+#endif

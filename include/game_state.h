@@ -1,4 +1,6 @@
-#include "cards.h"
+#ifndef GAME_STATE_H
+#define GAME_STATE_H
+
 #include "stack.h"
 
 #define MAX_UNDO 5
@@ -40,3 +42,5 @@ typedef struct {
 
 void fill_deck(Pile *pile);
 void shuffle_pile(Pile *pile);
+
+#endif
