@@ -1,19 +1,19 @@
 #include "cards.h"
 
-pile *make_pile(int num, card *head);
+Pile *make_pile(int num, Card *head);
 
-void push(pile *pile, card *card);
+void push(Pile *pile, Card *card);
 
-card *pop(pile *pile);
+Card *pop(Pile *pile);
 
-card *shift(pile *pile);
+Card *shift(Pile *pile);
 
-void unshift(pile *pile, card *card);
+void unshift(Pile *pile, Card *card);
 
-card *peek_card_at(pile *pile, int index);
+Card *peek_card_at(Pile *pile, int index);
 
-card *peek(pile *pile);
+Card *peek(Pile *pile);
 
-card *peek_last(pile *pile);
+Card *peek_last(Pile *pile);
 
-void remove_card(pile *pile, card *card);
+void remove_card(Pile *pile, Card *card);

@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #define CARD_COUNT 52
@@ -24,25 +25,26 @@ typedef struct card {
 	Rank rank;
 	Suit suit;
 	struct card *next;
-} card;
+} Card;
 
 
 typedef struct pile {
-	card *head;
+	Card *head;
 	int num_cards;
-} pile;
+	// uint8_t rules;
+} Pile;
 
-int is_black(card *c);
-
-
-int is_red(card *c);
-
-int is_alternate_color(card *first, card *second);
-
-int is_in_sequence(card *higher, card *lower);
-
-int can_be_placed_bottom(card *parent, card *child);
-int is_same_suit(card *first, card *second);
+int is_black(Card *c);
 
 
-card *make_card(Suit x, Rank y);
+int is_red(Card *c);
+
+int is_alternate_color(Card *first, Card *second);
+
+int is_in_sequence(Card *higher, Card *lower);
+
+int can_be_placed_bottom(Card *parent, Card *child);
+int is_same_suit(Card *first, Card *second);
+
+
+Card *make_card(Suit x, Rank y);

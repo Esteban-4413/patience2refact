@@ -1,13 +1,13 @@
 #include "../include/stack.h"
 
-pile *make_pile(int num, card *head) {
-	pile *p = malloc(sizeof(struct pile));
+Pile *make_pile(int num, Card *head) {
+	Pile *p = malloc(sizeof(Pile));
 	p->num_cards = num;
 	p->head = head;
 	return p;
 }
 
-void push(pile *pile, card *c) {
+void push(Pile *pile, Card *c) {
 	if (pile == NULL || c == NULL)
 		return;
 	c->next = pile->head;
@@ -15,33 +15,33 @@ void push(pile *pile, card *c) {
 	pile->num_cards++;
 }
 
-card *pop(pile *pile) {
+Card *pop(Pile *pile) {
 	if (pile == NULL)
 		return NULL;
-	card *r = pile->head;
+	Card *r = pile->head;
 	pile->head = pile->head->next;
 	pile->num_cards--;
 	return r;
 }
 
-card *shift(pile *p) {
+Card *shift(Pile *p) {
 	if (p == NULL || p->head == NULL)
 		return NULL;
-	card **indirect = &(p->head);
+	Card **indirect = &(p->head);
 	while ((*indirect)->next != NULL) {
 		indirect = (&(*indirect)->next);
 	}
-	card *last_card = *indirect;
+	Card *last_card = *indirect;
 	*indirect = NULL;
 	p->num_cards--;
 	return last_card;
 }
 
-void unshift(pile *p, card *c) {
+void unshift(Pile *p, Card *c) {
 	if (p == NULL || c == NULL)
 		return;
 	c->next = NULL;
-	card **indirect = &(p->head);
+	Card **indirect = &(p->head);
 	while ((*indirect)->next != NULL) {
 		indirect = (&(*indirect)->next);
 	}
@@ -49,32 +49,32 @@ void unshift(pile *p, card *c) {
 	p->num_cards++;
 }
 
-card *peek_card_at(pile *pile, int index) {
+Card *peek_card_at(Pile *pile, int index) {
 	if (pile == NULL || index < 0)
 		return NULL;
-	card *r = pile->head;
+	Card *r = pile->head;
 	for (int i = 0; i < index && r != NULL; i++) {
 		r = r->next;
 	}
 	return r;
 }
 
-card *peek(pile *pile) { return (pile == NULL) ? NULL : (pile->head); }
+Card *peek(Pile *pile) { return (pile == NULL) ? NULL : (pile->head); }
 
-card *peek_last(pile *pile) {
+Card *peek_last(Pile *pile) {
 	if (pile == NULL)
 		return NULL;
-	card *r = pile->head;
+	Card *r = pile->head;
 	while (r->next != NULL) {
 		r = r->next;
 	}
 	return r;
 }
 
-void remove_card(pile *p, card *c) {
+void remove_card(Pile *p, Card *c) {
 	if (p == NULL || p->head == NULL || c == NULL)
 		return;
-	card **indirect = &(p->head);
+	Card **indirect = &(p->head);
 	while (*indirect != NULL && *indirect != c) {
 		indirect = (&(*indirect)->next);
 	}
