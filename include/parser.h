@@ -12,5 +12,15 @@ GameDefinition *incializa_estado(void);
 
 void cmd_mov(char *buffer, GameDefinition *def, bool is_auto);
 
-void cmd_tipo(char *buffer, GameDefinition *def);
+void cmd_class(char *buffer, GameDefinition *def);
+
+void cmd_init(char *buffer, GameDefinition *est);
+
+void cmd_win(char *buffer, GameDefinition *def);
+
+void what_command(char *comando, char *buffer, GameDefinition *def);
+
+int process_line(char *buffer, GameDefinition *def);
+
+GameDefinition *load_paciencia(char *ficheiro);
 #endif
