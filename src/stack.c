@@ -59,9 +59,9 @@ Card *peek_card_at(Pile *pile, int index) {
 	return r;
 }
 
-Card *peek(Pile *pile) { return (pile == NULL) ? NULL : (pile->head); }
+Card *peek_pile(Pile *pile) { return (pile == NULL) ? NULL : (pile->head); }
 
-Card *peek_last(Pile *pile) {
+Card *peek_last_pile(Pile *pile) {
 	if (pile == NULL)
 		return NULL;
 	Card *r = pile->head;

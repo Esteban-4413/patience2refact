@@ -15,9 +15,9 @@ void unshift(Pile *pile, Card *card);
 
 Card *peek_card_at(Pile *pile, int index);
 
-Card *peek(Pile *pile);
+Card *peek_pile(Pile *pile);
 
-Card *peek_last(Pile *pile);
+Card *peek_last_pile(Pile *pile);
 
 void remove_card(Pile *pile, Card *card);
 

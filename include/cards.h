@@ -34,7 +34,7 @@ typedef struct card {
 typedef struct pile {
 	Card *head;
 	int num_cards;
-	// uint8_t rules;
+	uint32_t rules;
 } Pile;
 
 int is_black(Card *c);
