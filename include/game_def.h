@@ -39,7 +39,7 @@ typedef enum {
 } PileFlags;
 
 typedef struct {
-	char nome[20];
+	char name[20];
 	bool visible_all;
 	bool visible_none;
 	bool visible_top_only;

@@ -2,7 +2,7 @@
 #define UNDO_H
 
 
-#define MAX_UNDO
+#define MAX_UNDO 5
 
 typedef struct {
 	int src_pile;	// Pile from which the cards are going to be removed
