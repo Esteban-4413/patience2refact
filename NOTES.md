@@ -15,35 +15,38 @@ Crucially, we will **retain the custom DSL parser** that makes this engine gener
 ## 3. What Needs Refactoring
 
 - **Card Representation:** Move from `char` combinations (`'10'`, `'S'`) to strict `enums` (`Rank`, `Suit`).
-- **Stack Representation (`PILHA`):** Move from `CARTAS pilha[52]` (static arrays) to a pointer-based Linked List (`card *topo`).
-- **Movement Logic (`move.c`):** Replace $O(N)$ array shifting loops with $O(1)$ pointer reassignment.
-- **Validation Rules:** Map DSL flags (e.g., `~`, `v`) directly to highly optimized atomic C functions (`is_alternate_color`, `is_in_sequence`).
+- **Stack Representation (`PILHA`):** Move from `CARTAS pilha[52]` (static arrays) to a pointer-based Linked List (`card *head`).
+- **Movement Logic (`move.c`):** Replace O(N) array shifting loops with O(1) pointer reassignment.
+- **Validation Rules:** Map DSL flags (e.g., `~`, `v`) directly to highly optimized atomic C functions using **Bitwise Flags** (`uint32_t`).
 
 ## 4. Development Plan (Step-by-Step)
 
-### Phase 1: Core Data Structures (Foundation)
+### Phase 1: Core Data Structures (Foundation) - [COMPLETED]
 
-- [ ] Define `Suit` and `Rank` enums in `card.h`.
-- [ ] Create the `card` struct as a linked list node (`struct card *next_card`).
-- [ ] Refactor `PILHA` in `gamestate.h` to hold a `card *topo` pointer and an integer `tamanho`.
-- [ ] Implement atomic list operations in `stack.c`: `push_card`, `pop_card`, `move_sublist(source, dest, count)`.
+- [x] Define `Suit` and `Rank` enums in `cards.h`.
+- [x] Create the `card` struct as a linked list node (`struct card *next`).
+- [x] Refactor stack in `stack.h` (`pile`) to hold a `card *head` pointer, `num_cards`, and `uint32_t rules`.
+- [x] Implement atomic list operations in `stack.c`: `push`, `pop`, `shift`, `unshift`, `make_card`.
 
-### Phase 2: Adaptation of the Game State & Parser
+### Phase 2: Adaptation of the Game State & Parser - [IN PROGRESS]
 
-- [ ] Update `le_carta` to convert string inputs directly into Enum values.
-- [ ] Update `parse_linha_pilha` to build linked lists instead of filling static arrays.
-- [ ] Implement the atomic validation functions (`is_black`, `is_alternate_color`, `is_in_sequence`).
+- [x] Separate concerns into `gamedef.h` (Static Rules/Manual) and `game_state.h` (Dynamic Board).
+- [x] Implement Bitwise Flags (`F_SEQUENCE`, `F_DESCENDING`, etc.) to translate the DSL string rules.
+- [x] Update `parser.c` to parse `.paciencia` files completely without `realloc` (using static arrays in `GameDefinition`).
+- [x] Implement History/Undo as a circular buffer array.
+- [ ] Implement `loader.c`: Build the physical table (List of `pile`s) based on `GameDefinition` `INIT` commands.
+- [ ] Complete `game_state.c`: Functions to initialize the dynamic board (`game_state`), populate the `STOCK` with 52 cards (`fill_deck`), and shuffle.
 
 ### Phase 3: Movement & Engine Logic
 
-- [ ] Refactor `move.c`. Moving a stack of cards should now only involve changing the `next_card` pointer of the boundary cards.
-- [ ] Map DSL constraints to the new atomic validation functions.
-- [ ] Optimize `verifica_vitoria` to check the `tamanho` variable of the target stacks.
+- [ ] Refactor `move.c`. Moving a stack of cards should now only involve changing the `next` pointer of the boundary cards.
+- [ ] Map Bitwise Flags constraints to the new atomic validation functions (e.g., `if (rules & F_DESCENDING)`).
+- [ ] Optimize `verifica_vitoria` to check the `target_card_count` inside `win_conditions`.
 
 ### Phase 4: Save/Load & Undo Systems
 
+- [ ] Refactor `undo.c` using the circular buffer. Save `src_pile`, `dest_pile`, and `card_count` to easily revert pointer logic.
 - [ ] Refactor `save_game` to traverse the linked list from bottom to top and map Enums back to strings (`10S`, `AH`) for the `.txt` output.
-- [ ] Refactor `undo.c`. If using a deep copy for the history, implement a `clone_list` function to safely copy the state pointers.
 
 ### Phase 5: UI Integration & Debugging
 
@@ -53,5 +56,6 @@ Crucially, we will **retain the custom DSL parser** that makes this engine gener
 
 ## 6. Immediate TO-DOs (Next Session)
 
-- [ ] Finish writing the `stack.c` linked list helpers.
-- [ ] Test the `push` and `pop` functions in isolation (create a temporary `test_linked_list.c`) before plugging them into the game engine.
+- [ ] Create `loader.c` to consume the `GameDefinition` pointer from the parser.
+- [ ] Implement `fill_deck` and `shuffle` in `game_state.c` to generate the physical cards (`make_card`) before distributing them.
+- [ ] Connect the dynamic `game_state` with the parsed `.paciencia` logic.
