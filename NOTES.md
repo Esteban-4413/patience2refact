@@ -40,8 +40,24 @@ Crucially, we will **retain the custom DSL parser** that makes this engine gener
 ### Phase 3: Movement & Engine Logic
 
 - [ ] Refactor `move.c`. Moving a stack of cards should now only involve changing the `next` pointer of the boundary cards.
-- [ ] Map Bitwise Flags constraints to the new atomic validation functions (e.g., `if (rules & F_DESCENDING)`).
 - [ ] Optimize `verifica_vitoria` to check the `target_card_count` inside `win_conditions`.
+- [ ] Map Bitwise Flags constraints to the new atomic validation functions (e.g., `if (rules & F_DESCENDING)`).
+
+#### Phase 3.0: Validate a move (I would do this first)
+- [ ] Based on the ints given by the `move.src_pile` and the `move.dest_pile` set the pointers to acctual piles `source` and `destiny`, repectively. 
+- [ ] With the `move.column_out` we have the exact column where the card that was cliked is (see Note 1). Set a pointer that poinst exactly to the card that was clicked. 
+- [ ] Also setting a pointer to the card on top of the pile `destiny` is necessarie.
+- [ ] Working with linked lists makes necessary to not just keep a pointer in the card cliked(in column n), but also in the one in the column n-1 (so the next_card can be set as NULL
+ if the move is valid).
+- [ ] Implement a function that before taking care off the cards to be moved, verificade if the PileClass
+- [ ] Having a way to directly access the cards we need, we can then run the flags test on them. 
+
+> [!info] - Note 1
+> Was discussed that the columns of a pile will ne numered as the last node/card of the pile will be the column 0, while the head node/card on the pile will be the last column. 
+> So basicaly, the columns number increase in the oposite way from the way we read the linked list that is the pile. 
+> That said, when to find the card in the column n, we go thought the pile, car by card, as it has to be, with a counter (`count = num_cartas`), num_cartas being the number of card 
+> that the pile contains, and istead of incresing one each time we move to the next_card int decreases one.  
+> And it simply stops when the count == n. 
 
 ### Phase 4: Save/Load & Undo Systems
 
