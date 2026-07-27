@@ -20,5 +20,7 @@ typedef struct {
 
 Card *fill_deck(Pile *pile);
 void shuffle_pile(Card *deck);
+void swap(Card *deck, int a, int b);
+
 
 #endif

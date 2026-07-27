@@ -41,11 +41,9 @@ typedef struct card {
 typedef struct {
 	Card *head;
 	int num_cards;
-	uint32_t rules;
 } Pile;
 
 int is_black(Card *c);
-
 
 int is_red(Card *c);
 

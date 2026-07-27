@@ -4,7 +4,7 @@ Card *fill_deck(Pile *pile) {
 	if (pile == NULL)
 		return NULL;
 	Card *deck = malloc(52 * sizeof(*deck));
-	for (int i = 0; i <= 52; i++) {
+	for (int i = 0; i < 52; i++) {
 		for (int rank = 0; rank <= RANK_COUNT; rank++) {
 			for (int suit = 0; suit <= SUIT_COUNT; suit++) {
 				deck[i].rank = rank;
@@ -15,4 +15,20 @@ Card *fill_deck(Pile *pile) {
 	return deck;
 }
 
-void shuffle_pile(Card *deck) { return; }
+void shuffle_pile(Card *deck) {
+    if (deck == NULL) return;
+    for(int i = 0; i < 52; i++) {
+        int idx = rand() % (i+1);
+        swap(deck, idx, i);
+    }
+}
+
+
+void swap(Card *deck, int a, int b){
+    Card temp;
+    temp.rank= deck[a].rank;
+    temp.suit=deck[a].suit;
+
+    deck[a] = deck[b];
+    deck[b] = temp;
+}
