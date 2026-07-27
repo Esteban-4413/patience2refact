@@ -22,5 +22,5 @@ void what_command(char *comando, char *buffer, GameDefinition *def);
 
 int process_line(char *buffer, GameDefinition *def);
 
-GameDefinition *load_paciencia(char *ficheiro);
+GameDefinition *load_patience(char *ficheiro);
 #endif

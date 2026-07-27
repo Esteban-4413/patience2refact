@@ -4,7 +4,7 @@
 uint32_t parse_move_flags(char *flags_str) {
 	uint32_t flags = 0;
 
-	for (int i; flags_str[i] != '\0'; i++) {
+	for (int i = 0; flags_str[i] != '\0'; i++) {
 		switch (flags_str[i]) {
 		case '*':
 			flags |= F_NONE; // same as writing flags = flags | F_NONE;
@@ -98,7 +98,6 @@ void cmd_class(char *buffer, GameDefinition *def) {
 		return;
 
 	char cmd[32], name_class[20], flags_str[10];
-	int num_cards;
 	flags_str[0] = '\0';
 	sscanf(buffer, "%s %s %s", cmd, name_class, flags_str);
 
@@ -180,7 +179,7 @@ int process_line(char *buffer, GameDefinition *def) {
 	return 1;
 }
 
-GameDefinition *load_paciencia(char *ficheiro) {
+GameDefinition *load_patience(char *ficheiro) {
 	GameDefinition *def = incializa_estado();
 	FILE *paciencia = fopen(ficheiro, "r");
 	char buffer[255];
