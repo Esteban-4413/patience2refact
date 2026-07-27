@@ -28,15 +28,6 @@ void close_input_buffer(InputBuffer *input_buffer) {
 	free(input_buffer);
 }
 
-void print_deck_arr(Card *deck_arr) {
-	for (int i = 0; i < 52; i++) {
-		printf(" |%d %d| ", deck_arr[i].suit, deck_arr[i].rank);
-		if (i != 0 && i % 13 == 0)
-			printf("\n");
-	}
-	printf("Done!\n");
-}
-
 GameCommand parse_command(InputBuffer *input_buffer) {
 	GameCommand cmd;
 	char keyword[20];
@@ -85,19 +76,14 @@ void run_cli(Card *deck_arr) {
 				printf("Game loaded hehe\n");
 			break;
 		case CMD_PRINT:
-			if (current_game == NULL)
-				printf("First load your game\n");
-			else {
-				printf("Here is your game");
-
-				print_deck_arr(deck_arr);
-			}
+			printf("Here is your game\n");
+			print_deck_arr(deck_arr);
 			break;
 
 		case CMD_SHUFFLE:
 			printf("Shuffling the cards..\n");
 			shuffle_pile(deck_arr);
-			printf("Shuffled\n");
+			printf("Shuffled!\n");
 			print_deck_arr(deck_arr);
 			break;
 		case CMD_UNRECOGNIZED:

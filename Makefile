@@ -1,7 +1,7 @@
-jogo: card.o game_state.o parser.o stack.o undo.o src/main.c
+jogo: card.o game_state.o parser.o stack.o undo.o cli.o src/main.c
 	gcc -Wall -g $^ -o $@ -lncursesw
 
-mac: card.o game_state.o parser.o stack.o undo.o src/main.c
+mac: card.o game_state.o parser.o stack.o undo.o cli.o src/main.c
 	gcc -Wall -g $^ -o jogo -lncurses
 
 card.o: src/cards.c
@@ -19,6 +19,8 @@ stack.o: src/stack.c
 undo.o: src/undo.c
 	gcc -Wall -g $^ -c -o $@
 
+cli.o: src/cli.c
+	gcc -Wall -g $^ -c -o $@
 
 clean:
-	-rm -f card.o game_state.o parser.o stack.o undo.o jogo save.txt
+	-rm -f card.o game_state.o parser.o stack.o undo.o jogo save.txt cli.o jogo.dSYM
