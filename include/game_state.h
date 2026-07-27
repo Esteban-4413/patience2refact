@@ -19,8 +19,9 @@ typedef struct {
 
 
 Card *fill_deck(Pile *pile);
-void shuffle_pile(Card *deck);
-void swap(Card *deck, int a, int b);
+void shuffle_pile(Card *deck_arr);
+void swap(Card *deck_arr, int a, int b);
+Pile *arr2llist(Card **deck, int num_cards);
 
 
 #endif

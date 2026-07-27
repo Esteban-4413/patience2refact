@@ -5,4 +5,5 @@
 
 #include <stdbool.h>
 
-void print_deck(Card *deck);
+void print_deck_arr(Card *deck_arr);
+void print(Pile *deck_llist);
