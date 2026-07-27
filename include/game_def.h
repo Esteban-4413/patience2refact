@@ -37,6 +37,7 @@ typedef enum {
 	F_BOTTOM_KING = 1 << 18 // K Fundo a mover deve ser Rei
 
 } PileFlags;
+
 typedef struct {
 	char pile_name[20];
 	int num_cards;

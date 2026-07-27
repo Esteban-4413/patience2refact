@@ -6,7 +6,13 @@
 #include <stdlib.h>
 #define CARD_COUNT 52
 
-typedef enum { SUIT_HEART, SUIT_SPADE, SUIT_CLUB, SUIT_DIAMOND } Suit;
+typedef enum {
+	SUIT_HEART,
+	SUIT_SPADE,
+	SUIT_CLUB,
+	SUIT_DIAMOND,
+	SUIT_COUNT
+} Suit;
 
 typedef enum {
 	RANK_ACE,
@@ -21,7 +27,8 @@ typedef enum {
 	RANK_10,
 	RANK_JACK,
 	RANK_QUEEN,
-	RANK_KING
+	RANK_KING,
+	RANK_COUNT
 } Rank;
 
 typedef struct card {
@@ -31,7 +38,7 @@ typedef struct card {
 } Card;
 
 
-typedef struct pile {
+typedef struct {
 	Card *head;
 	int num_cards;
 	uint32_t rules;

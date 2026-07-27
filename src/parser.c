@@ -98,11 +98,13 @@ void cmd_class(char *buffer, GameDefinition *def) {
 		return;
 
 	char cmd[32], name_class[20], flags_str[10];
+	int num_cards;
 	flags_str[0] = '\0';
 	sscanf(buffer, "%s %s %s", cmd, name_class, flags_str);
 
 	int idx = def->class_count;
 	strcpy(def->pile_classes[idx].name, name_class);
+
 
 	for (int i = 0; flags_str[i] != '\0'; i++) {
 		if (flags_str[i] == '=')
