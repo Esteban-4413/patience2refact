@@ -1,0 +1,37 @@
+#ifndef CLI_H
+#define CLI_H
+#include "game_state.h"
+#include "parser.h"
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+	char *buffer;
+	size_t buffer_length;
+	ssize_t input_length;
+} InputBuffer;
+
+typedef enum {
+	CMD_LOAD,
+	CMD_PRINT,
+	CMD_SHUFFLE,
+	CMD_QUIT,
+	CMD_UNRECOGNIZED
+} CommandType;
+
+typedef struct {
+	CommandType type;
+	char arg[50];
+} GameCommand;
+
+InputBuffer *new_input_buffer();
+void print_deck_arr(Card *deck_arr);
+void print_prompt();
+void read_input(InputBuffer *input_buffer);
+void close_input_buffer(InputBuffer *input_buffer);
+GameCommand parse_command(InputBuffer *input_buffer);
+void run_cli(Card *deck_arr);
+
+#endif
