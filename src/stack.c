@@ -16,7 +16,7 @@ void push(Pile *pile, Card *c) {
 }
 
 Card *pop(Pile *pile) {
-	if (pile == NULL)
+	if (pile == NULL || pile->head == NULL)
 		return NULL;
 	Card *r = pile->head;
 	pile->head = pile->head->next;

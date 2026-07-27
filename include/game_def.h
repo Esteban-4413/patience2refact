@@ -64,7 +64,7 @@ typedef struct {
 } WinCondition;
 
 typedef struct {
-	char game_name[50];
+	char game_name[64];
 	int num_decks;
 
 	PileClass pile_classes[50];
