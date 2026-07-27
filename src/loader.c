@@ -25,3 +25,35 @@ GameDefinition *load_option(char *folder, char files[][256], int option) {
 	strcpy(g->game_name, files[option - 1]);
 	return g;
 }
+
+int list_options(DIR *d, char (*files)[256]) {
+	struct dirent *entry;
+	int count = 0;
+	while ((entry = readdir(d)) != NULL) {
+		if (entry->d_name[0] != '.') {
+			strcpy(files[count], entry->d_name);
+			printf("%d. %s\n", count + 1, entry->d_name);
+			count++;
+		}
+	}
+	return count;
+}
+
+int input_patience(int count) {
+	int option = 0;
+	char buffer[128];
+	int bflag = 0;
+	printf("What game do you wanna play?\n Choose a number\n");
+	while (!bflag) {
+		if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
+			if (sscanf(buffer, "%d", &option) == 1 && option >= 1 &&
+				option <= count)
+				bflag = 1;
+			else
+				printf("Not a valid option. Please try again but this time a "
+					   "number between 1 and %d\n",
+					   count);
+		}
+	}
+	return option;
+}
