@@ -18,8 +18,8 @@ typedef struct {
 } Game_state;
 
 
-Card *fill_deck(Pile *pile);
-void shuffle_pile(Card *deck_arr);
+void fill_deck(Pile *pile);
+void shuffle_pile(Pile *p);
 void swap(Card *deck_arr, int a, int b);
 Pile *arr2llist(Card **deck, int num_cards);
 

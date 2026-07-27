@@ -68,12 +68,8 @@ uint32_t parse_move_flags(char *flags_str) {
 }
 
 GameDefinition *incializa_estado(void) {
-	GameDefinition *def = malloc(sizeof(*def));
-	def->game_name[0] = '\0';
+	GameDefinition *def = calloc(1, sizeof(*def));
 	def->num_decks = 1;
-	def->class_count = 0;
-	def->rule_count = 0;
-	def->win_cond_count = 0;
 	return def;
 }
 

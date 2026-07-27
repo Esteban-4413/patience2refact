@@ -30,6 +30,7 @@ void close_input_buffer(InputBuffer *input_buffer) {
 
 GameCommand parse_command(InputBuffer *input_buffer) {
 	GameCommand cmd;
+	cmd.arg[0] = '\0';
 	char keyword[20];
 	if (sscanf(input_buffer->buffer, "%s", keyword) != 1) {
 		cmd.type = CMD_UNRECOGNIZED;
@@ -52,9 +53,10 @@ GameCommand parse_command(InputBuffer *input_buffer) {
 	return cmd;
 }
 
-void run_cli(Card *deck_arr) {
+void run_cli() {
 	InputBuffer *input_buffer = new_input_buffer();
-	GameDefinition *current_game = NULL;
+	GameDefinition *current_def = NULL;
+	Game_state *current_state = NULL;
 	printf("Welcome to <name>. Type your command ('load' <file>, 'print', "
 		   "'shuffle' or 'quit'.\n");
 	while (true) {
@@ -70,21 +72,30 @@ void run_cli(Card *deck_arr) {
 			exit(EXIT_SUCCESS);
 			break;
 		case CMD_LOAD:
-			printf("Loading your game: %s\n", cmd.arg);
-			current_game = load_patience(cmd.arg);
-			if (current_game->game_name[0] != '\0')
-				printf("Game loaded hehe\n");
-			break;
+			if (strlen(cmd.arg) > 0) {
+				printf("Loading your game: %s\n", cmd.arg);
+				current_def = load_patience("paciencias");
+			} else
+				current_def = choose_patience("paciencias");
+			if (current_def != NULL && current_def->game_name[0] != '\0') {
+				printf("Loaded %s\n", current_def->game_name);
+				current_state = build_game_state(current_def);
+				if (current_state != NULL)
+					printf("The cards have been shuffled and dealt\n");
+				break;
+			}
 		case CMD_PRINT:
-			printf("Here is your game\n");
-			print_deck_arr(deck_arr);
+			if (current_state == NULL)
+				printf("No game loaded yet. Type 'load' first\n");
+			else
+				printf("Printing board is not and implementation yet "
+					   "(TO-DO)\n"); // TODO:
 			break;
 
 		case CMD_SHUFFLE:
 			printf("Shuffling the cards..\n");
-			shuffle_pile(deck_arr);
 			printf("Shuffled!\n");
-			print_deck_arr(deck_arr);
+			printf("The deck is actually shuffled when you use 'load'\n");
 			break;
 		case CMD_UNRECOGNIZED:
 			printf("Command unrecognized: '%s\n", input_buffer->buffer);

@@ -1,6 +1,7 @@
 #ifndef CLI_H
 #define CLI_H
 #include "game_state.h"
+#include "loader.h"
 #include "parser.h"
 #include <stdbool.h>
 #include <stdio.h>
@@ -32,6 +33,6 @@ void print_prompt();
 void read_input(InputBuffer *input_buffer);
 void close_input_buffer(InputBuffer *input_buffer);
 GameCommand parse_command(InputBuffer *input_buffer);
-void run_cli(Card *deck_arr);
+void run_cli();
 
 #endif

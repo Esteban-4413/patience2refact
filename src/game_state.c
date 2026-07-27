@@ -1,28 +1,40 @@
 #include "../include/game_state.h"
 
-Card *fill_deck(Pile *pile) {
+void fill_deck(Pile *pile) {
 	if (pile == NULL)
-		return NULL;
-	Card *deck_arr = malloc(52 * sizeof(*deck_arr));
-
-	int i = 0;
-	for (int suit = 0; suit <= SUIT_COUNT; suit++) {
-		for (int rank = 0; rank <= RANK_COUNT; rank++) {
-			deck_arr[i].rank = rank;
-			deck_arr[i].suit = suit;
-			i++;
+		return;
+	for (int suit = 0; suit < SUIT_COUNT - 1; suit++) {
+		for (int rank = 1; rank <= RANK_COUNT; rank++) {
+			Card *new_card = make_card(rank, suit);
+			push(pile, new_card);
 		}
 	}
-	return deck_arr;
 }
 
-void shuffle_pile(Card *deck_arr) {
-	if (deck_arr == NULL)
+void shuffle_pile(Pile *p) {
+	if (p == NULL)
 		return;
-	for (int i = 0; i < 52; i++) {
-		int idx = rand() % (i + 1);
-		swap(deck_arr, idx, i);
+	int n = p->num_cards;
+	Card **arr = malloc(n * sizeof(Card *));
+	Card *curr = p->head;
+	for (int i = 0; i < n; i++) {
+		arr[i] = curr;
+		curr = curr->next;
 	}
+	for (int i = n - 1; i > 0; i--) {
+		int j = rand() % (i + 1);
+		Card *temp = arr[i];
+		arr[i] = arr[j];
+		arr[j] = temp;
+	}
+	p->head = arr[0];
+	curr = p->head;
+	for (int i = 1; i < n; i++) {
+		curr->next = arr[i];
+		curr = curr->next;
+	}
+	curr->next = NULL;
+	free(arr);
 }
 
 

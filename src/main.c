@@ -15,9 +15,7 @@ int main() {
 	// 		print_deck_arr(deck);
 	// 	}
 	// }
-	Pile p;
-	Card *deck = fill_deck(&p);
-	run_cli(deck);
+	run_cli();
 
 	return 0;
 }
