@@ -92,5 +92,11 @@ Game_state *build_game_state(GameDefinition *def) {
 		state->table_piles[idx]->num_cards = init_deck.num_cards;
 		state->pile_count++;
 	}
+	// Set move
+	state->move.src_pile = (-1);
+    state->move.dest_pile = (-1);
+    state->move.is_valid = SET;
+    state->move.card_count = 0;
+
 	return state;
 }
