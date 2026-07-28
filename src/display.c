@@ -10,9 +10,16 @@ void print_board(Game_state *current_state){
     }
     printf("\n");
 
+    // Get the number of columns needed to print all piles in the current game state.
+    int max = 0;
+    for(int i = 0; i < current_state->pile_count; i++) {
+        int num_cards = current_state->table_piles[i]->num_cards;
+        if (num_cards > max) max = num_cards;
+    }
 
-    //
-    while(column < 10){
+    // Print the cards of each pile
+    while(column < max) // The limit is the num_cards of the bigest pile.
+    {
         printf(" %2d ", column + 1);
 
         for(int i = 0; i < current_state->pile_count; i++){
