@@ -1,4 +1,5 @@
 #include "../include/cli.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -40,13 +41,14 @@ GameCommand parse_command(InputBuffer *input_buffer) {
 		cmd.type = CMD_QUIT;
 	else if (strcmp(keyword, "print") == 0)
 		cmd.type = CMD_PRINT;
-
-	else if (strcmp(keyword, "print") == 0)
-		cmd.type = CMD_PRINT;
 	else if (strcmp(keyword, "shuffle") == 0)
 		cmd.type = CMD_SHUFFLE;
 	else if (strcmp(keyword, "load") == 0) {
 		cmd.type = CMD_LOAD;
+		sscanf(input_buffer->buffer, "%*s %s", cmd.arg);
+	}
+	else if (strcmp(keyword, "move") == 0){
+	    cmd.type = CMD_MOVE;
 		sscanf(input_buffer->buffer, "%*s %s", cmd.arg);
 	} else
 		cmd.type = CMD_UNRECOGNIZED;
@@ -58,7 +60,7 @@ void run_cli() {
 	GameDefinition *current_def = NULL;
 	Game_state *current_state = NULL;
 	printf("Welcome to <name>. Type your command ('load' <file>, 'print', "
-		   "'shuffle' or 'quit'.\n");
+		   "'shuffle', 'quit' or 'move pile|column' .\n");
 	while (true) {
 		print_prompt();
 		read_input(input_buffer);
@@ -96,6 +98,22 @@ void run_cli() {
 			printf("Shuffled!\n");
 			printf("The deck is actually shuffled when you use 'load'\n");
 			break;
+
+		case CMD_MOVE:
+            if (current_state == NULL){
+                printf("No game loaded yet. Type 'load' first\n");
+		    } else {
+				if(strlen(cmd.arg) > 0){
+				//Função que vai preencher o move;
+				printf("We are not ready for this yet\n"); // TODO
+				} else {
+    				printf("Ups, I belive you forgot the argument \n");
+    				printf("Try again!\n");
+    				print_prompt();
+				}
+			}
+            break;
+
 		case CMD_UNRECOGNIZED:
 			printf("Command unrecognized: '%s\n", input_buffer->buffer);
 			break;
