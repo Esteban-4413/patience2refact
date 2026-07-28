@@ -46,9 +46,8 @@ GameCommand parse_command(InputBuffer *input_buffer) {
 	else if (strcmp(keyword, "load") == 0) {
 		cmd.type = CMD_LOAD;
 		sscanf(input_buffer->buffer, "%*s %s", cmd.arg);
-	}
-	else if (strcmp(keyword, "move") == 0){
-	    cmd.type = CMD_MOVE;
+	} else if (strcmp(keyword, "move") == 0) {
+		cmd.type = CMD_MOVE;
 		sscanf(input_buffer->buffer, "%*s %s", cmd.arg);
 	} else
 		cmd.type = CMD_UNRECOGNIZED;
@@ -75,8 +74,13 @@ void run_cli() {
 			break;
 		case CMD_LOAD:
 			if (strlen(cmd.arg) > 0) {
+				char path[64];
+				if (strstr(cmd.arg, ".paciencia") != NULL)
+					sprintf(path, "paciencias/%s", cmd.arg);
+				else
+					sprintf(path, "paciencias/%s.paciencia", cmd.arg);
 				printf("Loading your game: %s\n", cmd.arg);
-				current_def = load_patience("paciencias");
+				current_def = load_patience(path);
 			} else
 				current_def = choose_patience("paciencias");
 			if (current_def != NULL && current_def->game_name[0] != '\0') {
@@ -84,13 +88,15 @@ void run_cli() {
 				current_state = build_game_state(current_def);
 				if (current_state != NULL)
 					printf("The cards have been shuffled and dealt\n");
-				break;
-			}
+			} else
+				printf("Failed to load the game. Check the filename and try "
+					   "again!\n");
+			break;
 		case CMD_PRINT:
 			if (current_state == NULL)
 				printf("No game loaded yet. Type 'load' first\n");
 			else
-                print_board(current_state);
+				print_board(current_state);
 			break;
 
 		case CMD_SHUFFLE:
@@ -98,29 +104,28 @@ void run_cli() {
 			printf("Shuffled!\n");
 			printf("The deck is actually shuffled when you use 'load'\n");
 			break;
-
 		case CMD_MOVE:
-            if (current_state == NULL){
-                printf("No game loaded yet. Type 'load' first\n");
-		    } else {
-				if(strlen(cmd.arg) > 0){
-				//Função que vai fazer o move e vai fazer print do novo board (TODO);
-
-				// Se a pessoa digitar 'move 17!2' ele ainda retira
-                // o valor da source pile, mas não o da column
-                // Talvez seja melhor verificar que se não houver nenum '|'
-                // no cmd.arg ele é logo classificado como CMD_UNRECOGNIZED
-				fill_move(current_state, &cmd);
-				} else {
-    				printf("Ups, I belive you forgot the argument \n");
-    				printf("Try again!\n");
-    				print_prompt();
-				}
+			if (current_state == NULL) {
+				printf("No game loaded yet. Type 'load' first\n");
+			} else if (strlen(cmd.arg) == 0) {
+				// Si no escribieron nada después de "move"
+				printf("Oops, I believe you forgot the argument.\n");
+				printf("Try again! Example: move 1|2\n");
+			} else if (strchr(cmd.arg, '|') == NULL) {
+				// Validación para ver si falta el '|' que mencionaste en tu
+				// comentario
+				printf("Invalid format! You must use '|' to separate pile and "
+					   "column (e.g., move 1|2)\n");
+			} else {
+				// Aquí ya sabemos que el juego está cargado, hay argumento y
+				// tiene el formato correcto fill_move(current_state, &cmd);  //
+				// Descomenta esto cuando lo implementes
+				printf("We are not ready for this yet (TODO)\n");
 			}
-            break;
+			break;
 
 		case CMD_UNRECOGNIZED:
-			printf("Command unrecognized: '%s\n", input_buffer->buffer);
+			printf("Command unrecognized: '%s'\n", input_buffer->buffer);
 			break;
 		}
 	}
