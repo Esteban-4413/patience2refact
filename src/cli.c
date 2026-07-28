@@ -106,7 +106,6 @@ void run_cli() {
 				if(strlen(cmd.arg) > 0){
 				//Função que vai preencher o move;
 				printf("We are not ready for this yet (TODO)\n"); // TODO
-				print_prompt();
 				} else {
     				printf("Ups, I belive you forgot the argument \n");
     				printf("Try again!\n");
