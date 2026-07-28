@@ -3,6 +3,7 @@
 #include "game_state.h"
 #include "loader.h"
 #include "parser.h"
+#include "display.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>

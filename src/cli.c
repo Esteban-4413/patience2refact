@@ -88,8 +88,7 @@ void run_cli() {
 			if (current_state == NULL)
 				printf("No game loaded yet. Type 'load' first\n");
 			else
-				printf("Printing board is not and implementation yet "
-					   "(TO-DO)\n"); // TODO:
+                print_board(current_state);
 			break;
 
 		case CMD_SHUFFLE:
