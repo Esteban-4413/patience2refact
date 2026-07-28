@@ -74,7 +74,7 @@ void run_cli() {
 			break;
 		case CMD_LOAD:
 			if (strlen(cmd.arg) > 0) {
-				char path[64];
+				char path[80];
 				if (strstr(cmd.arg, ".paciencia") != NULL)
 					sprintf(path, "paciencias/%s", cmd.arg);
 				else
