@@ -24,10 +24,12 @@ typedef enum {
 	CMD_UNRECOGNIZED
 } CommandType;
 
-typedef struct {
+typedef struct GameCommand{
 	CommandType type;
 	char arg[50];
 } GameCommand;
+
+#include "move.h"
 
 InputBuffer *new_input_buffer();
 void print_deck_arr(Card *deck_arr);

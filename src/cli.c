@@ -104,8 +104,13 @@ void run_cli() {
                 printf("No game loaded yet. Type 'load' first\n");
 		    } else {
 				if(strlen(cmd.arg) > 0){
-				//Função que vai preencher o move;
-				printf("We are not ready for this yet (TODO)\n"); // TODO
+				//Função que vai fazer o move e vai fazer print do novo board (TODO);
+
+				// Se a pessoa digitar 'move 17!2' ele ainda retira
+                // o valor da source pile, mas não o da column
+                // Talvez seja melhor verificar que se não houver nenum '|'
+                // no cmd.arg ele é logo classificado como CMD_UNRECOGNIZED
+				fill_move(current_state, &cmd);
 				} else {
     				printf("Ups, I belive you forgot the argument \n");
     				printf("Try again!\n");
