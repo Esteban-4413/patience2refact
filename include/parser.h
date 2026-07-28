@@ -8,7 +8,7 @@
 
 uint32_t parse_move_flags(char *flags_str);
 
-GameDefinition *incializa_estado(void);
+GameDefinition *init_state(void);
 
 void cmd_mov(char *buffer, GameDefinition *def, bool is_auto);
 

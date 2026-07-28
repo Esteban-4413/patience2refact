@@ -67,7 +67,7 @@ uint32_t parse_move_flags(char *flags_str) {
 	return flags;
 }
 
-GameDefinition *incializa_estado(void) {
+GameDefinition *init_state(void) {
 	GameDefinition *def = calloc(1, sizeof(*def));
 	def->num_decks = 1;
 	return def;
@@ -176,7 +176,7 @@ int process_line(char *buffer, GameDefinition *def) {
 }
 
 GameDefinition *load_patience(char *ficheiro) {
-	GameDefinition *def = incializa_estado();
+	GameDefinition *def = init_state();
 	FILE *paciencia = fopen(ficheiro, "r");
 	char buffer[255];
 
