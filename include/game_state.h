@@ -15,6 +15,8 @@ typedef struct {
 
 	History *history;
 
+	Move move;
+
 } Game_state;
 
 
