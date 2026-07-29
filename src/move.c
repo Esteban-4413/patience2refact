@@ -11,7 +11,7 @@ void fill_move(Game_state *current_state, GameCommand *cmd){
     Flag f = current_state->move.is_valid;
     switch (f) {
         case SET:
-            if (strlen(cmd->arg) < 4){
+            if (strlen(cmd->arg) < 3){
                 printf("Your command was inclomplete \n");
                 printf("The command has to be 'move pile|column' \n");
                 printf("Try again... \n");
@@ -41,7 +41,10 @@ void fill_move(Game_state *current_state, GameCommand *cmd){
                 current_state->move.src_pile = pile;
                 current_state->move.column_out = column;
 
-                // current_state->move.card_count =
+                current_state->move.card_count = current_state->table_piles[pile]->num_cards - column;
+                // Ou seja, se o card_count <= 0
+                // o jogador selecionou uma coluna em que não existem
+                // cartas nessa pilha!
 
                 current_state->move.is_valid = WAIT;
 
