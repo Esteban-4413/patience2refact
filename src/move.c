@@ -52,7 +52,6 @@ void fill_move(Game_state *current_state, GameCommand *cmd){
                 } else {
                     current_state->move.is_valid = WAIT;
                 }
-                print_move(current_state);
             }
             break;
         case WAIT:
@@ -71,25 +70,20 @@ void fill_move(Game_state *current_state, GameCommand *cmd){
                 p_dest[i] = '\0';
 
                 current_state->move.dest_pile = atoi(p_dest) - 1;
-                current_state->move.is_valid = VALID; // Para fins de teste apenas
+                current_state->move.is_valid = VALID;
+                // Para fins de teste estou a considerar todo move como válido
 
                 //validate_move(); (TODO)
             }
-            print_move(current_state);
-
             break;
         case VALID:
             move(current_state);
-            printf("MOVE doneee! \n");
-            print_board(current_state);
             // add_history(); (TODO)
-            // set_move(current_state);
+            print_board(current_state);
+            set_move(current_state);
             break;
         case INVALID:
-            // Reinicia o move
             set_move(current_state);
-            print_move(current_state);
-
             break;
     }
 }
@@ -100,31 +94,22 @@ void move(Game_state *current_state){
     Pile *dest_pile = current_state->table_piles[move.dest_pile];
 
     Card *ant = NULL;
-    Card *head = peek_card_at(src_pile, 0); // Não tem como a pilha está fazia (já foi verificado)
+    Card *head = peek_card_at(src_pile, 0); // Não tem como a pilha está vazia (já foi verificado)
     if (src_pile == NULL || src_pile->head == NULL) return; // não acontece!!
     if (move.column_out > 0) {
         ant = peek_card_at(src_pile, move.column_out - 1);
         head = peek_card_at(src_pile, move.column_out);
     }
-
     if (ant == NULL) { src_pile->head = NULL; }
     else { ant->next = NULL; }
     src_pile->num_cards -= move.card_count;
-
-    if (ant != NULL) printf("ant [%d %d] \n", ant->rank, ant->suit);
-    if (head != NULL) printf("head [%d %d] \n", head->rank, head->suit);
 
     if (dest_pile->head == NULL) { dest_pile->head = head; }
     else {
           Card *last_card = peek_card_at(dest_pile, dest_pile->num_cards - 1);
           if (last_card == NULL) return;
-          else {printf("last [%d %d] \n", last_card->rank, last_card->suit);}
-          printf("HEreee!\n");
-          if (last_card->next == NULL) printf("rigth!\n");
-          last_card->next = head;
-
+          if (last_card->next == NULL) { last_card->next = head; }
     }
     dest_pile->num_cards += move.card_count;
-
 
 }
