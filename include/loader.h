@@ -16,4 +16,6 @@ int list_options(DIR *d, char files[][256]);
 int input_patience(int count);
 
 Game_state *build_game_state(GameDefinition *def);
+
+void set_move(Game_state *state);
 #endif

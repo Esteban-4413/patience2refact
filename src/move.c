@@ -48,12 +48,10 @@ void fill_move(Game_state *current_state, GameCommand *cmd){
                 if (current_state->move.card_count <= 0){
                     printf("There is no card in this position\n");
                     printf("Try again...\n");
-                    current_state->move.is_valid = INVALID;
+                    set_move(current_state);
+                } else {
+                    current_state->move.is_valid = WAIT;
                 }
-
-                current_state->move.is_valid = WAIT;
-                print_move(current_state); // Só para debugar - apagar depois
-
             }
             break;
         case WAIT:
@@ -80,7 +78,8 @@ void fill_move(Game_state *current_state, GameCommand *cmd){
             // TODO
             break;
         case INVALID:
-            // TODO
+            // Reinicia o move
+            set_move(current_state);
             break;
     }
 }
