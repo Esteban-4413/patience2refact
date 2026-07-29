@@ -83,6 +83,7 @@ void fill_move(Game_state *current_state, GameCommand *cmd){
             printf("MOVE doneee! \n");
             print_board(current_state);
             // add_history(); (TODO)
+            // set_move(current_state);
             break;
         case INVALID:
             // Reinicia o move
@@ -96,25 +97,33 @@ void fill_move(Game_state *current_state, GameCommand *cmd){
 void move(Game_state *current_state){
     Move move = current_state->move;
     Pile *src_pile = current_state->table_piles[move.src_pile];
-    Card **head = &(src_pile->head);
     Pile *dest_pile = current_state->table_piles[move.dest_pile];
-    Card *last_card = peek_card_at(dest_pile, dest_pile->num_cards - 1);
 
-    int i;
-    Card **ant = NULL;
-    if (src_pile == NULL || src_pile->head == NULL) return;
-    for(i = 0; (i < move.column_out) && (i < src_pile->num_cards); i++){
-        ant = head;
-        head = (&(*head)->next);
+    Card *ant = NULL;
+    Card *head = peek_card_at(src_pile, 0); // Não tem como a pilha está fazia (já foi verificado)
+    if (src_pile == NULL || src_pile->head == NULL) return; // não acontece!!
+    if (move.column_out > 0) {
+        ant = peek_card_at(src_pile, move.column_out - 1);
+        head = peek_card_at(src_pile, move.column_out);
     }
-    if (ant == NULL) return;
-    (*ant)->next = NULL;
+
+    if (ant == NULL) { src_pile->head = NULL; }
+    else { ant->next = NULL; }
     src_pile->num_cards -= move.card_count;
 
-    if (last_card == NULL) return;
-    printf("HEreee!\n");
-    if (last_card->next == NULL) printf("rigth!\n");
-    last_card->next = *head;
+    if (ant != NULL) printf("ant [%d %d] \n", ant->rank, ant->suit);
+    if (head != NULL) printf("head [%d %d] \n", head->rank, head->suit);
+
+    if (dest_pile->head == NULL) { dest_pile->head = head; }
+    else {
+          Card *last_card = peek_card_at(dest_pile, dest_pile->num_cards - 1);
+          if (last_card == NULL) return;
+          else {printf("last [%d %d] \n", last_card->rank, last_card->suit);}
+          printf("HEreee!\n");
+          if (last_card->next == NULL) printf("rigth!\n");
+          last_card->next = head;
+
+    }
     dest_pile->num_cards += move.card_count;
 
 
