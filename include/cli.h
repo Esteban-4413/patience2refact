@@ -27,6 +27,9 @@ typedef enum {
 typedef struct GameCommand{
 	CommandType type;
 	char arg[50];
+	int src;
+	int dest;
+	int card_index;
 } GameCommand;
 
 #include "move.h"

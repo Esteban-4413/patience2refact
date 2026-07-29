@@ -32,6 +32,9 @@ void close_input_buffer(InputBuffer *input_buffer) {
 GameCommand parse_command(InputBuffer *input_buffer) {
 	GameCommand cmd;
 	cmd.arg[0] = '\0';
+	cmd.card_index = -1;
+	cmd.dest = -1;
+	cmd.src = -1;
 	char keyword[20];
 	if (sscanf(input_buffer->buffer, "%s", keyword) != 1) {
 		cmd.type = CMD_UNRECOGNIZED;
@@ -46,9 +49,16 @@ GameCommand parse_command(InputBuffer *input_buffer) {
 	else if (strcmp(keyword, "load") == 0) {
 		cmd.type = CMD_LOAD;
 		sscanf(input_buffer->buffer, "%*s %s", cmd.arg);
-	} else if (strcmp(keyword, "move") == 0) {
+	} else if (strcmp(keyword, "mv") == 0) {
 		cmd.type = CMD_MOVE;
-		sscanf(input_buffer->buffer, "%*s %s", cmd.arg);
+		if (sscanf(input_buffer->buffer, "%*s %d|%d %d", &cmd.src,
+				   &cmd.card_index, &cmd.dest) == 3)
+			;
+		else if (sscanf(input_buffer->buffer, "%*s %d %d", &cmd.src, &cmd.dest))
+			cmd.card_index = -1;
+		else {
+			cmd.src = -1;
+		}
 	} else
 		cmd.type = CMD_UNRECOGNIZED;
 	return cmd;
@@ -107,20 +117,27 @@ void run_cli() {
 		case CMD_MOVE:
 			if (current_state == NULL) {
 				printf("No game loaded yet. Type 'load' first\n");
-			} else if (strlen(cmd.arg) == 0) {
-				// Si no escribieron nada después de "move"
-				printf("Oops, I believe you forgot the argument.\n");
-				printf("Try again! Example: move 1|2\n");
-			} else if (strchr(cmd.arg, '|') == NULL) {
-				// Validación para ver si falta el '|' que mencionaste en tu
-				// comentario
-				printf("Invalid format! You must use '|' to separate pile and "
-					   "column (e.g., move 1|2)\n");
+			} else if (cmd.src == -1 || cmd.dest == -1) {
+				printf("Invalid format! Use 'move <src> <dest>' or 'move "
+					   "<src>|<index> <dest>'\n");
+				printf("Examples:\n");
+				printf("  move 1 2   (Moves the top card from pile 1 to pile "
+					   "2)\n");
+				printf("  move 1|3 2 (Moves a sequence starting from index 3 "
+					   "in pile 1 to pile 2)\n");
 			} else {
-				// Aquí ya sabemos que el juego está cargado, hay argumento y
-				// tiene el formato correcto fill_move(current_state, &cmd);  //
-				// Descomenta esto cuando lo implementes
-				printf("We are not ready for this yet (TODO)\n");
+
+				// TODO: execute_move here
+				if (cmd.card_index != -1) {
+					printf("making the move of the sequence %d>>top from the "
+						   "pile %d "
+						   "to the pile %d\n",
+						   cmd.card_index, cmd.src, cmd.dest);
+				} else {
+					printf("Moving the card from the top of the pile %d to the "
+						   "pile %d\n",
+						   cmd.src, cmd.dest);
+				}
 			}
 			break;
 
