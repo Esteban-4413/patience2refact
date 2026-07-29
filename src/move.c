@@ -52,6 +52,7 @@ void fill_move(Game_state *current_state, GameCommand *cmd){
                 } else {
                     current_state->move.is_valid = WAIT;
                 }
+                print_move(current_state);
             }
             break;
         case WAIT:
@@ -70,16 +71,51 @@ void fill_move(Game_state *current_state, GameCommand *cmd){
                 p_dest[i] = '\0';
 
                 current_state->move.dest_pile = atoi(p_dest) - 1;
+                current_state->move.is_valid = VALID; // Para fins de teste apenas
 
                 //validate_move(); (TODO)
             }
+            print_move(current_state);
+
             break;
         case VALID:
-            // TODO
+            move(current_state);
+            printf("MOVE doneee! \n");
+            print_board(current_state);
+            // add_history(); (TODO)
             break;
         case INVALID:
             // Reinicia o move
             set_move(current_state);
+            print_move(current_state);
+
             break;
     }
+}
+
+void move(Game_state *current_state){
+    Move move = current_state->move;
+    Pile *src_pile = current_state->table_piles[move.src_pile];
+    Card **head = &(src_pile->head);
+    Pile *dest_pile = current_state->table_piles[move.dest_pile];
+    Card *last_card = peek_card_at(dest_pile, dest_pile->num_cards - 1);
+
+    int i;
+    Card **ant = NULL;
+    if (src_pile == NULL || src_pile->head == NULL) return;
+    for(i = 0; (i < move.column_out) && (i < src_pile->num_cards); i++){
+        ant = head;
+        head = (&(*head)->next);
+    }
+    if (ant == NULL) return;
+    (*ant)->next = NULL;
+    src_pile->num_cards -= move.card_count;
+
+    if (last_card == NULL) return;
+    printf("HEreee!\n");
+    if (last_card->next == NULL) printf("rigth!\n");
+    last_card->next = *head;
+    dest_pile->num_cards += move.card_count;
+
+
 }
