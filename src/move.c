@@ -17,10 +17,10 @@ void fill_move(Game_state *current_state, GameCommand *cmd){
                 printf("Try again... \n");
                 cmd->type = CMD_UNRECOGNIZED;
             } else {
-                char p[25];
+                char p[3];
                 int j = 0;
                 int i;
-                for(i = 0; cmd->arg[i] != '\0' && (cmd->arg[i] != '|'); i++){
+                for(i = 0; (cmd->arg[i] != '\0') && (cmd->arg[i] != '|'); i++){
                     p[j] = cmd->arg[i];
                     j++;
                 }
@@ -28,7 +28,7 @@ void fill_move(Game_state *current_state, GameCommand *cmd){
                 int pile = atoi(p) - 1;
                 // o input é numerado sempre de 1...
                 // mas na lógica  do jogo é numerado de 0...
-                char c[25];
+                char c[3];
                 j = 0;
                 for(i = i + 1; cmd->arg[i] != '\0'; i++){
                     c[j] = cmd->arg[i];
@@ -45,15 +45,36 @@ void fill_move(Game_state *current_state, GameCommand *cmd){
                 // Ou seja, se o card_count <= 0
                 // o jogador selecionou uma coluna em que não existem
                 // cartas nessa pilha!
+                if (current_state->move.card_count <= 0){
+                    printf("There is no card in this position\n");
+                    printf("Try again...\n");
+                    current_state->move.is_valid = INVALID;
+                }
 
                 current_state->move.is_valid = WAIT;
-
                 print_move(current_state); // Só para debugar - apagar depois
 
             }
             break;
         case WAIT:
-            // TODO
+            if (strlen(cmd->arg) < 2){
+                printf("Your command was inclomplete \n");
+                printf("The command has to be 'move pile|' \n");
+                printf("Try again... \n");
+            } else {
+                char p_dest[3];
+                int i;
+                int j = 0;
+                for(i = 0; (cmd->arg[i] != '\0') && (cmd->arg[i] != '|'); i++){
+                    p_dest[j] = cmd->arg[i];
+                    j++;
+                }
+                p_dest[i] = '\0';
+
+                current_state->move.dest_pile = atoi(p_dest) - 1;
+
+                //validate_move(); (TODO)
+            }
             break;
         case VALID:
             // TODO
