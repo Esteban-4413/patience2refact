@@ -32,4 +32,4 @@ move.o: src/move.c
 	gcc -Wall -g $^ -c -o $@
 
 clean:
-	-rm -f card.o game_state.o parser.o stack.o undo.o jogo save.txt cli.o jogo.dSYM loader.o display.o move.o
+	-rm -rf *.o jogo save.txt jogo.dSYMlean:
