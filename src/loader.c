@@ -93,10 +93,14 @@ Game_state *build_game_state(GameDefinition *def) {
 		state->pile_count++;
 	}
 	// Set move
-	state->move.src_pile = (-1);
+	set_move(state);
+
+	return state;
+}
+
+void set_move(Game_state *state){
+    state->move.src_pile = (-1);
     state->move.dest_pile = (-1);
     state->move.is_valid = SET;
     state->move.card_count = 0;
-
-	return state;
 }
