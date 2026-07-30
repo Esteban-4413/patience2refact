@@ -69,7 +69,7 @@ void run_cli() {
 	GameDefinition *current_def = NULL;
 	Game_state *current_state = NULL;
 	printf("Welcome to <name>. Type your command ('load' <file>, 'print', "
-		   "'shuffle', 'quit' or 'move pile|column' .\n");
+		   "'shuffle', 'quit' or 'mv pile|column' .\n");
 	while (true) {
 		print_prompt();
 		read_input(input_buffer);
@@ -118,16 +118,16 @@ void run_cli() {
 			if (current_state == NULL) {
 				printf("No game loaded yet. Type 'load' first\n");
 			} else if (cmd.src == -1 || cmd.dest == -1) {
-				printf("Invalid format! Use 'move <src> <dest>' or 'move "
+				printf("Invalid format! Use 'mv <src> <dest>' or 'mv "
 					   "<src>|<index> <dest>'\n");
 				printf("Examples:\n");
-				printf("  move 1 2   (Moves the top card from pile 1 to pile "
+				printf("  mv 1 2   (Moves the top card from pile 1 to pile "
 					   "2)\n");
-				printf("  move 1|3 2 (Moves a sequence starting from index 3 "
+				printf("  mv 1|3 2 (Moves a sequence starting from index 3 "
 					   "in pile 1 to pile 2)\n");
 			} else {
+				fill_move(current_state, &cmd);
 
-				// TODO: execute_move here
 				if (cmd.card_index != -1) {
 					printf("making the move of the sequence %d>>top from the "
 						   "pile %d "
@@ -137,7 +137,10 @@ void run_cli() {
 					printf("Moving the card from the top of the pile %d to the "
 						   "pile %d\n",
 						   cmd.src, cmd.dest);
+					move(current_state);
 				}
+				move(current_state);
+				print_board(current_state);
 			}
 			break;
 

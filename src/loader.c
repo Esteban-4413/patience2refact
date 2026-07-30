@@ -58,7 +58,6 @@ int input_patience(int count) {
 	return option;
 }
 
-// BUG: SEGMENTATION FAULT HERE!!!!
 Game_state *build_game_state(GameDefinition *def) {
 	if (def == NULL || def->game_name[0] == '\0')
 		return NULL;
@@ -101,6 +100,6 @@ Game_state *build_game_state(GameDefinition *def) {
 void set_move(Game_state *state){
     state->move.src_pile = (-1);
     state->move.dest_pile = (-1);
-    state->move.is_valid = SET;
-    state->move.card_count = 0;
+	state->move.is_move_valid = SET;
+	state->move.card_count = 0;
 }

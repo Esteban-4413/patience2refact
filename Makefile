@@ -32,4 +32,4 @@ move.o: src/move.c
 	gcc -Wall -g $^ -c -o $@
 
 clean:
-	-rm -rf *.o jogo save.txt jogo.dSYMlean:
+	-rm -rf *.o jogo save.txt jogo.dSYM Contents

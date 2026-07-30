@@ -8,16 +8,17 @@ typedef enum {
 	INVALID,	// The move was verified and classified as invalid
 	WAIT,		// Contains information about the source pile/exit of the cards
 	VALID		// The move was verified and classified as valid
-} Flag;
+} MoveFlag;
 
 typedef struct {
 	int src_pile;	// Pile from which the cards are going to be removed
 	int column_out; // Position in the pile of the card selected by the player
-	int card_count; // How many cards were selected
+	int card_count; // How many cards were selected (not necessary anymore i
+					// guess)
 
 	int dest_pile; // Pile to which the card(s) are going to be moved
 
-	Flag is_valid; // Indicates the current state of the move (enum Flag)
+	MoveFlag is_move_valid; // Indicates the current state of the move
 } Move;
 
 typedef struct History {
