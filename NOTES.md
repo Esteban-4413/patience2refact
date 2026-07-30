@@ -40,7 +40,6 @@ Crucially, we will **retain the custom DSL parser** that makes this engine gener
 ### Phase 3: Movement & Engine Logic - [IN PROGRESS]
 
 - [x] Refactor `move.c`. Moving a stack of cards should now only involve changing the `next` pointer of the boundary cards.
-- [ ] Implemanting the move logic (`switch case (move.flag)`).
 - [ ] Refactor `movAutos` to apply the automatics moves. (Now using the `current_state->move` instead of creating a new move).
 - [ ] Optimize `verifica_vitoria` to check the `target_card_count` inside `win_conditions`.
 - [ ] Map Bitwise Flags constraints to the new atomic validation functions (e.g., `if (rules & F_DESCENDING)`).
@@ -52,6 +51,7 @@ Crucially, we will **retain the custom DSL parser** that makes this engine gener
 
 ### Phase 5: UI Integration & Debugging
 
+- [ ] Implemanting the move logic (`switch case (move.flag)`).
 - [ ] Update `printPilhas` in `display.c` to traverse the linked list for rendering instead of accessing `pilha[i]`.
 - [ ] Implement a debug mode in `main.c` with a fixed seed (`srand(123)`) to easily reproduce edge cases during testing.
 - [ ] Run Valgrind or AddressSanitizer to ensure no memory leaks occur with the new linked lists (ensure every `malloc` has a `free`).
