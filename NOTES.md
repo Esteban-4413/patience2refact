@@ -28,29 +28,22 @@ Crucially, we will **retain the custom DSL parser** that makes this engine gener
 - [x] Refactor stack in `stack.h` (`pile`) to hold a `card *head` pointer, `num_cards`, and `uint32_t rules`.
 - [x] Implement atomic list operations in `stack.c`: `push`, `pop`, `shift`, `unshift`, `make_card`.
 
-### Phase 2: Adaptation of the Game State & Parser - [IN PROGRESS]
+### Phase 2: Adaptation of the Game State & Parser - [COMPLETE]
 
 - [x] Separate concerns into `gamedef.h` (Static Rules/Manual) and `game_state.h` (Dynamic Board).
 - [x] Implement Bitwise Flags (`F_SEQUENCE`, `F_DESCENDING`, etc.) to translate the DSL string rules.
 - [x] Update `parser.c` to parse `.paciencia` files completely without `realloc` (using static arrays in `GameDefinition`).
 - [x] Implement History/Undo as a circular buffer array.
-- [ ] Implement `loader.c`: Build the physical table (List of `pile`s) based on `GameDefinition` `INIT` commands.
-- [ ] Complete `game_state.c`: Functions to initialize the dynamic board (`game_state`), populate the `STOCK` with 52 cards (`fill_deck`), and shuffle.
+- [x] Implement `loader.c`: Build the physical table (List of `pile`s) based on `GameDefinition` `INIT` commands.
+- [x] Complete `game_state.c`: Functions to initialize the dynamic board (`game_state`), populate the `STOCK` with 52 cards (`fill_deck`), and shuffle.
 
-### Phase 3: Movement & Engine Logic
+### Phase 3: Movement & Engine Logic - [IN PROGRESS]
 
-- [ ] Refactor `move.c`. Moving a stack of cards should now only involve changing the `next` pointer of the boundary cards.
+- [x] Refactor `move.c`. Moving a stack of cards should now only involve changing the `next` pointer of the boundary cards.
+- [ ] Implemanting the move logic (`switch case (move.flag)`).
+- [ ] Refactor `movAutos` to apply the automatics moves. (Now using the `current_state->move` instead of creating a new move).
 - [ ] Optimize `verifica_vitoria` to check the `target_card_count` inside `win_conditions`.
 - [ ] Map Bitwise Flags constraints to the new atomic validation functions (e.g., `if (rules & F_DESCENDING)`).
-
-#### Phase 3.0: Validate a move
-- [ ] Based on the ints given by the `move.src_pile` and the `move.dest_pile` set the pointers to acctual piles `source` and `destiny`, repectively. 
-- [ ] With the `move.column_out` we have the exact column where the card that was cliked is. Set a pointer that poinst exactly to the card that was clicked(`peek_card_at`). 
-- [ ] Also setting a pointer to the card on top of the pile `destiny` is necessarie.
-- [ ] Working with linked lists makes necessary to not just keep a pointer in the card cliked(in column n), but also in the one in the column n-1 (so the next_card can be set as NULL
- if the move is valid).
-- [ ] Implement a function that before taking care off the cards to be moved, verificade if the PileClass
-- [ ] Having a way to directly access the cards we need, we can then run the flags test on them.  
 
 ### Phase 4: Save/Load & Undo Systems
 
@@ -65,6 +58,6 @@ Crucially, we will **retain the custom DSL parser** that makes this engine gener
 
 ## 6. Immediate TO-DOs (Next Session)
 
-- [ ] Create `loader.c` to consume the `GameDefinition` pointer from the parser.
-- [ ] Implement `fill_deck` and `shuffle` in `game_state.c` to generate the physical cards (`make_card`) before distributing them.
+- [x] Create `loader.c` to consume the `GameDefinition` pointer from the parser.
+- [x] Implement `fill_deck` and `shuffle` in `game_state.c` to generate the physical cards (`make_card`) before distributing them.
 - [ ] Connect the dynamic `game_state` with the parsed `.paciencia` logic.
