@@ -1,4 +1,5 @@
 #include "../include/cli.h"
+#include <stdint.h>
 
 void print_move(Game_state *state){
     Move m = state->move;
@@ -140,5 +141,19 @@ void move(Game_state *current_state){
           if (last_card->next == NULL) { last_card->next = head; }
     }
     dest_pile->num_cards += move.card_count;
+}
 
+bool is_move_valid(Game_state *current_state) {
+	Move mov = current_state->move;
+	Pile *src = current_state->table_piles[mov.src_pile];
+	Pile *dest = current_state->table_piles[mov.dest_pile];
+	uint32_t flags = current_state->definition->rules->flags;
+	Card *moving_card = peek_card_at(src, mov.column_out);
+	if (flags & F_NONE) {
+		return true;
+	}
+	if (flags & F_SEQUENCE) {
+		return (mov.card_count);
+	}
+	return true;
 }

@@ -47,3 +47,12 @@ void print_board(Game_state *current_state){
         column++;
     }
 }
+
+void print_linked(Pile *pile) {
+	Card *c = pile->head;
+	while (c->next != NULL) {
+		printf(" [%d %d]-> ", c->rank, c->suit);
+		c = c->next;
+	}
+	printf(" * \n");
+}

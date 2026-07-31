@@ -107,6 +107,7 @@ void run_cli() {
 				printf("No game loaded yet. Type 'load' first\n");
 			else
 				print_board(current_state);
+			print_linked(current_state->table_piles[2]);
 			break;
 
 		case CMD_SHUFFLE:
