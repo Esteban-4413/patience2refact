@@ -31,3 +31,38 @@ Card *make_card(Suit x, Rank y) {
 	c->next = NULL;
 	return c;
 }
+
+bool is_seq_ascending(Card *parent, int n) {
+	for (int i = 0; i < n; i++) {
+		Card *child = parent->next;
+		if (child == NULL)
+			return false;
+		if (parent->rank != child->rank + 1)
+			return false;
+		parent = child;
+	}
+	return true;
+}
+
+bool is_seq_descending(Card *parent, int n) {
+	for (int i = 0; i < n; i++) {
+		Card *child = parent->next;
+		if (child == NULL)
+			return false;
+		if (parent->rank != child->rank - 1)
+			return false;
+		parent = child;
+	}
+	return true;
+}
+bool is_seq_same_suit(Card *parent, int n) {
+	for (int i = 0; i < n; i++) {
+		Card *child = parent->next;
+		if (child == NULL)
+			return false;
+		if (parent->suit != child->suit)
+			return false;
+		parent = child;
+	}
+	return false;
+}

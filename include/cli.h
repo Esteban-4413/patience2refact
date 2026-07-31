@@ -1,9 +1,10 @@
 #ifndef CLI_H
 #define CLI_H
+#include "display.h"
 #include "game_state.h"
 #include "loader.h"
+#include "move.h"
 #include "parser.h"
-#include "display.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,10 +30,9 @@ typedef struct GameCommand{
 	char arg[50];
 	int src;
 	int dest;
-	int card_index;
+	int card_index_input;
 } GameCommand;
 
-#include "move.h"
 
 InputBuffer *new_input_buffer();
 void print_deck_arr(Card *deck_arr);

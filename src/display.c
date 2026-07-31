@@ -49,10 +49,26 @@ void print_board(Game_state *current_state){
 }
 
 void print_linked(Pile *pile) {
+	if (pile == NULL) {
+		printf("[pile is empty]\n");
+		return;
+	}
 	Card *c = pile->head;
-	while (c->next != NULL) {
-		printf(" [%d %d]-> ", c->rank, c->suit);
+	if (c == NULL) {
+		printf(" * \n");
+		return;
+	}
+	while (c != NULL) {
+		printf("[%d %d] -> ", c->rank, c->suit);
 		c = c->next;
 	}
-	printf(" * \n");
+	printf("* \n");
+}
+
+void print_board_linked(Game_state *state) {
+	printf("---\t---\t---\t---\n");
+	for (int i = 0; i < state->pile_count; i++) {
+		printf("Pile (%d): ", i + 1);
+		print_linked(state->table_piles[i]);
+	}
 }

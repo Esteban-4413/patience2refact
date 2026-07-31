@@ -1,3 +1,4 @@
+#include "../include/move.h"
 #include "../include/cli.h"
 
 void print_move(Game_state *state){
@@ -12,105 +13,25 @@ void print_move(Game_state *state){
 // bem colocadas
 // tirei os cases switch para esta função ficar mais minimalista, depois para a
 // interface gráfica criamos uma função que fique encarregada destas flags.
-void fill_move(Game_state *current_state, GameCommand *cmd){
-	// Flag f = current_state->move.is_valid;
+bool fill_move(Game_state *current_state, GameCommand *cmd) {
 	int src = cmd->src - 1;
 	int dest = cmd->dest - 1;
 	Pile *src_pile = current_state->table_piles[src];
-	int column0 = (cmd->card_index == - 1) ? 0 : cmd->card_index;
+	int column_input =
+		(cmd->card_index_input == -1) ? 0 : cmd->card_index_input;
 
-	int cards_to_move = src_pile->num_cards - column0;
-	if (cards_to_move <= 0 || column0 < 0) {
+	int cards_to_move = src_pile->num_cards - column_input;
+	if (cards_to_move <= 0 || column_input < 0) {
 		printf("There is no card to move\n Please try again\n");
-		return;
+		return false;
 	}
 	current_state->move.src_pile = src;
 	current_state->move.dest_pile = dest;
-	current_state->move.column_out = (column0 == 0) ? column0 : src_pile->num_cards - column0;
-	current_state->move.card_count = (column0 == 0) ? 1 : src_pile->num_cards - column0 + 1;
-
-	// switch (f) {
-	// case SET:
-	// 	if (strlen(cmd->arg) < 3) {
-	// 		printf("Your command was inclomplete \n");
-	// 		printf("The command has to be 'move <pile|column> <dest pile>' "
-	// 			   "\n");
-	// 		printf("Try again... \n");
-	// 		cmd->type = CMD_UNRECOGNIZED;
-
-	// 	} else {
-	// 		char p[3];
-	// 		int j = 0;
-	// 		int i;
-	// 		for (i = 0; (cmd->arg[i] != '\0') && (cmd->arg[i] != '|'); i++) {
-	// 			p[j] = cmd->arg[i];
-	// 			j++;
-	// 		}
-	// 		p[j] = '\n';
-	// 		int pile = atoi(p) - 1;
-	// 		// o input é numerado sempre de 1...
-	// 		// mas na lógica  do jogo é numerado de 0...
-	// 		char c[3];
-	// 		j = 0;
-	// 		for (i = i + 1; cmd->arg[i] != '\0'; i++) {
-	// 			c[j] = cmd->arg[i];
-	// 			j++;
-	// 		}
-	// 		c[j] = '\n';
-
-	// 		int column = atoi(c) - 1;
-
-	// 		current_state->move.src_pile = pile;
-	// 		current_state->move.column_out = column;
-
-	// 		current_state->move.card_count =
-	// 			current_state->table_piles[pile]->num_cards - column;
-	// 		// Ou seja, se o card_count <= 0
-	// 		// o jogador selecionou uma coluna em que não existem
-	// 		// cartas nessa pilha!
-	// 		if (current_state->move.card_count <= 0) {
-	// 			printf("There is no card in this position\n");
-	// 			printf("Try again...\n");
-	// 			set_move(current_state);
-	// 		} else {
-	// 			current_state->move.is_valid = WAIT;
-	// 		}
-
-
-	// 	}
-	// 	break;
-	// case WAIT:
-	// 	if (strlen(cmd->arg) < 2) {
-	// 		printf("Your command was inclomplete \n");
-	// 		printf("The command has to be 'move pile|' \n");
-	// 		printf("Try again... \n");
-	// 	} else {
-	// 		char p_dest[3];
-	// 		int i;
-	// 		int j = 0;
-	// 		for (i = 0; (cmd->arg[i] != '\0') && (cmd->arg[i] != '|'); i++) {
-	// 			p_dest[j] = cmd->arg[i];
-	// 			j++;
-	// 		}
-	// 		p_dest[i] = '\0';
-
-	// 		current_state->move.dest_pile = atoi(p_dest) - 1;
-	// 		current_state->move.is_valid = VALID;
-	// 		// Para fins de teste estou a considerar todo move como válido
-
-	// 		// validate_move(); (TODO)
-	// 	}
-	// 	break;
-	// case VALID:
-	// 	move(current_state);
-	// 	// add_history(); (TODO)
-	// 	print_board(current_state);
-	// 	set_move(current_state);
-	// 	break;
-	// case INVALID:
-	// 	set_move(current_state);
-	// 	break;
-	// }
+	current_state->move.column_out =
+		(column_input == 0) ? column_input : src_pile->num_cards - column_input;
+	current_state->move.card_count =
+		(column_input == 0) ? 1 : src_pile->num_cards - column_input + 1;
+	return true;
 }
 
 void move(Game_state *current_state){
@@ -120,8 +41,8 @@ void move(Game_state *current_state){
 
     Card *src_head = src_pile->head;
     int index = move.column_out;
-    Card *dest_head = dest_pile->head;
-    Card *card = peek_card_at(src_pile, index);
+	// Card *dest_head = dest_pile->head;
+	Card *card = peek_card_at(src_pile, index);
 
     src_pile->head = card->next;
     card->next = dest_pile->head;
@@ -136,12 +57,41 @@ bool is_move_valid(Game_state *current_state) {
 	Pile *src = current_state->table_piles[mov.src_pile];
 	Pile *dest = current_state->table_piles[mov.dest_pile];
 	uint32_t flags = current_state->definition->rules->flags;
-	Card *moving_card = peek_card_at(src, mov.column_out);
+	// Card *moving_card = peek_card_at(src, mov.column_out);
+
 	if (flags & F_NONE) {
 		return true;
 	}
-	if (flags & F_SEQUENCE) {
-		return (mov.card_count);
+	if (mov.card_count > 1) {
+		if (!(flags & F_SEQUENCE))
+			return false;
+		if (flags & F_DESCENDING) {
+			if (!is_seq_ascending(src->head, mov.card_count))
+				return false;
+		}
+		if (!(flags & F_ASCENDING)) {
+			if (!is_seq_descending(src->head, mov.card_count))
+				return false;
+		}
+		if (flags & F_SUIT_SAME_SEQ) {
+			if (!is_seq_same_suit(src->head, mov.card_count))
+				return false;
+		}
+	}
+	if (dest->head == NULL) {
+		return true;
+	}
+	if (flags & F_VAL_LOWER) {
+		if (src->head->rank != dest->head->rank + 1)
+			return false;
+	}
+	if (flags & F_VAL_HIGHER) {
+		if (src->head->rank != dest->head->rank - 1)
+			return false;
+	}
+	if (flags & F_VAL_ADJACENT) {
+		if (abs((int)src->head->rank - (int)dest->head->rank) != 1)
+			return false;
 	}
 	return true;
 }

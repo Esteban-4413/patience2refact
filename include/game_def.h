@@ -12,7 +12,7 @@ typedef enum {
 	F_DESCENDING = 1 << 1, // [ Sequência decrescente
 	F_ASCENDING = 1 << 2,  // ] Sequência crescente
 
-	// --- VALOR EM RELAÇÃO AO DESTINO ---
+	// --- VALOR EM RELAÇÃO AO DESTINO (RANK)---
 	F_VAL_LOWER = 1 << 3,	 // < Topo a mover é 1 valor inferior ao destino
 	F_VAL_HIGHER = 1 << 4,	 // > Topo a mover é 1 valor superior ao destino
 	F_VAL_ADJACENT = 1 << 5, // ~ Valor imediatamente superior ou inferior

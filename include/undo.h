@@ -13,8 +13,7 @@ typedef enum {
 typedef struct {
 	int src_pile;	// Pile from which the cards are going to be removed
 	int column_out; // Position in the pile of the card selected by the player
-	int card_count; // How many cards were selected (not necessary anymore i
-					// guess)
+	int card_count; // How many cards were selected
 
 	int dest_pile; // Pile to which the card(s) are going to be moved
 

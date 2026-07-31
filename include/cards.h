@@ -1,6 +1,7 @@
 #ifndef CARDS_H
 #define CARDS_H
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,4 +57,7 @@ int is_same_suit(Card *first, Card *second);
 
 
 Card *make_card(Suit x, Rank y);
+bool is_seq_ascending(Card *parent, int n);
+bool is_seq_descending(Card *parent, int n);
+bool is_seq_same_suit(Card *Parent, int n);
 #endif

@@ -11,7 +11,7 @@ typedef struct GameCommand GameCommand;
 
 void print_move(Game_state *state);
 
-void fill_move(Game_state *current_state, GameCommand *cmd);
+bool fill_move(Game_state *current_state, GameCommand *cmd);
 
 void move(Game_state *current_state);
 
