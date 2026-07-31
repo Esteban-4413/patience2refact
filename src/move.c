@@ -1,5 +1,4 @@
 #include "../include/cli.h"
-#include <stdint.h>
 
 void print_move(Game_state *state){
     Move m = state->move;
@@ -18,12 +17,8 @@ void fill_move(Game_state *current_state, GameCommand *cmd){
 	int src = cmd->src - 1;
 	int dest = cmd->dest - 1;
 	Pile *src_pile = current_state->table_piles[src];
-	int column0;
-	if (cmd->card_index == -1) {
-		column0 = src_pile->num_cards - 1;
-	} else {
-		column0 = cmd->card_index - 1;
-	}
+	int column0 = (cmd->card_index == - 1) ? 0 : cmd->card_index;
+
 	int cards_to_move = src_pile->num_cards - column0;
 	if (cards_to_move <= 0 || column0 < 0) {
 		printf("There is no card to move\n Please try again\n");
@@ -31,8 +26,8 @@ void fill_move(Game_state *current_state, GameCommand *cmd){
 	}
 	current_state->move.src_pile = src;
 	current_state->move.dest_pile = dest;
-	current_state->move.column_out = column0;
-	current_state->move.card_count = cards_to_move;
+	current_state->move.column_out = (column0 == 0) ? column0 : src_pile->num_cards - column0;
+	current_state->move.card_count = (column0 == 0) ? 1 : src_pile->num_cards - column0 + 1;
 
 	// switch (f) {
 	// case SET:
@@ -123,23 +118,16 @@ void move(Game_state *current_state){
     Pile *src_pile = current_state->table_piles[move.src_pile];
     Pile *dest_pile = current_state->table_piles[move.dest_pile];
 
-    Card *ant = NULL;
-    Card *head = peek_card_at(src_pile, 0); // Não tem como a pilha está vazia (já foi verificado)
-    if (src_pile == NULL || src_pile->head == NULL) return; // não acontece!!
-    if (move.column_out > 0) {
-        ant = peek_card_at(src_pile, move.column_out - 1);
-        head = peek_card_at(src_pile, move.column_out);
-    }
-    if (ant == NULL) { src_pile->head = NULL; }
-    else { ant->next = NULL; }
-    src_pile->num_cards -= move.card_count;
+    Card *src_head = src_pile->head;
+    int index = move.column_out;
+    Card *dest_head = dest_pile->head;
+    Card *card = peek_card_at(src_pile, index);
 
-    if (dest_pile->head == NULL) { dest_pile->head = head; }
-    else {
-          Card *last_card = peek_card_at(dest_pile, dest_pile->num_cards - 1);
-          if (last_card == NULL) return;
-          if (last_card->next == NULL) { last_card->next = head; }
-    }
+    src_pile->head = card->next;
+    card->next = dest_pile->head;
+    dest_pile->head = src_head;
+
+    src_pile->num_cards -= move.card_count;
     dest_pile->num_cards += move.card_count;
 }
 

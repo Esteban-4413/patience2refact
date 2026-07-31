@@ -25,7 +25,7 @@ void print_board(Game_state *current_state){
         for(int i = 0; i < current_state->pile_count; i++){
             Pile *current_pile= current_state->table_piles[i];
             if(current_pile != NULL){
-                Card *card = peek_card_at(current_pile, column);
+                Card *card = peek_card_at(current_pile, current_pile->num_cards -1 -column);
                 if (card != NULL){
                     printf("    [%2d %2d]    ", card->rank, card->suit);
                 }

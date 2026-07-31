@@ -138,9 +138,9 @@ void run_cli() {
 					printf("Moving the card from the top of the pile %d to the "
 						   "pile %d\n",
 						   cmd.src, cmd.dest);
-					move(current_state);
 				}
 				move(current_state);
+
 				print_board(current_state);
 			}
 			break;
