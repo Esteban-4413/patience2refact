@@ -33,7 +33,7 @@ Card *make_card(Suit x, Rank y) {
 }
 
 bool is_seq_ascending(Card *parent, int n) {
-	for (int i = 0; i < n; i++) {
+	for (int i = 0; i < n - 1; i++) {
 		Card *child = parent->next;
 		if (child == NULL)
 			return false;
@@ -45,7 +45,7 @@ bool is_seq_ascending(Card *parent, int n) {
 }
 
 bool is_seq_descending(Card *parent, int n) {
-	for (int i = 0; i < n; i++) {
+	for (int i = 0; i < n - 1; i++) {
 		Card *child = parent->next;
 		if (child == NULL)
 			return false;
@@ -56,7 +56,7 @@ bool is_seq_descending(Card *parent, int n) {
 	return true;
 }
 bool is_seq_same_suit(Card *parent, int n) {
-	for (int i = 0; i < n; i++) {
+	for (int i = 0; i < n - 1; i++) {
 		Card *child = parent->next;
 		if (child == NULL)
 			return false;
@@ -64,5 +64,39 @@ bool is_seq_same_suit(Card *parent, int n) {
 			return false;
 		parent = child;
 	}
-	return false;
+	return true;
+}
+
+bool is_seq_alt_suit(Card *parent, int n) {
+	for (int i = 0; i < n - 1; i++) {
+		Card *child = parent->next;
+		if (child == NULL)
+			return false;
+		if (parent->suit == child->suit)
+			return false;
+		parent = child;
+	}
+	return true;
+}
+
+bool is_seq_same_color(Card *parent, int n) {
+	for (int i = 0; i < n - 1; i++) {
+		Card *child = parent->next;
+		if (child == NULL)
+			return false;
+		if (is_alternate_color(parent, child))
+			return false;
+	}
+	return true;
+}
+
+bool is_seq_alt_color(Card *parent, int n) {
+	for (int i = 0; i < n - 1; i++) {
+		Card *child = parent->next;
+		if (child == NULL)
+			return false;
+		if (!is_alternate_color(parent, child))
+			return false;
+	}
+	return true;
 }

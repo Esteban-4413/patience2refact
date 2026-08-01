@@ -59,5 +59,8 @@ int is_same_suit(Card *first, Card *second);
 Card *make_card(Suit x, Rank y);
 bool is_seq_ascending(Card *parent, int n);
 bool is_seq_descending(Card *parent, int n);
-bool is_seq_same_suit(Card *Parent, int n);
+bool is_seq_same_suit(Card *parent, int n);
+bool is_seq_alt_suit(Card *parent, int n);
+bool is_seq_same_color(Card *parent, int n);
+bool is_seq_alt_color(Card *paretn, int n);
 #endif

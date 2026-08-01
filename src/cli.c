@@ -59,7 +59,9 @@ GameCommand parse_command(InputBuffer *input_buffer) {
 		else {
 			cmd.src = -1;
 		}
-	} else
+	} else if (strcmp(keyword, "undo") == 0)
+		cmd.type = CMD_UNDO;
+	else
 		cmd.type = CMD_UNRECOGNIZED;
 	return cmd;
 }
@@ -132,14 +134,10 @@ void run_cli() {
 			} else {
 				if (fill_move(current_state, &cmd)) {
 					if (cmd.card_index_input != -1) {
-						printf("making the move of the sequence %d>>top from "
-							   "the pile %d to the pile %d\n",
+						printf("making the move of the sequence %d>>top from the pile %d to the pile %d\n",
 							   cmd.card_index_input, cmd.src, cmd.dest);
 					} else {
-						printf("Moving the card from the top of the pile %d to "
-							   "the "
-							   "pile %d\n",
-							   cmd.src, cmd.dest);
+						printf("Moving the card from the top of the pile %d to the pile %d\n", cmd.src, cmd.dest);
 					}
 					if (!is_move_valid(current_state)) {
 						printf("Move is not valid\n Try somthing else!");
@@ -149,7 +147,8 @@ void run_cli() {
 				}
 			}
 			break;
-
+		case CMD_UNDO:
+			break;
 		case CMD_UNRECOGNIZED:
 			printf("Command unrecognized: '%s'\n", input_buffer->buffer);
 			break;

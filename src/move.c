@@ -9,10 +9,6 @@ void print_move(Game_state *state){
 		   m.is_move_valid);
 }
 
-// fill move podia devolver um bool para sabbermos se todas as informações foram
-// bem colocadas
-// tirei os cases switch para esta função ficar mais minimalista, depois para a
-// interface gráfica criamos uma função que fique encarregada destas flags.
 bool fill_move(Game_state *current_state, GameCommand *cmd) {
 	int src = cmd->src - 1;
 	int dest = cmd->dest - 1;
@@ -57,6 +53,7 @@ bool is_move_valid(Game_state *current_state) {
 	Pile *src = current_state->table_piles[mov.src_pile];
 	Pile *dest = current_state->table_piles[mov.dest_pile];
 	uint32_t flags = current_state->definition->rules->flags;
+	int n = mov.card_count;
 	// Card *moving_card = peek_card_at(src, mov.column_out);
 
 	if (flags & F_NONE) {
@@ -66,32 +63,59 @@ bool is_move_valid(Game_state *current_state) {
 		if (!(flags & F_SEQUENCE))
 			return false;
 		if (flags & F_DESCENDING) {
-			if (!is_seq_ascending(src->head, mov.card_count))
+			if (!is_seq_descending(src->head, n))
 				return false;
 		}
 		if (!(flags & F_ASCENDING)) {
-			if (!is_seq_descending(src->head, mov.card_count))
+			if (!is_seq_ascending(src->head, n))
 				return false;
 		}
 		if (flags & F_SUIT_SAME_SEQ) {
-			if (!is_seq_same_suit(src->head, mov.card_count))
+			if (!is_seq_same_suit(src->head, n))
+				return false;
+		}
+		if (flags & F_SUIT_ALT_SEQ) {
+			if (!is_seq_alt_suit(src->head, n))
+				return false;
+		}
+		if (flags & F_COLOR_SAME_SEQ) {
+			if (!is_seq_same_color(src->head, n))
+				return false;
+		}
+		if (flags & F_COLOR_ALT_SEQ) {
+			if (!is_seq_alt_color(src->head, n))
 				return false;
 		}
 	}
-	if (dest->head == NULL) {
-		return true;
+
+	// flags que comparam as cartas da src_pile com as cartas do dest_pile
+	// se a dest_pile não tiver cartas então não vale a pena entrar ai
+	if (dest->head != NULL) {
+		if (flags & F_VAL_LOWER) {
+			if (src->head->rank != dest->head->rank + 1)
+				return false;
+		}
+		if (flags & F_VAL_HIGHER) {
+			if (src->head->rank != dest->head->rank - 1)
+				return false;
+		}
+		if (flags & F_VAL_ADJACENT) {
+			if (abs((int)src->head->rank - (int)dest->head->rank) != 1)
+				return false;
+		}
+		if (flags & F_SUIT_SAME_DST) {
+			if (src->head->suit != dest->head->suit)
+				return false;
+		}
+		if (flags & F_SUIT_DIFF_DST) {
+			if (src->head->suit == dest->head->suit)
+				return false;
+		}
+		if (flags & F_COLOR_SAME_DST) {
+			if (is_alternate_color(src->head, dest->head))
+				return false;
+		}
 	}
-	if (flags & F_VAL_LOWER) {
-		if (src->head->rank != dest->head->rank + 1)
-			return false;
-	}
-	if (flags & F_VAL_HIGHER) {
-		if (src->head->rank != dest->head->rank - 1)
-			return false;
-	}
-	if (flags & F_VAL_ADJACENT) {
-		if (abs((int)src->head->rank - (int)dest->head->rank) != 1)
-			return false;
-	}
+
 	return true;
 }

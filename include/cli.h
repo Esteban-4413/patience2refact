@@ -22,6 +22,7 @@ typedef enum {
 	CMD_SHUFFLE,
 	CMD_QUIT,
 	CMD_MOVE,
+	CMD_UNDO,
 	CMD_UNRECOGNIZED
 } CommandType;
 
