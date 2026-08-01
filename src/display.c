@@ -5,47 +5,61 @@ void print_board(Game_state *current_state){
 
     // Print the identification of the piles
     for (int i = 0; i <= current_state->pile_count; i++){
-        if (i == 0) printf( "      ");
-        else printf(" Pilha %2d(%2d): ", i , current_state->table_piles[i-1]->num_cards);
-    }
-    printf("\n");
+		if (i == 0) {
+			printf("      ");
+		} else {
+			Pile *p = current_state->table_piles[i - 1];
+			char *name = (p->pile_class != NULL) ? p->pile_class->name : "null";
+			printf(" %s%2d(%2d): ", name, i, current_state->table_piles[i - 1]->num_cards);
+		}
+	}
+	printf("\n");
 
-    // Get the number of columns needed to print all piles in the current game state.
-    int max = 0;
-    for(int i = 0; i < current_state->pile_count; i++) {
-        int num_cards = current_state->table_piles[i]->num_cards;
-        if (num_cards > max) max = num_cards;
-    }
+	// Get the number of columns needed to print all piles in the current game state.
+	int max = 0;
+	for (int i = 0; i < current_state->pile_count; i++) {
+		int num_cards = current_state->table_piles[i]->num_cards;
+		if (num_cards > max)
+			max = num_cards;
+	}
 
-    // Print the cards of each pile
-    while(column < max) // The limit is the num_cards of the bigest pile.
-    {
-        printf(" %2d ", column + 1);
+	// Print the cards of each pile
+	while (column < max) // The limit is the num_cards of the bigest pile.
+	{
+		printf(" %2d ", column + 1);
 
-        for(int i = 0; i < current_state->pile_count; i++){
-            Pile *current_pile= current_state->table_piles[i];
-            if(current_pile != NULL){
-                Card *card = peek_card_at(current_pile, current_pile->num_cards -1 -column);
-                if (card != NULL){
-                    printf("    [%2d %2d]    ", card->rank, card->suit);
-                }
-                else if (column + 1 >=current_pile->num_cards){
-                    printf("    [%2s %2s]    ", "-", "-");
-                    // Só para fins de debugar, porque na prática quando as cartas da pilha acabarem,
-                    // vai fazer print de espaços
-                } else {
-                    printf("    [%2s %2s]    ", " ", " ");
-                }
-            } else {
-                printf("%9s","PILE");
-                // Para debugar
-            }
-
-
-        }
-        printf("\n");
-        column++;
-    }
+		for (int i = 0; i < current_state->pile_count; i++) {
+			Pile *current_pile = current_state->table_piles[i];
+			if (current_pile != NULL) {
+				Card *card = peek_card_at(current_pile, current_pile->num_cards - 1 - column);
+				if (card != NULL) {
+					bool is_visible = true;
+					bool is_top_card = (column == current_pile->num_cards - 1);
+					if (current_pile->pile_class != NULL) {
+						if (current_pile->pile_class->visible_none)
+							is_visible = false;
+						else if (current_pile->pile_class->visible_top_only && !is_top_card)
+							is_visible = false;
+					}
+					if (is_visible)
+						printf("    [%2d %2d]    ", card->rank, card->suit);
+					else
+						printf("    [** **]    ");
+				} else if (column + 1 >= current_pile->num_cards) {
+					printf("    [%2s %2s]    ", "-", "-");
+					// Só para fins de debugar, porque na prática quando as cartas da pilha acabarem,
+					// vai fazer print de espaços
+				} else {
+					printf("    [%2s %2s]    ", " ", " ");
+				}
+			} else {
+				printf("%15s", "PILE");
+				// Para debugar
+			}
+		}
+		printf("\n");
+		column++;
+	}
 }
 
 void print_linked(Pile *pile) {

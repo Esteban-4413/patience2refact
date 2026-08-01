@@ -1,6 +1,7 @@
 #ifndef CARDS_H
 #define CARDS_H
 
+#include "game_def.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -42,6 +43,7 @@ typedef struct card {
 typedef struct {
 	Card *head;
 	int num_cards;
+	PileClass *pile_class;
 } Pile;
 
 int is_black(Card *c);
