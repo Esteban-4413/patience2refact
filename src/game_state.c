@@ -3,9 +3,9 @@
 void fill_deck(Pile *pile) {
 	if (pile == NULL)
 		return;
-	for (int suit = 0; suit < SUIT_COUNT - 1; suit++) {
-		for (int rank = 1; rank <= RANK_COUNT; rank++) {
-			Card *new_card = make_card(rank, suit);
+	for (int suit = 0; suit < SUIT_COUNT; suit++) {
+		for (int rank = 0; rank < RANK_COUNT; rank++) {
+			Card *new_card = make_card(suit, rank);
 			push(pile, new_card);
 		}
 	}

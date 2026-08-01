@@ -116,8 +116,9 @@ void run_cli() {
 
 		case CMD_SHUFFLE:
 			printf("Shuffling the cards..\n");
-			build_game_state(current_def);
+			current_state = build_game_state(current_def);
 			printf("Shuffled!\n");
+			print_board(current_state);
 			printf("The deck is actually shuffled when you use 'load'\n");
 			break;
 		case CMD_MOVE:

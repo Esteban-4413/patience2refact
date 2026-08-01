@@ -76,6 +76,13 @@ Game_state *build_game_state(GameDefinition *def) {
 		state->table_piles[i] = malloc(sizeof(Pile));
 		state->table_piles[i]->head = NULL;
 		state->table_piles[i]->num_cards = 0;
+		state->table_piles[i]->pile_class = NULL;
+		for (int c = 0; c < def->class_count; c++) {
+			if (strcmp(def->pile_classes[c].name, def->inits[i].pile_name) == 0) {
+				state->table_piles[i]->pile_class = &(def->pile_classes[c]);
+				break;
+			}
+		}
 		int cards_needed = def->inits[i].num_cards;
 		for (int c = 0; c < cards_needed; c++) {
 			Card *card_to_move = pop(&init_deck);
@@ -89,6 +96,13 @@ Game_state *build_game_state(GameDefinition *def) {
 		state->table_piles[idx] = malloc(sizeof(Pile));
 		state->table_piles[idx]->head = init_deck.head;
 		state->table_piles[idx]->num_cards = init_deck.num_cards;
+		state->table_piles[idx]->pile_class = NULL;
+		for (int c = 0; c < def->class_count; c++) {
+			if (strcmp(def->pile_classes[c].name, "STOCK") == 0) {
+				state->table_piles[idx]->pile_class = &(def->pile_classes[c]);
+				break;
+			}
+		}
 		state->pile_count++;
 	}
 	// Set move

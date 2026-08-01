@@ -54,7 +54,7 @@ bool is_move_valid(Game_state *current_state) {
 	Pile *dest = current_state->table_piles[mov.dest_pile];
 	uint32_t flags = current_state->definition->rules->flags;
 	int n = mov.card_count;
-	// Card *moving_card = peek_card_at(src, mov.column_out);
+	Card *moving_card = peek_card_at(src, mov.column_out);
 
 	if (flags & F_NONE) {
 		return true;
@@ -90,32 +90,49 @@ bool is_move_valid(Game_state *current_state) {
 
 	// flags que comparam as cartas da src_pile com as cartas do dest_pile
 	// se a dest_pile não tiver cartas então não vale a pena entrar ai
-	if (dest->head != NULL) {
+	if (dest->head != NULL) { // neste bloque if lowkey não sei se usar moving_card instead of src_head
 		if (flags & F_VAL_LOWER) {
-			if (src->head->rank != dest->head->rank + 1)
+			if (moving_card->rank != dest->head->rank - 1)
 				return false;
 		}
 		if (flags & F_VAL_HIGHER) {
-			if (src->head->rank != dest->head->rank - 1)
+			if (moving_card->rank != dest->head->rank + 1)
 				return false;
 		}
 		if (flags & F_VAL_ADJACENT) {
-			if (abs((int)src->head->rank - (int)dest->head->rank) != 1)
+			if (abs((int)moving_card->rank - (int)dest->head->rank) != 1)
 				return false;
 		}
 		if (flags & F_SUIT_SAME_DST) {
-			if (src->head->suit != dest->head->suit)
+			if (moving_card->suit != dest->head->suit)
 				return false;
 		}
 		if (flags & F_SUIT_DIFF_DST) {
-			if (src->head->suit == dest->head->suit)
+			if (moving_card->suit == dest->head->suit)
 				return false;
 		}
 		if (flags & F_COLOR_SAME_DST) {
-			if (is_alternate_color(src->head, dest->head))
+			if (is_alternate_color(moving_card, dest->head))
 				return false;
 		}
+		if (flags & F_EMPTY_DEST)
+			return false;
 	}
-
+	if (flags & F_TOP_ACE) {
+		if (moving_card->rank != RANK_ACE)
+			return false;
+	}
+	if (flags & F_BOTTOM_ACE) {
+		if (src->head->rank != RANK_ACE)
+			return false;
+	}
+	if (flags & F_BOTTOM_KING) {
+		if (src->head->rank != RANK_KING)
+			return false;
+	}
+	if (flags & F_TOP_KING) {
+		if (moving_card->rank != RANK_KING)
+			return false;
+	}
 	return true;
 }
