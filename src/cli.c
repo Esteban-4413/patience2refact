@@ -166,8 +166,9 @@ void run_cli() {
 			}
 			break;
 			case CMD_SAVE:
-			    if (current_state == NULL) { printf("No game loaded yet. Type 'load' first\n");}
-				else {
+			    if (current_state == NULL) {
+					 printf("No game loaded yet. Type 'load' first\n");
+				} else {
 				    printf("Saving your game| \n");
 					save_game(current_state);
 				}
