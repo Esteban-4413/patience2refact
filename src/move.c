@@ -30,11 +30,18 @@ void move(Game_state *current_state) {
 	Move move = current_state->move;
 	Pile *src_pile = current_state->table_piles[move.src_pile];
 	Pile *dest_pile = current_state->table_piles[move.dest_pile];
-
-	Card *src_head = src_pile->head;
+	if (move.src_pile < 0 || move.src_pile >= current_state->pile_count || move.dest_pile < 0 ||
+		move.dest_pile >= current_state->pile_count)
+		return;
+	if (src_pile == NULL || src_pile->head == NULL)
+		return;
 	int index = move.column_out;
 	// Card *dest_head = dest_pile->head;
 	Card *card = peek_card_at(src_pile, index);
+	if (card == NULL)
+		return;
+
+	Card *src_head = src_pile->head;
 
 	src_pile->head = card->next;
 	card->next = dest_pile->head;
@@ -182,7 +189,7 @@ void undo_move(Game_state *state) {
 		return;
 	}
 	pop_history(state->history, &last_turn);
-	for (int i = last_turn.count - 1; 1 >= 0; i--) {
+	for (int i = last_turn.count - 1; i >= 0; i--) {
 		Move m = last_turn.sub_moves[i];
 		if (m.is_auto)
 			printf("[UNDO AUTO action] returning %d card(s) from pile: %d to pile %d", m.card_count, m.dest_pile,
@@ -192,6 +199,8 @@ void undo_move(Game_state *state) {
 		state->move.src_pile = m.dest_pile;
 		state->move.dest_pile = m.src_pile;
 		state->move.card_count = m.card_count;
+		Pile *source = state->table_piles[m.dest_pile];
+		state->move.column_out = (m.column_out == 0) ? 0 : source->num_cards - m.card_count;
 		state->move.is_auto = true;
 		move(state);
 	}
