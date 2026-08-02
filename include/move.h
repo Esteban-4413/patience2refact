@@ -16,4 +16,6 @@ bool fill_move(Game_state *current_state, GameCommand *cmd);
 void move(Game_state *current_state);
 
 bool is_move_valid(Game_state *current_state);
+
+void auto_moves(Game_state *current_state);
 #endif

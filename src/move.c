@@ -136,3 +136,41 @@ bool is_move_valid(Game_state *current_state) {
 	}
 	return true;
 }
+
+void auto_moves(Game_state *current_state){
+    GameDefinition *game_def = current_state->definition;
+    int moves_count = game_def->rule_count;
+    GameCommand cmd;
+    bool moved = true;
+
+   while (moved){
+       moved = false;
+       for (int i = 0; i < moves_count && !moved; i++){ // Para cada MoveAUTO
+           if(game_def->rules[i].is_auto){
+               MoveRule move_rule = game_def->rules[i];
+
+               for(int j = 0; (strcmp(current_state->table_piles[j]->pile_class->name, move_rule.src_pile) == 0) &&
+                        (j < current_state->pile_count) && !moved; j++){
+                   cmd.src = j + 1;
+                   for(int k = 0; (k < current_state->table_piles[i]->num_cards) && !moved; k++){
+                       cmd.card_index_input = k + 1;
+                       for(int l = 0; (strcmp(current_state->table_piles[l]->pile_class->name, move_rule.dest_pile) == 0) &&
+                                (l < current_state->pile_count) && !moved; l++){
+                           cmd.dest = l + 1;
+                           fill_move(current_state, &cmd);
+                           if(is_move_valid(current_state)){
+                               move(current_state);
+                               // Isso conta como uma jogada para entrar no historial?
+                               moved = true;
+                           }
+                       }
+                   }
+
+               }
+
+           }
+       }
+
+   }
+   set_move(current_state);
+}
