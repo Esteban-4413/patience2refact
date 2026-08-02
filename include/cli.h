@@ -5,6 +5,7 @@
 #include "loader.h"
 #include "move.h"
 #include "parser.h"
+#include "save_load.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,6 +24,7 @@ typedef enum {
 	CMD_QUIT,
 	CMD_MOVE,
 	CMD_UNDO,
+	CMD_SAVE,
 	CMD_UNRECOGNIZED
 } CommandType;
 

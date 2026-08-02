@@ -59,6 +59,9 @@ GameCommand parse_command(InputBuffer *input_buffer) {
 		}
 	} else if (strcmp(keyword, "undo") == 0)
 		cmd.type = CMD_UNDO;
+	else if (strcmp(keyword, "save") == 0){
+	    cmd.type = CMD_SAVE;
+	}
 	else
 		cmd.type = CMD_UNRECOGNIZED;
 	return cmd;
@@ -162,6 +165,13 @@ void run_cli() {
 				print_board(current_state);
 			}
 			break;
+			case CMD_SAVE:
+			    if (current_state == NULL) { printf("No game loaded yet. Type 'load' first\n");}
+				else {
+				    printf("Saving your game| \n");
+					save_game(current_state);
+				}
+
 		case CMD_UNRECOGNIZED:
 			printf("Command unrecognized: '%s'\n", input_buffer->buffer);
 			break;
