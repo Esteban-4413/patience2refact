@@ -5,8 +5,16 @@ bool save_game(Game_state *current_state){
     char name[64];
     strcpy(name, current_state->definition->game_name);
 
+    char just_name[64];
+    int i = 0;
+    while(name[i] != '\0' && name[i] != '.'){
+        just_name[i] = name[i];
+        i++;
+    }
+    just_name[i] = '\0';
+
     char path[128];
-    snprintf(path, 128, "saves/%s.txt", name);
+    snprintf(path, 128, "saves/%s.txt", just_name);
 
     FILE *f = fopen(path, "w");
     if (f == NULL) return false;
