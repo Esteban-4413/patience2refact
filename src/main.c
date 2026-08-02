@@ -1,21 +1,27 @@
 #include "../include/main.h"
 
+typedef enum { CMD_MODE_CLI, CMD_MODE_GUI, CMD_MODE_UNKNOWN } UImode;
+
+void start_cli_mode() { run_cli(); }
+
+void start_ncurses_mode() { return; }
+
 int main() {
-
-	// bool playing = true;
-	// while (playing) {
-	// 	int ch = getchar();
-	// 	if (ch == 'q')
-	// 		playing = false;
-	// 	else if (ch == 't') {
-	// 		print_deck_arr(deck);
-	// 		printf("\n");
-	// 	} else if (ch == 's') {
-	// 		shuffle_pile(deck);
-	// 		print_deck_arr(deck);
-	// 	}
-	// }
-	run_cli();
-
+	char choice[10];
+	printf("Select interface mode:\n");
+	printf("  1. Classic Terminal (CLI)\n");
+	printf("  2. Graphical Interface (NCurses)\n");
+	printf("Enter choice [1/2]: ");
+	if (fgets(choice, sizeof(choice), stdin) != NULL) {
+		choice[strcspn(choice, "\n")] = 0;
+		if (strcmp(choice, "1") == 0 || strcasecmp(choice, "cli") == 0) {
+			start_cli_mode();
+		} else if (strcmp(choice, "2") == 0 || strcasecmp(choice, "ncurses") == 0) {
+			start_ncurses_mode();
+		} else {
+			printf("Invalid option. Defaulting to CLI mode.\n");
+			start_cli_mode();
+		}
+	}
 	return 0;
 }
