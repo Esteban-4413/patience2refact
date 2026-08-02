@@ -35,8 +35,6 @@ MenuChoice start_menu() {
 			mvwprintw(win, 0, 15, "Options");
 			break;
 		}
-
-	default:
 	}
 
 	wgetch(win);
