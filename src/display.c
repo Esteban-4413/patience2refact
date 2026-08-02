@@ -6,11 +6,15 @@ void print_board(Game_state *current_state){
     // Print the identification of the piles
     for (int i = 0; i <= current_state->pile_count; i++){
 		if (i == 0) {
-			printf("      ");
+			printf("        ");
 		} else {
 			Pile *p = current_state->table_piles[i - 1];
 			char *name = (p->pile_class != NULL) ? p->pile_class->name : "null";
-			printf(" %s%2d(%2d): ", name, i, current_state->table_piles[i - 1]->num_cards);
+			char space[10];
+			if(strlen(name) < 4) { strcpy(space, "       ");}
+			else if (strlen(name) == 4) {strcpy(space, "     ");}
+			else strcpy(space, "    ");
+			printf("%s%2d(%2d):%s", name, i, current_state->table_piles[i - 1]->num_cards, space);
 		}
 	}
 	printf("\n");
@@ -42,15 +46,15 @@ void print_board(Game_state *current_state){
 							is_visible = false;
 					}
 					if (is_visible)
-						printf("    [%2d %2d]    ", card->rank, card->suit);
+						printf("     [%2d %2d]     ", card->rank, card->suit);
 					else
-						printf("    [** **]    ");
+						printf("     [** **]     ");
 				} else if (column + 1 >= current_pile->num_cards) {
-					printf("    [%2s %2s]    ", "-", "-");
+					printf("     [%2s %2s]     ", "-", "-");
 					// Só para fins de debugar, porque na prática quando as cartas da pilha acabarem,
 					// vai fazer print de espaços
 				} else {
-					printf("    [%2s %2s]    ", " ", " ");
+					printf("     [%2s %2s]     ", " ", " ");
 				}
 			} else {
 				printf("%15s", "PILE");

@@ -1,4 +1,6 @@
 #include "game_state.h"
+#include <stdlib.h>
+#include <string.h>
 
 void print_board(Game_state *current_state);
 
