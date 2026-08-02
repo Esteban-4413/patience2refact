@@ -1,6 +1,7 @@
 #ifndef UNDO_H
 #define UNDO_H
 
+#include <stdbool.h>
 #define MAX_UNDO 5
 
 typedef enum {
@@ -18,22 +19,29 @@ typedef struct {
 	int dest_pile; // Pile to which the card(s) are going to be moved
 
 	MoveFlag is_move_valid; // Indicates the current state of the move
+	bool is_auto;
 } Move;
+
+typedef struct {
+	int count;
+	Move sub_moves[15];
+} Turn;
 
 typedef struct History {
 	int front;
 	int length;
-	Move move_history[MAX_UNDO];
+	Turn turn_history[MAX_UNDO];
 } History;
 
 void initialize_history(History *h);
 
 int is_history_empty(History *h);
 
-void enqueue_history(History *h, Move *m);
+void push_history(History *h, Turn *m);
 
-int dequeue_history(History *h, Move *out_move);
+int pop_history(History *h, Turn *out_move);
 
-int peek_history(History *h, Move *peeked_move);
+int peek_history(History *h, Turn *peeked_move);
+
 
 #endif

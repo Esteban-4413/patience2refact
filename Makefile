@@ -1,35 +1,26 @@
-jogo: card.o game_state.o parser.o stack.o undo.o cli.o loader.o display.o move.o src/main.c
-	gcc -Wall -g $^ -o $@ -lncursesw
+CC = gcc
+CFLAGS = -Wall -g
 
-mac: card.o game_state.o parser.o stack.o undo.o cli.o loader.o display.o move.o src/main.c
-	gcc -Wall -g $^ -o jogo -lncurses
+UNAME_S := $(shell uname -s)
 
-card.o: src/cards.c
-	gcc -Wall -g $^ -c -o $@
+ifeq ($(UNAME_S),Darwin)
+    LDLIBS = -lncurses
+else
+    LDLIBS = -lncursesw
+endif
 
-game_state.o: src/game_state.c
-	gcc -Wall -g $^ -c -o $@
+SRCS = $(wildcard src/*.c)
+OBJS = $(wildcard src/%.c, %.o, $(SRCS))
 
-parser.o: src/parser.c
-	gcc -Wall -g $^ -c -o $@
+TARGET = jogo
 
-stack.o: src/stack.c
-	gcc -Wall -g $^ -c -o $@
+all: $(TARGET)
 
-undo.o: src/undo.c
-	gcc -Wall -g $^ -c -o $@
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDLIBS)
 
-cli.o: src/cli.c
-	gcc -Wall -g $^ -c -o $@
-
-loader.o: src/loader.c
-	gcc -Wall -g $^ -c -o $@
-
-display.o: src/display.c
-	gcc -Wall -g $^ -c -o $@
-
-move.o: src/move.c
-	gcc -Wall -g $^ -c -o $@
+*.o: src/*.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	-rm -rf *.o jogo save.txt jogo.dSYM Contents
+	-rm -rf *.o $(TARGET) save.txt $(TARGET).dSYM Contents

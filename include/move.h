@@ -1,7 +1,6 @@
 #ifndef MOVE_H
 #define MOVE_H
 #include "game_state.h"
-#include "display.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,4 +15,8 @@ bool fill_move(Game_state *current_state, GameCommand *cmd);
 void move(Game_state *current_state);
 
 bool is_move_valid(Game_state *current_state);
+
+void auto_moves(Game_state *current_state, Turn *current_turn);
+
+void undo_move(Game_state *state);
 #endif

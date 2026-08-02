@@ -1,20 +1,18 @@
 #include "../include/move.h"
 #include "../include/cli.h"
 
-void print_move(Game_state *state){
-    Move m = state->move;
+void print_move(Game_state *state) {
+	Move m = state->move;
 	printf("Pile src: %d | Column: %d | Pile dest: %d | num: %d | Flag: %d"
 		   "\n",
-		   m.src_pile, m.column_out, m.dest_pile, m.card_count,
-		   m.is_move_valid);
+		   m.src_pile, m.column_out, m.dest_pile, m.card_count, m.is_move_valid);
 }
 
 bool fill_move(Game_state *current_state, GameCommand *cmd) {
 	int src = cmd->src - 1;
 	int dest = cmd->dest - 1;
 	Pile *src_pile = current_state->table_piles[src];
-	int column_input =
-		(cmd->card_index_input == -1) ? 0 : cmd->card_index_input;
+	int column_input = (cmd->card_index_input == -1) ? 0 : cmd->card_index_input;
 
 	int cards_to_move = src_pile->num_cards - column_input;
 	if (cards_to_move <= 0 || column_input < 0) {
@@ -23,29 +21,34 @@ bool fill_move(Game_state *current_state, GameCommand *cmd) {
 	}
 	current_state->move.src_pile = src;
 	current_state->move.dest_pile = dest;
-	current_state->move.column_out =
-		(column_input == 0) ? column_input : src_pile->num_cards - column_input;
-	current_state->move.card_count =
-		(column_input == 0) ? 1 : src_pile->num_cards - column_input + 1;
+	current_state->move.column_out = (column_input == 0) ? column_input : src_pile->num_cards - column_input;
+	current_state->move.card_count = (column_input == 0) ? 1 : src_pile->num_cards - column_input + 1;
 	return true;
 }
 
-void move(Game_state *current_state){
-    Move move = current_state->move;
-    Pile *src_pile = current_state->table_piles[move.src_pile];
-    Pile *dest_pile = current_state->table_piles[move.dest_pile];
-
-    Card *src_head = src_pile->head;
-    int index = move.column_out;
+void move(Game_state *current_state) {
+	Move move = current_state->move;
+	Pile *src_pile = current_state->table_piles[move.src_pile];
+	Pile *dest_pile = current_state->table_piles[move.dest_pile];
+	if (move.src_pile < 0 || move.src_pile >= current_state->pile_count || move.dest_pile < 0 ||
+		move.dest_pile >= current_state->pile_count)
+		return;
+	if (src_pile == NULL || src_pile->head == NULL)
+		return;
+	int index = move.column_out;
 	// Card *dest_head = dest_pile->head;
 	Card *card = peek_card_at(src_pile, index);
+	if (card == NULL)
+		return;
 
-    src_pile->head = card->next;
-    card->next = dest_pile->head;
-    dest_pile->head = src_head;
+	Card *src_head = src_pile->head;
 
-    src_pile->num_cards -= move.card_count;
-    dest_pile->num_cards += move.card_count;
+	src_pile->head = card->next;
+	card->next = dest_pile->head;
+	dest_pile->head = src_head;
+
+	src_pile->num_cards -= move.card_count;
+	dest_pile->num_cards += move.card_count;
 }
 
 bool is_move_valid(Game_state *current_state) {
@@ -135,4 +138,70 @@ bool is_move_valid(Game_state *current_state) {
 			return false;
 	}
 	return true;
+}
+
+void auto_moves(Game_state *current_state, Turn *current_turn) {
+	GameDefinition *game_def = current_state->definition;
+	int moves_count = game_def->rule_count;
+	GameCommand cmd;
+	bool moved = true;
+
+	while (moved) {
+		moved = false;
+		for (int i = 0; i < moves_count && !moved; i++) { // Para cada MoveAUTO
+			if (game_def->rules[i].is_auto) {
+				MoveRule move_rule = game_def->rules[i];
+
+				for (int j = 0; (strcmp(current_state->table_piles[j]->pile_class->name, move_rule.src_pile) == 0) &&
+								(j < current_state->pile_count) && !moved;
+					 j++) {
+					if (strcmp(current_state->table_piles[j]->pile_class->name, move_rule.src_pile) == 0) {
+						cmd.src = j + 1;
+						for (int k = 0; k < current_state->table_piles[j]->num_cards && !moved; k++) {
+							cmd.card_index_input = k + 1;
+							for (int l = 0; l < current_state->pile_count && !moved; l++) {
+								cmd.dest = l + 1;
+								fill_move(current_state, &cmd);
+								if (is_move_valid(current_state)) {
+									current_state->move.is_auto = true;
+									if (current_turn != NULL) {
+										current_turn->sub_moves[current_turn->count] = current_state->move;
+										current_turn->count++;
+									}
+									move(current_state);
+									// Isso conta como uma jogada para entrar no historial?
+									moved = true;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	set_move(current_state);
+}
+
+void undo_move(Game_state *state) {
+	Turn last_turn;
+	if (is_history_empty(state->history)) {
+		printf("You have no more moves to undo");
+		return;
+	}
+	pop_history(state->history, &last_turn);
+	for (int i = last_turn.count - 1; i >= 0; i--) {
+		Move m = last_turn.sub_moves[i];
+		if (m.is_auto)
+			printf("[UNDO AUTO action] returning %d card(s) from pile: %d to pile %d", m.card_count, m.dest_pile,
+				   m.src_pile);
+		else
+			printf("[UNDO action] returning %d card(s) from pile %d to pile %d", m.card_count, m.dest_pile, m.src_pile);
+		state->move.src_pile = m.dest_pile;
+		state->move.dest_pile = m.src_pile;
+		state->move.card_count = m.card_count;
+		Pile *source = state->table_piles[m.dest_pile];
+		state->move.column_out = (m.column_out == 0) ? 0 : source->num_cards - m.card_count;
+		state->move.is_auto = true;
+		move(state);
+	}
 }

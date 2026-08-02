@@ -46,8 +46,7 @@ int input_patience(int count) {
 	printf("What game do you wanna play?\n Choose a number\n");
 	while (!bflag) {
 		if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
-			if (sscanf(buffer, "%d", &option) == 1 && option >= 1 &&
-				option <= count)
+			if (sscanf(buffer, "%d", &option) == 1 && option >= 1 && option <= count)
 				bflag = 1;
 			else
 				printf("Not a valid option. Please try again but this time a "
@@ -63,6 +62,9 @@ Game_state *build_game_state(GameDefinition *def) {
 		return NULL;
 	Game_state *state = calloc(1, sizeof(*state));
 	state->definition = def;
+	state->history = malloc(sizeof(History));
+	if (state->history != NULL)
+		initialize_history(state->history);
 	Pile init_deck;
 	init_deck.head = NULL;
 	init_deck.num_cards = 0;
@@ -111,9 +113,9 @@ Game_state *build_game_state(GameDefinition *def) {
 	return state;
 }
 
-void set_move(Game_state *state){
-    state->move.src_pile = (-1);
-    state->move.dest_pile = (-1);
+void set_move(Game_state *state) {
+	state->move.src_pile = (-1);
+	state->move.dest_pile = (-1);
 	state->move.is_move_valid = SET;
 	state->move.card_count = 0;
 }
