@@ -14,8 +14,7 @@ InputBuffer *new_input_buffer() {
 void print_prompt() { printf("input > "); }
 
 void read_input(InputBuffer *input_buffer) {
-	ssize_t bytes_read =
-		getline(&(input_buffer->buffer), &(input_buffer->buffer_length), stdin);
+	ssize_t bytes_read = getline(&(input_buffer->buffer), &(input_buffer->buffer_length), stdin);
 	if (bytes_read <= 0) {
 		printf("Error reading the input\n");
 		exit(EXIT_FAILURE);
@@ -51,8 +50,7 @@ GameCommand parse_command(InputBuffer *input_buffer) {
 		sscanf(input_buffer->buffer, "%*s %s", cmd.arg);
 	} else if (strcmp(keyword, "mv") == 0) {
 		cmd.type = CMD_MOVE;
-		if (sscanf(input_buffer->buffer, "%*s %d|%d %d", &cmd.src,
-				   &cmd.card_index_input, &cmd.dest) == 3)
+		if (sscanf(input_buffer->buffer, "%*s %d|%d %d", &cmd.src, &cmd.card_index_input, &cmd.dest) == 3)
 			;
 		else if (sscanf(input_buffer->buffer, "%*s %d %d", &cmd.src, &cmd.dest))
 			cmd.card_index_input = -1;
@@ -142,13 +140,27 @@ void run_cli() {
 					}
 					if (!is_move_valid(current_state)) {
 						printf("Move is not valid\n Try somthing else!");
-					} else
+					} else {
+						Turn current_turn;
+						current_turn.count = 0;
+						current_state->move.is_auto = false;
+						current_turn.sub_moves[current_turn.count] = current_state->move;
+						current_turn.count++;
 						move(current_state);
+						auto_moves(current_state, &current_turn);
+						push_history(current_state->history, &current_turn);
+					}
 					print_board(current_state);
 				}
 			}
 			break;
 		case CMD_UNDO:
+			if (current_state == NULL)
+				printf("No game loaded yet.\n");
+			else {
+				undo_move(current_state);
+				print_board(current_state);
+			}
 			break;
 		case CMD_UNRECOGNIZED:
 			printf("Command unrecognized: '%s'\n", input_buffer->buffer);
