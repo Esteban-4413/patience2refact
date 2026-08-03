@@ -17,18 +17,9 @@ typedef struct {
 	ssize_t input_length;
 } InputBuffer;
 
-typedef enum {
-	CMD_LOAD,
-	CMD_PRINT,
-	CMD_SHUFFLE,
-	CMD_QUIT,
-	CMD_MOVE,
-	CMD_UNDO,
-	CMD_SAVE,
-	CMD_UNRECOGNIZED
-} CommandType;
+typedef enum { CMD_LOAD, CMD_PRINT, CMD_SHUFFLE, CMD_QUIT, CMD_MOVE, CMD_UNDO, CMD_SAVE, CMD_UNRECOGNIZED } CommandType;
 
-typedef struct GameCommand{
+typedef struct GameCommand {
 	CommandType type;
 	char arg[50];
 	int src;
@@ -45,7 +36,7 @@ void close_input_buffer(InputBuffer *input_buffer);
 GameCommand parse_command(InputBuffer *input_buffer);
 void run_cli();
 
-void menu(GameDefinition *current_def, Game_state *current_state);
+void menu(GameDefinition **current_def, Game_state **current_state);
 int input_menu();
 
 #endif
