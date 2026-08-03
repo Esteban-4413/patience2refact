@@ -146,7 +146,7 @@ void run_cli() {
 						current_state->move.is_auto = false;
 						current_turn.sub_moves[current_turn.count] = current_state->move;
 						current_turn.count++;
-						move(current_state);
+						do_move(current_state);
 						auto_moves(current_state, &current_turn);
 						push_history(current_state->history, &current_turn);
 					}

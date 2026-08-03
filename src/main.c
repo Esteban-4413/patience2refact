@@ -1,10 +1,26 @@
-#include "../include/main.h"
-
-typedef enum { CMD_MODE_CLI, CMD_MODE_GUI, CMD_MODE_UNKNOWN } UImode;
+// #include "../include/main.h"
+#include "../include/cli.h"
+#include "../include/gui.h"
 
 void start_cli_mode() { run_cli(); }
 
-void start_ncurses_mode() { return; }
+void start_ncurses_mode() {
+	MenuChoice choice = start_menu();
+	if (choice == MENU_NEW_GAME) {
+		GameDefinition *def = choose_patience("paciencias");
+		if (def != NULL && def->game_name[0] != '\0') {
+			Game_state *state = build_game_state(def);
+			run_ncurses_gui(state);
+		} else {
+			printf("Failed to load the game definition.\n");
+		}
+	} else if (choice == MENU_CONTINUE) // TODOO!!
+		;
+	else {
+		printf("Bye bye...\n");
+	}
+}
+
 
 int main() {
 	char choice[10];
