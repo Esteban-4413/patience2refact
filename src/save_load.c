@@ -2,7 +2,14 @@
 
 
 bool save_game(Game_state *current_state){
-    char name[64];
+    #ifdef _WIN32
+            mkdir("saves");
+        #else
+            mkdir("saves", S_IRWXU | S_IRWXG | S_IRWXO);
+        #endif
+        // S_IRWXU = Read, Write, Execute for User
+
+        char name[64];
     strcpy(name, current_state->definition->game_name);
 
     char just_name[64];
@@ -80,3 +87,5 @@ void translate_rank(char *char_rank, Rank rank){
             break;
     }
 }
+
+// void load_game(Game_state *current_state){}

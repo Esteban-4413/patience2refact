@@ -94,18 +94,28 @@ void run_cli() {
 					sprintf(path, "paciencias/%s.paciencia", cmd.arg);
 				printf("Loading your game: %s\n", cmd.arg);
 				current_def = load_patience(path);
-			} else
-				current_def = choose_patience("paciencias");
-			if (current_def != NULL && current_def->game_name[0] != '\0') {
-				printf("Loaded %s\n", current_def->game_name);
-				current_state = build_game_state(current_def);
-				if (current_state != NULL) {
-					printf("The cards have been shuffled and dealt\n");
-					print_board(current_state);
-				}
-			} else
-				printf("Failed to load the game. Check the filename and try "
-					   "again!\n");
+			} else {
+                DIR *d = opendir("saves");
+                if (d == NULL){
+                    current_def = choose_patience("paciencias");
+                    if (current_def != NULL && current_def->game_name[0] != '\0') {
+                        printf("Loaded %s\n", current_def->game_name);
+                        current_state = build_game_state(current_def);
+                        if (current_state != NULL) {
+                           	printf("The cards have been shuffled and dealt\n");
+                           	print_board(current_state);
+                        }
+                    } else {
+                        printf("Failed to load the game. Check the filename and try "
+                    	   "again!\n");
+                    }
+                } else {
+                    printf("Not ready for this yet!\n");
+                    menu(current_def, current_state);
+                }
+
+			}
+
 			break;
 		case CMD_PRINT:
 			if (current_state == NULL)
@@ -168,14 +178,52 @@ void run_cli() {
 			case CMD_SAVE:
 			    if (current_state == NULL) {
 					 printf("No game loaded yet. Type 'load' first\n");
+						// o save quando chamado depois de entrar para a função menu()
+						// não funciona porque tem o current_state a NULL;
 				} else {
-				    printf("Saving your game| \n");
+				    printf("Saving your game! \n");
 					save_game(current_state);
 				}
-
+				break;
 		case CMD_UNRECOGNIZED:
 			printf("Command unrecognized: '%s'\n", input_buffer->buffer);
 			break;
 		}
 	}
+}
+
+void menu(GameDefinition *current_def, Game_state *current_state){
+    int r = input_menu();
+    if (r == 2) {
+        current_def = choose_patience("paciencias");
+        if (current_def != NULL && current_def->game_name[0] != '\0') {
+            printf("Loaded %s\n", current_def->game_name);
+            current_state = build_game_state(current_def);
+            if (current_state != NULL) {
+               	printf("The cards have been shuffled and dealt\n");
+               	print_board(current_state);
+            }
+        } else {
+            printf("Failed to load the game. Check the filename and try "
+        	   "again!\n");
+        }
+    }
+    else {
+        //choose_patience("saves");
+    }
+
+}
+
+int input_menu(){
+    printf("Encontrei um jogo guardado\n1 - Continuar\n2 - Novo Jogo\n");
+    int op = 0;
+    char buf[64];
+    int buul = 0;
+    while (!buul){
+        if(fgets(buf, sizeof(buf), stdin) != NULL){
+            if(sscanf(buf, "%d", &op) == 1 && (op == 1 || op == 2)) buul = 1;
+            else printf("Número invalido. Tenta outra vez man");
+        }
+    }
+    return op;
 }

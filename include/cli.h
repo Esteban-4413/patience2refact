@@ -45,4 +45,7 @@ void close_input_buffer(InputBuffer *input_buffer);
 GameCommand parse_command(InputBuffer *input_buffer);
 void run_cli();
 
+void menu(GameDefinition *current_def, Game_state *current_state);
+int input_menu();
+
 #endif
