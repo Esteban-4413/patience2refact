@@ -3,13 +3,14 @@
 #include "game_def.h"
 #include "game_state.h"
 #include "parser.h"
+#include "save_load.h"
 #include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-GameDefinition *choose_patience(char *folder);
+GameDefinition *choose_patience(Game_state **current_state, char *folder);
 
-GameDefinition *load_option(char *folder, char files[][256], int patience);
+GameDefinition *load_option(Game_state **current_state, char *folder, char files[][256], int option);
 
 int list_options(DIR *d, char files[][256]);
 

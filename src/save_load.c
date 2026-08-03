@@ -1,4 +1,6 @@
 #include "../include/save_load.h"
+#include <stdio.h>
+#include <string.h>
 
 void mkdir_saves() {
 #ifdef _WIN32
@@ -92,4 +94,35 @@ void translate_rank(char *char_rank, Rank rank) {
 	}
 }
 
-// void load_game(Game_state *current_state){}
+Game_state *load_game(char *save_file){
+    Game_state *state = calloc(1, sizeof(*state));
+
+    state->history = malloc(sizeof(History));
+	if (state->history != NULL)
+		initialize_history(state->history);
+
+	FILE *f = fopen(save_file, "r");
+	char buffer[128];
+
+	// load_definition
+	fgets(buffer, sizeof(buffer), f);
+	int len = strlen(buffer);
+	if(len > 0 && buffer[len -1] == '\n') buffer[len-1] = '\0';
+	char path[256];
+	snprintf(path, sizeof(path), "paciencias/%s", buffer);
+
+	GameDefinition *current_def = load_patience(path);
+	if(current_def != NULL){
+	    state->definition = current_def;
+		printf("Game Definition set!\n");
+	}
+
+	// // load_cards
+	// int i = 0;
+	// while (i > 0)
+
+
+
+	fclose(f);
+	return state;
+}

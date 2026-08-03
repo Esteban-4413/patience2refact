@@ -96,7 +96,7 @@ void run_cli() {
 			} else {
 				DIR *d = opendir("saves");
 				if (d == NULL) {
-					current_def = choose_patience("paciencias");
+					current_def = choose_patience(&current_state, "paciencias");
 					if (current_def != NULL && current_def->game_name[0] != '\0') {
 						printf("Loaded %s\n", current_def->game_name);
 						current_state = build_game_state(current_def);
@@ -176,8 +176,6 @@ void run_cli() {
 		case CMD_SAVE:
 			if (current_state == NULL) {
 				printf("No game loaded yet. Type 'load' first\n");
-				// o save quando chamado depois de entrar para a função menu()
-				// não funciona porque tem o current_state a NULL;
 			} else {
 				printf("Saving your game! \n");
 				save_game(current_state);
@@ -193,7 +191,7 @@ void run_cli() {
 void menu(GameDefinition **current_def, Game_state **current_state) {
 	int r = input_menu();
 	if (r == 2) {
-		*current_def = choose_patience("paciencias");
+		*current_def = choose_patience(current_state, "paciencias");
 		if (current_def != NULL && (*current_def)->game_name[0] != '\0') {
 			printf("Loaded %s\n", (*current_def)->game_name);
 			*current_state = build_game_state(*current_def);
@@ -206,7 +204,10 @@ void menu(GameDefinition **current_def, Game_state **current_state) {
 				   "again!\n");
 		}
 	} else {
-		// choose_patience("saves");
+		*current_def = choose_patience(current_state, "saves");
+		if (current_def == NULL && current_state != NULL){
+		    printf("choose_patience done!\n");
+		}
 	}
 }
 
@@ -220,7 +221,7 @@ int input_menu() {
 			if (sscanf(buf, "%d", &op) == 1 && (op == 1 || op == 2))
 				buul = 1;
 			else
-				printf("Número invalido. Tenta outra vez man");
+				printf("Número invalido. Tenta outra vez man\n");
 		}
 	}
 	return op;

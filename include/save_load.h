@@ -11,7 +11,7 @@
 #endif
 
 #include "game_state.h"
-#include "loader.h"
+#include "parser.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,4 +23,6 @@ bool save_game(Game_state *current_state);
 void translate_suit(char *char_suit, Suit suit);
 
 void translate_rank(char *char_rank, Rank rank);
+
+Game_state *load_game(char *save_file);
 #endif

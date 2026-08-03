@@ -1,7 +1,7 @@
 #include "../include/loader.h"
-#include <string.h>
 
-GameDefinition *choose_patience(char *folder) {
+
+GameDefinition *choose_patience(Game_state **current_state, char *folder) {
 	GameDefinition *r;
 	DIR *d = opendir(folder);
 	if (d == NULL) {
@@ -13,16 +13,23 @@ GameDefinition *choose_patience(char *folder) {
 	char files[50][256];
 	int count = list_options(d, files);
 	int option = input_patience(count);
-	r = load_option(folder, files, option);
+	r = load_option(current_state, folder, files, option);
 	return r;
 }
 
-GameDefinition *load_option(char *folder, char files[][256], int option) {
+GameDefinition *load_option(Game_state **current_state, char *folder, char files[][256], int option) {
 	char path[256];
 	sprintf(path, "%s/%s", folder, files[option - 1]);
-	GameDefinition *g = load_patience(path);
+	GameDefinition *g;
+	if(strcmp(folder, "saves") == 0 ) {
+	    g  = NULL;
+		*current_state = load_game(path);
+	} else {
+        g = load_patience(path);
+        *current_state = NULL;
+	}
 	printf("loading %s for you <3\n", path);
-	strcpy(g->game_name, files[option - 1]);
+	if (g != NULL) {strcpy(g->game_name, files[option - 1]); }
 	return g;
 }
 
