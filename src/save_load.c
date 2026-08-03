@@ -180,13 +180,12 @@ Game_state *load_game(char *save_file){
             if(buffer[0] != '\0'){
                     char token[4];
                     int pos = 0;
-                    int read;
+                    int read = 0;
                     while (sscanf(buffer + pos, "%s%n", token, &read) == 1){
                         if (read <= 0) break;
                         Card *c = read_card(token);
                         if(!head) {state->table_piles[i]->head = c; head = true;}
                         push(state->table_piles[i], c);
-                        state->table_piles[i]->num_cards++;
                         pos += read;
                         read = 0;
                     }
