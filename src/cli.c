@@ -111,6 +111,7 @@ void run_cli() {
 				} else {
 					printf("Here are the games to continue!\n");
 					menu(&current_def, &current_state);
+					print_board(current_state);
 				}
 			}
 

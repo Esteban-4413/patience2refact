@@ -25,4 +25,6 @@ void translate_suit(char *char_suit, Suit suit);
 void translate_rank(char *char_rank, Rank rank);
 
 Game_state *load_game(char *save_file);
+
+Card *read_card(char *str);
 #endif
