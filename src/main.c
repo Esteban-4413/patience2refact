@@ -1,23 +1,26 @@
 // #include "../include/main.h"
 #include "../include/cli.h"
 #include "../include/gui.h"
+#include <stdio.h>
 
 void start_cli_mode() { run_cli(); }
 
 void start_ncurses_mode() {
-	MenuChoice choice = start_menu();
+	char chosen_file[128] = {0};
+	MenuChoice choice = start_menu(chosen_file);
 	if (choice == MENU_NEW_GAME) {
-		GameDefinition *def = choose_patience("paciencias");
-		if (def != NULL && def->game_name[0] != '\0') {
-			Game_state *state = build_game_state(def);
-			run_ncurses_gui(state);
-		} else {
-			printf("Failed to load the game definition.\n");
-		}
-	} else if (choice == MENU_CONTINUE) // TODOO!!
-		;
-	else {
-		printf("Bye bye...\n");
+		if (chosen_file[0] != NULL) {
+			char path[256];
+			snprintf(path, sizeof(path), "paciencias/%s", chosen_file);
+			GameDefinition *def = load_patience(path);
+			if (def != NULL && def->game_name[0] != '\0') {
+				Game_state *state = build_game_state(def);
+				run_ncurses_gui(state);
+			} else
+				printf("Failed to load the game definition from %s.\n", path);
+		} else
+			printf("No game was selected.\n");
+	} else if (choice == MENU_CONTINUE) { // TODO:}
 	}
 }
 

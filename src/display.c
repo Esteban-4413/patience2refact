@@ -1,21 +1,28 @@
 #include "../include/display.h"
 
-void print_board(Game_state *current_state){
-    int column = 0;
-    char space[10];
 
-    // Print the identification of the piles
-    for (int i = 0; i <= current_state->pile_count; i++){
+void print_board(Game_state *current_state) {
+	int column = 0;
+	char space[10];
+
+	// Print the identification of the piles
+	for (int i = 0; i <= current_state->pile_count; i++) {
 		if (i == 0) {
 			printf("        ");
 		} else {
 			Pile *p = current_state->table_piles[i - 1];
 			char *name = (p->pile_class != NULL) ? p->pile_class->name : "null";
-			if(strlen(name) < 4) { strcpy(space, "       ");}
-			else if (strlen(name) == 4) {strcpy(space, "      ");}
-			else strcpy(space, "    ");
-			if (i != current_state->pile_count) {printf("%s%2d(%2d):%s", name, i, current_state->table_piles[i - 1]->num_cards, space);}
-			else { printf("%s%2d(%2d):", name, i, current_state->table_piles[i - 1]->num_cards);}
+			if (strlen(name) < 4) {
+				strcpy(space, "       ");
+			} else if (strlen(name) == 4) {
+				strcpy(space, "      ");
+			} else
+				strcpy(space, "    ");
+			if (i != current_state->pile_count) {
+				printf("%s%2d(%2d):%s", name, i, current_state->table_piles[i - 1]->num_cards, space);
+			} else {
+				printf("%s%2d(%2d):", name, i, current_state->table_piles[i - 1]->num_cards);
+			}
 		}
 	}
 	printf("\n");
@@ -37,8 +44,10 @@ void print_board(Game_state *current_state){
 			Pile *current_pile = current_state->table_piles[i];
 			if (current_pile != NULL) {
 				Card *card = peek_card_at(current_pile, current_pile->num_cards - 1 - column);
-				if (i == current_state->pile_count -1) {strcpy(space, " ");}
-				else strcpy(space, "     ");
+				if (i == current_state->pile_count - 1) {
+					strcpy(space, " ");
+				} else
+					strcpy(space, "     ");
 				if (card != NULL) {
 					bool is_visible = true;
 					bool is_top_card = (column == current_pile->num_cards - 1);

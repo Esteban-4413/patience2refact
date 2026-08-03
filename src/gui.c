@@ -1,4 +1,23 @@
 #include "../include/gui.h"
+#include <string.h>
+
+int get_patience_file(char files[][64], int max_files) {
+	DIR *d;
+	struct dirent *dir;
+	int count = 0;
+	d = opendir("paciencias");
+	if (d) {
+		while ((dir = readdir(d)) != NULL && count < max_files) {
+			if (strstr(dir->d_name, ".paciencia") != NULL) {
+				strncpy(files[count], dir->d_name, 63);
+				files[count][63] = '\0';
+				count++;
+			}
+		}
+		closedir(d);
+	}
+	return count;
+}
 
 void menu_bar_draw(MenuBar *mb) {
 	for (int i = 0; i < mb->num_menus; i++) {
@@ -12,7 +31,8 @@ void menu_bar_draw(MenuBar *mb) {
 	wrefresh(mb->win);
 }
 
-void draw_main_panel(WINDOW *win, int selected_menu, int active_option, int yMax, int xMax) {
+void draw_main_panel(WINDOW *win, int selected_menu, int active_option, int active_pane, int right_option,
+					 char patience_files[][64], int num_files, int yMax, int xMax) {
 	for (int y = 1; y < yMax / 2 - 1; y++) {
 		for (int x = 1; x < xMax / 2 - 1; x++) {
 			mvwprintw(win, y, x, " ");
@@ -20,16 +40,34 @@ void draw_main_panel(WINDOW *win, int selected_menu, int active_option, int yMax
 	}
 	switch (selected_menu) {
 	case 0:
-		if (active_option == 0)
+		int split_x = (xMax / 2) / 3;
+		mvwvline(win, 1, split_x, ACS_VLINE, yMax / 2 - 2);
+		if (active_pane == 0 && active_option == 0)
 			wattron(win, A_REVERSE);
-		mvwprintw(win, 2, 2, "  New Game  ");
-		if (active_option == 0)
+		mvwprintw(win, 2, 2, "  New game  ");
+		if (active_pane == 0 && active_option == 0)
 			wattroff(win, A_REVERSE);
-		if (active_option == 1)
+		if (active_pane == 0 && active_option == 1)
 			wattron(win, A_REVERSE);
 		mvwprintw(win, 3, 2, "  Continue  ");
-		if (active_option == 1)
+		if (active_pane == 0 && active_option == 1)
 			wattroff(win, A_REVERSE);
+		if (active_option == 0) {
+			mvwprintw(win, 1, split_x + 2, "Avaiable games:");
+			for (int i = 0; i < num_files; i++) {
+				if (active_pane == 1 && right_option == i)
+					wattron(win, A_REVERSE);
+				mvwprintw(win, 3 + i, split_x + 2, " 1.%s ", patience_files[i]);
+				if (active_pane == 1 && right_option == i)
+					wattroff(win, A_REVERSE);
+			}
+			if (num_files == 0)
+				mvwprintw(win, 3, split_x + 2, "  (No files found)  ");
+		} else if (active_option == 1) {
+			mvwprintw(win, 1, split_x + 2, "  Saved games:  ");
+
+			mvwprintw(win, 3, split_x + 2, "  (Not saved games for now)  ");
+		}
 		break;
 	case 1:
 		if (active_option == 0)
@@ -54,7 +92,7 @@ void draw_main_panel(WINDOW *win, int selected_menu, int active_option, int yMax
 	}
 }
 
-MenuChoice start_menu() {
+MenuChoice start_menu(char *chosen_file_out) {
 	MenuChoice choice;
 	initscr();
 	cbreak();
@@ -78,11 +116,16 @@ MenuChoice start_menu() {
 
 	mb.selected = 0;
 	int active_option = 0;
-
 	int num_options_per_tab[] = {2, 2, 0};
 
+	char patience_files[20][64];
+	int num_files = get_patience_file(patience_files, 20);
+
+	int active_pane = 0;
+	int right_option = 0;
+
 	menu_bar_draw(&mb);
-	draw_main_panel(win, mb.selected, active_option, yMax, xMax);
+	draw_main_panel(win, mb.selected, active_option, active_pane, right_option, patience_files, num_files, yMax, xMax);
 	wrefresh(win);
 
 	int ch;
@@ -92,35 +135,58 @@ MenuChoice start_menu() {
 		switch (ch) {
 		case 'l':
 		case KEY_RIGHT:
-			mb.selected = (mb.selected + 1) % mb.num_menus;
-			active_option = 0;
+			if (mb.selected == 0 && active_pane == 0 && num_files > 0)
+				active_pane = 1;
+			else {
+				mb.selected = (mb.selected + 1) % mb.num_menus;
+				active_pane = 0;
+				active_option = 0;
+			}
 			break;
 		case 'j':
 		case KEY_DOWN:
-			if (num_options_per_tab[mb.selected] > 0)
-				active_option = (active_option + 1) % num_options_per_tab[mb.selected];
+			if (active_pane == 0) {
+				if (num_options_per_tab[mb.selected] > 0)
+					active_option = (active_option + 1) % num_options_per_tab[mb.selected];
+			} else if (active_pane == 1) {
+				if (num_files > 0)
+					right_option = (right_option + 1) % num_files;
+			}
 			break;
 		case 'h':
 		case KEY_LEFT:
-			mb.selected = (mb.selected - 1 + mb.num_menus) % mb.num_menus;
-			active_option = 0;
+			if (mb.selected == 0 && active_pane == 0 && num_files > 0)
+				active_pane = 0;
+			else {
+				mb.selected = (mb.selected - 1 + mb.num_menus) % mb.num_menus;
+				active_pane = 0;
+				active_option = 0;
+			}
 			break;
 		case 'k':
 		case KEY_UP:
-			if (num_options_per_tab[mb.selected] > 0)
-				active_option =
-					(active_option - 1 + num_options_per_tab[mb.selected]) % num_options_per_tab[mb.selected];
+			if (active_pane == 0) {
+				if (num_options_per_tab[mb.selected] > 0)
+					active_option =
+						(active_option - 1 + num_options_per_tab[mb.selected]) % num_options_per_tab[mb.selected];
+			} else if (active_pane == 1) {
+				if (num_files > 0)
+					right_option = (right_option - 1 + num_files) % num_files;
+			}
 			break;
 
 		case '\n':
 			if (mb.selected == 0) {
-				if (active_option == 0)
+				if (active_pane == 0) {
+					if (active_option == 0 && num_files > 0)
+						active_pane = 1;
+				} else if (active_pane == 1) {
 					choice = MENU_NEW_GAME;
-				if (active_option == 1)
-					choice = MENU_CONTINUE;
-				running = false;
+					strcpy(chosen_file_out, patience_files[right_option]);
+					running = false;
+				}
 			} else if (mb.selected == 1)
-				; // TODO}
+				; // TODO
 			break;
 		case 'q':
 			choice = MENU_QUIT;
@@ -129,7 +195,8 @@ MenuChoice start_menu() {
 		}
 
 		menu_bar_draw(&mb);
-		draw_main_panel(win, mb.selected, active_option, yMax, xMax);
+		draw_main_panel(win, mb.selected, active_option, active_pane, right_option, patience_files, num_files, yMax,
+						xMax);
 		wrefresh(win);
 	}
 	delwin(win);
