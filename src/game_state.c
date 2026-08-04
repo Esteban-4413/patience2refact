@@ -64,3 +64,23 @@ void print_deck_arr(Card *deck_arr) {
 	}
 	printf("\nDone!\n");
 }
+
+int win_codition(Game_state *current_state){
+    WinCondition *win_cond = current_state->definition->win_condition;
+    int win_count = current_state->definition->win_cond_count;
+
+    Pile *current_pile;
+
+    int r = 0;
+    for (int i = 0; i < win_count; i++){
+        WinCondition win = win_cond[i];
+        for (int j  = 0; j < current_state->pile_count; j++){
+            current_pile = current_state->table_piles[j];
+            if (strcmp(win.name_condition, current_pile->pile_class->name) == 0){
+                r += (current_pile->num_cards) - win.target_card_count;
+            }
+        }
+    }
+
+    return r;
+}
