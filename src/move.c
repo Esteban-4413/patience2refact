@@ -16,7 +16,6 @@ bool fill_move(Game_state *current_state, GameCommand *cmd) {
 
 	int cards_to_move = src_pile->num_cards - column_input;
 	if (cards_to_move <= 0 || column_input < 0) {
-		printf("There is no card to move\n Please try again\n");
 		return false;
 	}
 	current_state->move.src_pile = src;
@@ -185,17 +184,11 @@ void auto_moves(Game_state *current_state, Turn *current_turn) {
 void undo_move(Game_state *state) {
 	Turn last_turn;
 	if (is_history_empty(state->history)) {
-		printf("You have no more moves to undo");
 		return;
 	}
 	pop_history(state->history, &last_turn);
 	for (int i = last_turn.count - 1; i >= 0; i--) {
 		Move m = last_turn.sub_moves[i];
-		if (m.is_auto)
-			printf("[UNDO AUTO action] returning %d card(s) from pile: %d to pile %d", m.card_count, m.dest_pile,
-				   m.src_pile);
-		else
-			printf("[UNDO action] returning %d card(s) from pile %d to pile %d", m.card_count, m.dest_pile, m.src_pile);
 		state->move.src_pile = m.dest_pile;
 		state->move.dest_pile = m.src_pile;
 		state->move.card_count = m.card_count;

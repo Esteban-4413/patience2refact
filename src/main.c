@@ -20,12 +20,23 @@ void start_ncurses_mode() {
 				printf("Failed to load the game definition from %s.\n", path);
 		} else
 			printf("No game was selected.\n");
-	} else if (choice == MENU_CONTINUE) { // TODO:}
+	} else if (choice == MENU_CONTINUE) {
+		if (chosen_file[0] != '\0') {
+			char path[256];
+			snprintf(path, sizeof(path), "saves/%s", chosen_file);
+			Game_state *state = load_game(path);
+			if (state != NULL)
+				run_ncurses_gui(state);
+			else
+				printf("Faile to load the save from %s.\n", path);
+		} else
+			printf("No save file was selected.\n");
 	}
 }
 
 
 int main() {
+	setlocale(LC_ALL, "");
 	char choice[10];
 	printf("Select interface mode:\n");
 	printf("  1. Classic Terminal (CLI)\n");
