@@ -42,7 +42,7 @@ void unshift(Pile *p, Card *c) {
 		return;
 	c->next = NULL;
 	Card **indirect = &(p->head);
-	while ((*indirect)->next != NULL) {
+	while (*indirect != NULL) {
 		indirect = (&(*indirect)->next);
 	}
 	*indirect = c;

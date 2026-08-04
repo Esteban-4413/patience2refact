@@ -23,4 +23,4 @@ $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	-rm -rf *.o $(TARGET) save.txt $(TARGET).dSYM Contents
+	-rm -rf src/*.o $(TARGET) save.txt $(TARGET).dSYM Contents
