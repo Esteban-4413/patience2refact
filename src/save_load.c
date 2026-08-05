@@ -94,48 +94,54 @@ void translate_rank(char *char_rank, Rank rank) {
 	}
 }
 
-Card *read_card(char *str){
-    int len = strlen(str);
+Card *read_card(char *str) {
+	int len = strlen(str);
 
-    int suit;
-    char char_suit = str[len-1];
+	int suit;
+	char char_suit = str[len - 1];
 
-    switch (char_suit) {
-        case 'H':
-            suit = SUIT_HEART;
-            break;
-        case 'S':
-            suit = SUIT_SPADE;
-            break;
-        case 'C':
-            suit = SUIT_CLUB;
-            break;
-        case 'D':
-            suit = SUIT_DIAMOND;
-            break;
-    }
+	switch (char_suit) {
+	case 'H':
+		suit = SUIT_HEART;
+		break;
+	case 'S':
+		suit = SUIT_SPADE;
+		break;
+	case 'C':
+		suit = SUIT_CLUB;
+		break;
+	case 'D':
+		suit = SUIT_DIAMOND;
+		break;
+	}
 
-    int rank;
-    char char_rank[3];
-    int i;
-    for(i = 0; i < len - 1; i ++) char_rank[i] = str[i];
-    char_rank[i] = '\0';
-    if (strcmp(char_rank, "A") == 0) {rank = RANK_ACE;}
-    else if (strcmp(char_rank, "J") == 0) { rank = RANK_JACK;}
-    else if (strcmp(char_rank, "Q") == 0) {rank = RANK_QUEEN;}
-    else if (strcmp(char_rank, "K") == 0) {rank = RANK_KING;}
-    else {
-        rank = atoi(char_rank) - 1;
-
-    }
-    return make_card(suit, rank);
+	int rank;
+	char char_rank[3];
+	int i;
+	for (i = 0; i < len - 1; i++)
+		char_rank[i] = str[i];
+	char_rank[i] = '\0';
+	if (strcmp(char_rank, "A") == 0) {
+		rank = RANK_ACE;
+	} else if (strcmp(char_rank, "J") == 0) {
+		rank = RANK_JACK;
+	} else if (strcmp(char_rank, "Q") == 0) {
+		rank = RANK_QUEEN;
+	} else if (strcmp(char_rank, "K") == 0) {
+		rank = RANK_KING;
+	} else {
+		rank = atoi(char_rank) - 1;
+	}
+	return make_card(suit, rank);
 }
 
-Game_state *load_game(char *save_file){
-    Game_state *state = calloc(1, sizeof(*state));
+Game_state *load_game(char *save_file) {
+	Game_state *state = calloc(1, sizeof(*state));
 
-    state->history = malloc(sizeof(History));
-	if (state->history != NULL) { initialize_history(state->history);}
+	state->history = malloc(sizeof(History));
+	if (state->history != NULL) {
+		initialize_history(state->history);
+	}
 
 	FILE *f = fopen(save_file, "r");
 	char buffer[128];
@@ -143,13 +149,14 @@ Game_state *load_game(char *save_file){
 	// load_definition
 	fgets(buffer, sizeof(buffer), f);
 	int len = strlen(buffer);
-	if(len > 0 && buffer[len -1] == '\n') buffer[len-1] = '\0';
+	if (len > 0 && buffer[len - 1] == '\n')
+		buffer[len - 1] = '\0';
 	char path[256];
 	snprintf(path, sizeof(path), "paciencias/%s", buffer);
 
 	GameDefinition *current_def = load_patience(path);
 	state->definition = current_def;
-	if(current_def != NULL){
+	if (current_def != NULL) {
 		printf("Game Definition set!\n");
 	}
 
@@ -161,41 +168,45 @@ Game_state *load_game(char *save_file){
 	printf("Loading de game...\n");
 	printf("Loading %d piles...\n", state->pile_count);
 	int i = 0;
-	while (i < state->pile_count){
-        if(fgets(buffer, sizeof(buffer), f) == NULL) { break;}
-        else{
-            int len = strlen(buffer);
-            if(len > 0 && buffer[len-1] == '\n') buffer[len-1] = '\0';
-            state->table_piles[i] = malloc(sizeof(Pile));
-    		state->table_piles[i]->head = NULL;
-    		state->table_piles[i]->num_cards = 0;
-    		state->table_piles[i]->pile_class = NULL;
-            bool head = false;
-    		for (int c = 0; c < current_def->class_count; c++) {
-                if (strcmp(current_def->pile_classes[c].name, current_def->inits[i].pile_name) == 0) {
-                    state->table_piles[i]->pile_class = &(current_def->pile_classes[c]);
-                    break;
-                }
+	while (i < state->pile_count) {
+		if (fgets(buffer, sizeof(buffer), f) == NULL) {
+			break;
+		} else {
+			int len = strlen(buffer);
+			if (len > 0 && buffer[len - 1] == '\n')
+				buffer[len - 1] = '\0';
+			state->table_piles[i] = malloc(sizeof(Pile));
+			state->table_piles[i]->head = NULL;
+			state->table_piles[i]->num_cards = 0;
+			state->table_piles[i]->pile_class = NULL;
+			bool head = false;
+			for (int c = 0; c < current_def->class_count; c++) {
+				if (strcmp(current_def->pile_classes[c].name, current_def->inits[i].pile_name) == 0) {
+					state->table_piles[i]->pile_class = &(current_def->pile_classes[c]);
+					break;
+				}
 			}
-            if(buffer[0] != '\0'){
-                    char token[4];
-                    int pos = 0;
-                    int read = 0;
-                    while (sscanf(buffer + pos, "%s%n", token, &read) == 1){
-                        if (read <= 0) break;
-                        Card *c = read_card(token);
-                        if(!head) {state->table_piles[i]->head = c; head = true;}
-                        push(state->table_piles[i], c);
-                        pos += read;
-                        read = 0;
-                    }
-                    printf("Pile %d- cards: %d\n", i, state->table_piles[i]->num_cards);
-            } else {
-                printf("buffer é 0 \n");
-            }
-        }
-        i++;
-    }
+			if (buffer[0] != '\0') {
+				char token[4];
+				int pos = 0;
+				int read = 0;
+				while (sscanf(buffer + pos, "%s%n", token, &read) == 1) {
+					if (read <= 0)
+						break;
+					Card *c = read_card(token);
+					// if(!head) {state->table_piles[i]->head = c; head = true;}
+					// push(state->table_piles[i], c);
+					unshift(state->table_piles[i], c);
+					pos += read;
+					read = 0;
+				}
+				printf("Pile %d- cards: %d\n", i, state->table_piles[i]->num_cards);
+			} else {
+				printf("buffer é 0 \n");
+			}
+		}
+		i++;
+	}
 	fclose(f);
 	return state;
 }

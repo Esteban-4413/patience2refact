@@ -16,7 +16,6 @@ bool fill_move(Game_state *current_state, GameCommand *cmd) {
 
 	int cards_to_move = src_pile->num_cards - column_input;
 	if (cards_to_move <= 0 || column_input < 0) {
-		printf("There is no card to move\n Please try again\n");
 		return false;
 	}
 	current_state->move.src_pile = src;
@@ -26,7 +25,7 @@ bool fill_move(Game_state *current_state, GameCommand *cmd) {
 	return true;
 }
 
-void move(Game_state *current_state) {
+void do_move(Game_state *current_state) {
 	Move move = current_state->move;
 	Pile *src_pile = current_state->table_piles[move.src_pile];
 	Pile *dest_pile = current_state->table_piles[move.dest_pile];
@@ -148,9 +147,9 @@ void auto_moves(Game_state *current_state, Turn *current_turn) {
 
 	while (moved) {
 		moved = false;
-		for (int i = 0; i < moves_count && !moved; i++) { // Para cada MoveAUTO
+		for (int i = 0; i < moves_count && !moved; i++) { // Para cada moveAUTO
 			if (game_def->rules[i].is_auto) {
-				MoveRule move_rule = game_def->rules[i];
+				moveRule move_rule = game_def->rules[i];
 
 				for (int j = 0; (strcmp(current_state->table_piles[j]->pile_class->name, move_rule.src_pile) == 0) &&
 								(j < current_state->pile_count) && !moved;
@@ -168,7 +167,7 @@ void auto_moves(Game_state *current_state, Turn *current_turn) {
 										current_turn->sub_moves[current_turn->count] = current_state->move;
 										current_turn->count++;
 									}
-									move(current_state);
+									do_move(current_state);
 									// Isso conta como uma jogada para entrar no historial?
 									moved = true;
 								}
@@ -185,23 +184,17 @@ void auto_moves(Game_state *current_state, Turn *current_turn) {
 void undo_move(Game_state *state) {
 	Turn last_turn;
 	if (is_history_empty(state->history)) {
-		printf("You have no more moves to undo");
 		return;
 	}
 	pop_history(state->history, &last_turn);
 	for (int i = last_turn.count - 1; i >= 0; i--) {
 		Move m = last_turn.sub_moves[i];
-		if (m.is_auto)
-			printf("[UNDO AUTO action] returning %d card(s) from pile: %d to pile %d", m.card_count, m.dest_pile,
-				   m.src_pile);
-		else
-			printf("[UNDO action] returning %d card(s) from pile %d to pile %d", m.card_count, m.dest_pile, m.src_pile);
 		state->move.src_pile = m.dest_pile;
 		state->move.dest_pile = m.src_pile;
 		state->move.card_count = m.card_count;
 		Pile *source = state->table_piles[m.dest_pile];
 		state->move.column_out = (m.column_out == 0) ? 0 : source->num_cards - m.card_count;
 		state->move.is_auto = true;
-		move(state);
+		do_move(state);
 	}
 }

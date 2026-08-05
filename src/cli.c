@@ -28,7 +28,41 @@ void close_input_buffer(InputBuffer *input_buffer) {
 	free(input_buffer);
 }
 
-GameCommand parse_command(InputBuffer *input_buffer) {
+GameCommand parse_command(char *input_text) {
+	GameCommand cmd;
+	cmd.arg[0] = '\0';
+	cmd.card_index_input = -1;
+	cmd.dest = -1;
+	cmd.src = -1;
+	char keyword[20];
+	if (sscanf(input_text, "%s", keyword) != 1) {
+		cmd.type = CMD_UNRECOGNIZED;
+		return cmd;
+	}
+	if (strcmp(keyword, "quit") == 0 || strcmp(keyword, "q") == 0)
+		cmd.type = CMD_QUIT;
+
+	else if (strcmp(keyword, "mv") == 0) {
+		cmd.type = CMD_MOVE;
+		if (sscanf(input_text, "%*s %d|%d %d", &cmd.src, &cmd.card_index_input, &cmd.dest) == 3) {
+		} else if (sscanf(input_text, "%*s %d %d", &cmd.src, &cmd.dest)) {
+			cmd.card_index_input = -1;
+		} else {
+			cmd.src = -1;
+			cmd.dest = -1;
+		}
+	} else if (strcmp(input_text, "undo") == 0)
+		cmd.type = CMD_UNDO;
+	else if (strcmp(keyword, "save") == 0) {
+		cmd.type = CMD_SAVE;
+	} else if (strcmp(keyword, "hint") == 0)
+		cmd.type = CMD_HINT;
+	else
+		cmd.type = CMD_UNRECOGNIZED;
+	return cmd;
+}
+
+GameCommand parse_command_cli(InputBuffer *input_buffer) {
 	GameCommand cmd;
 	cmd.arg[0] = '\0';
 	cmd.card_index_input = -1;
@@ -66,10 +100,65 @@ GameCommand parse_command(InputBuffer *input_buffer) {
 	return cmd;
 }
 
+bool execute_command(Game_state *state, GameCommand cmd, char *feedback_msg) {
+	if (state == NULL) {
+		strcpy(feedback_msg, "Error: No game was loaded");
+		return true;
+	}
+	switch (cmd.type) {
+	case CMD_QUIT:
+		strcpy(feedback_msg, "Bye byeeee...");
+		return false;
+	case CMD_MOVE:
+		if (cmd.src == -1 || cmd.dest == -1 || cmd.src > state->pile_count || cmd.dest > state->pile_count)
+			strcpy(feedback_msg, "Error: Invalid move format.");
+		else {
+			if (fill_move(state, &cmd)) {
+				if (!is_move_valid(state))
+					strcpy(feedback_msg, "Not a valid move");
+				else {
+					Turn current_turn;
+					current_turn.count = 0;
+					state->move.is_auto = false;
+					current_turn.sub_moves[current_turn.count] = state->move;
+					current_turn.count++;
+
+					do_move(state);
+					auto_moves(state, &current_turn);
+					push_history(state->history, &current_turn);
+
+					sprintf(feedback_msg, "The card was moved from the pile %d to the pile %d", cmd.src, cmd.dest);
+				}
+			} else
+				strcpy(feedback_msg, "Error: We could not process the move.");
+		}
+		break;
+	case CMD_UNDO:
+		undo_move(state);
+		strcpy(feedback_msg, "Undo");
+		break;
+	case CMD_SAVE:
+		save_game(state);
+		strcpy(feedback_msg, "Your game was saved");
+		break;
+	case CMD_HINT:
+		strcpy(feedback_msg, "In development...");
+		break;
+	case CMD_UNRECOGNIZED:
+		strcpy(feedback_msg, "Command not recognized... Try: mv, undo, save, hint, or quit");
+		break;
+	default:
+		strcpy(feedback_msg, "Command ignored");
+		break;
+	}
+	return true;
+}
+
 void run_cli() {
 	InputBuffer *input_buffer = new_input_buffer();
 	GameDefinition *current_def = NULL;
 	Game_state *current_state = NULL;
+	char feedback_msg[128] = "Welcome! Type 'load' to start";
 	printf("Welcome to <name>. Type your command ('load' <file>, 'print', "
 		   "'shuffle', 'quit' or 'mv pile|column' .\n");
 	while (true) {
@@ -77,7 +166,7 @@ void run_cli() {
 		read_input(input_buffer);
 		if (input_buffer->input_length == 0)
 			continue;
-		GameCommand cmd = parse_command(input_buffer);
+		GameCommand cmd = parse_command_cli(input_buffer);
 		switch (cmd.type) {
 		case CMD_QUIT:
 			printf("Bye bye...\n");
@@ -158,7 +247,7 @@ void run_cli() {
 						current_state->move.is_auto = false;
 						current_turn.sub_moves[current_turn.count] = current_state->move;
 						current_turn.count++;
-						move(current_state);
+						do_move(current_state);
 						auto_moves(current_state, &current_turn);
 						push_history(current_state->history, &current_turn);
 					}
@@ -206,8 +295,8 @@ void menu(GameDefinition **current_def, Game_state **current_state) {
 		}
 	} else {
 		*current_def = choose_patience(current_state, "saves");
-		if (current_def == NULL && current_state != NULL){
-		    printf("choose_patience done!\n");
+		if (current_def == NULL && current_state != NULL) {
+			printf("choose_patience done!\n");
 		}
 	}
 }

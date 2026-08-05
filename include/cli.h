@@ -17,7 +17,17 @@ typedef struct {
 	ssize_t input_length;
 } InputBuffer;
 
-typedef enum { CMD_LOAD, CMD_PRINT, CMD_SHUFFLE, CMD_QUIT, CMD_MOVE, CMD_UNDO, CMD_SAVE, CMD_UNRECOGNIZED } CommandType;
+typedef enum {
+	CMD_LOAD,
+	CMD_PRINT,
+	CMD_SHUFFLE,
+	CMD_QUIT,
+	CMD_MOVE,
+	CMD_UNDO,
+	CMD_SAVE,
+	CMD_HINT,
+	CMD_UNRECOGNIZED
+} CommandType;
 
 typedef struct GameCommand {
 	CommandType type;
@@ -33,7 +43,9 @@ void print_deck_arr(Card *deck_arr);
 void print_prompt();
 void read_input(InputBuffer *input_buffer);
 void close_input_buffer(InputBuffer *input_buffer);
-GameCommand parse_command(InputBuffer *input_buffer);
+GameCommand parse_command_cli(InputBuffer *input_buffer);
+GameCommand parse_command(char *input_text);
+bool execute_command(Game_state *state, GameCommand cmd, char *feedback_msg);
 void run_cli();
 
 void menu(GameDefinition **current_def, Game_state **current_state);

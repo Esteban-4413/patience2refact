@@ -56,7 +56,7 @@ typedef struct {
 	char dest_pile[20];
 	uint32_t flags;
 	bool is_auto;
-} MoveRule;
+} moveRule;
 
 typedef struct {
 	char name_condition[20];
@@ -70,7 +70,7 @@ typedef struct {
 	PileClass pile_classes[50];
 	int class_count;
 
-	MoveRule rules[50];
+	moveRule rules[50];
 	int rule_count;
 
 	WinCondition win_condition[50];

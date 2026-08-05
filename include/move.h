@@ -12,7 +12,7 @@ void print_move(Game_state *state);
 
 bool fill_move(Game_state *current_state, GameCommand *cmd);
 
-void move(Game_state *current_state);
+void do_move(Game_state *current_state);
 
 bool is_move_valid(Game_state *current_state);
 
