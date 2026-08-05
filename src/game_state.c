@@ -1,4 +1,5 @@
 #include "../include/game_state.h"
+#include <stdlib.h>
 
 void fill_deck(Pile *pile) {
 	if (pile == NULL)
@@ -82,5 +83,5 @@ int win_codition(Game_state *current_state){
         }
     }
 
-    return r;
+    return abs(r);
 }

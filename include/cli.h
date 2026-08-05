@@ -6,6 +6,7 @@
 #include "move.h"
 #include "parser.h"
 #include "save_load.h"
+#include "hint.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
