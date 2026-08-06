@@ -195,10 +195,9 @@ MoveList get_valid_moves(Game_state *current_state, bool is_auto){ // set the mo
         moveRule current_rule = rules[i];
        if (is_auto == current_rule.is_auto){
            for (int j = 0; j < current_state->pile_count && flag; j++){
-               Pile *src = current_state->table_piles[j];
-               if ( src->num_cards > 0 && (strcmp(src->pile_class->name, current_rule.src_pile) == 0)){
+               if ( current_state->table_piles[j]->num_cards > 0 && (strcmp(current_state->table_piles[j]->pile_class->name, current_rule.src_pile) == 0)){
                    cmd.src = j + 1;
-                   for (int k = 0; k < src->num_cards && flag; k++){
+                   for (int k = 0; k < current_state->table_piles[j]->num_cards && flag; k++){
                        cmd.card_index_input = k + 1;
                        for (int l = 0; l < current_state->pile_count && flag; l++){
                            if(strcmp(current_state->table_piles[l]->pile_class->name, current_rule.dest_pile) == 0){
