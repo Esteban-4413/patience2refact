@@ -160,43 +160,71 @@ bool is_move_valid(Game_state *current_state) {
 void auto_moves(Game_state *current_state, Turn *current_turn) {
 	GameDefinition *game_def = current_state->definition;
 	int moves_count = game_def->rule_count;
-	GameCommand cmd;
 	bool moved = true;
 
 	while (moved) {
 		moved = false;
-		for (int i = 0; i < moves_count && !moved; i++) { // Para cada moveAUTO
-			if (game_def->rules[i].is_auto) {
-				moveRule move_rule = game_def->rules[i];
-
-				for (int j = 0; (strcmp(current_state->table_piles[j]->pile_class->name, move_rule.src_pile) == 0) &&
-								(j < current_state->pile_count) && !moved;
-					 j++) {
-					if (strcmp(current_state->table_piles[j]->pile_class->name, move_rule.src_pile) == 0) {
-						cmd.src = j + 1;
-						for (int k = 0; k < current_state->table_piles[j]->num_cards && !moved; k++) {
-							cmd.card_index_input = k + 1;
-							for (int l = 0; l < current_state->pile_count && !moved; l++) {
-								cmd.dest = l + 1;
-								fill_move(current_state, &cmd);
-								if (is_move_valid(current_state)) {
-									current_state->move.is_auto = true;
-									if (current_turn != NULL) {
-										current_turn->sub_moves[current_turn->count] = current_state->move;
-										current_turn->count++;
-									}
-									do_move(current_state);
-									// Isso conta como uma jogada para entrar no historial?
-									moved = true;
-								}
-							}
-						}
-					}
-				}
-			}
+		MoveList move_list = get_valid_moves(current_state, true);
+		if(move_list.count <= 0) {moved = false;}
+		else {
+		    Move mv =  move_list.moves[move_list.count - 1 ].move;
+    		current_state->move = mv;
+    		current_state->move.is_auto = true;
+    		if (current_turn != NULL) {
+    			current_turn->sub_moves[current_turn->count] = current_state->move;
+    			current_turn->count++;
+    		}
+    		do_move(current_state);
+    		// Isso conta como uma jogada para entrar no historial?
+    		moved = true;
 		}
 	}
 	set_move(current_state);
+}
+
+MoveList get_valid_moves(Game_state *current_state, bool is_auto){ // set the moveList with all possible moves
+    MoveList move_list;
+    move_list.count = 0;
+
+    moveRule *rules = current_state->definition->rules;
+    int rules_count = current_state->definition->rule_count;
+
+    GameCommand cmd;
+
+    bool flag = true;
+
+    for (int i = 0; i < rules_count && flag; i++){
+        // limita para o auto_moves para buscar apenas
+        // um movimento válido por vez.
+        moveRule current_rule = rules[i];
+       if (is_auto == current_rule.is_auto){
+           for (int j = 0; j < current_state->pile_count && flag; j++){
+               Pile *src = current_state->table_piles[j];
+               if ( src->num_cards > 0 && (strcmp(src->pile_class->name, current_rule.src_pile) == 0)){
+                   cmd.src = j + 1;
+                   for (int k = 0; k < src->num_cards && flag; k++){
+                       cmd.card_index_input = k + 1;
+                       for (int l = 0; l < current_state->pile_count && flag; l++){
+                           if(strcmp(current_state->table_piles[l]->pile_class->name, current_rule.dest_pile) == 0){
+                               cmd.dest = l + 1;
+                               fill_move(current_state, &cmd);
+                               if(is_move_valid(current_state)){
+                                   move_list.moves[move_list.count].move = current_state->move;
+                                   move_list.moves[move_list.count].best_score = (-1);
+                                   move_list.count++;
+                                   if(is_auto == true && move_list.count == 1) {flag = false;}
+                               }
+                           }
+                       }
+                   }
+               }
+           }
+        }
+    }
+
+    set_move(current_state);
+
+    return move_list;
 }
 
 void undo_move(Game_state *state) {
