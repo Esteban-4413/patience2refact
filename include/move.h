@@ -10,7 +10,7 @@
 
 typedef struct MoveEvaluation{
     Move move;
-    int best_score;
+    int win_score;
 }MoveEvaluation;
 
 typedef struct MoveList{

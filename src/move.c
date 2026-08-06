@@ -15,13 +15,14 @@ bool fill_move(Game_state *current_state, GameCommand *cmd) {
 	int column_input = (cmd->card_index_input == -1) ? 0 : cmd->card_index_input;
 
 	int cards_to_move = src_pile->num_cards - column_input;
-	if (cards_to_move <= 0 || column_input < 0) {
-		return false;
-	}
+
 	current_state->move.src_pile = src;
 	current_state->move.dest_pile = dest;
 	current_state->move.column_out = (column_input == 0) ? column_input : src_pile->num_cards - column_input;
 	current_state->move.card_count = (column_input == 0) ? 1 : src_pile->num_cards - column_input + 1;
+	if(current_state->move.card_count <= 0 || current_state->move.column_out < 0){
+	    return false;
+	}
 	return true;
 }
 
@@ -210,7 +211,7 @@ MoveList get_valid_moves(Game_state *current_state, bool is_auto){ // set the mo
                                fill_move(current_state, &cmd);
                                if(is_move_valid(current_state)){
                                    move_list.moves[move_list.count].move = current_state->move;
-                                   move_list.moves[move_list.count].best_score = (-1);
+                                   move_list.moves[move_list.count].win_score = (-1);
                                    move_list.count++;
                                    if(is_auto == true && move_list.count == 1) {flag = false;}
                                }
