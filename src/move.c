@@ -159,10 +159,7 @@ bool is_move_valid(Game_state *current_state) {
 }
 
 void auto_moves(Game_state *current_state, Turn *current_turn) {
-	GameDefinition *game_def = current_state->definition;
-	int moves_count = game_def->rule_count;
 	bool moved = true;
-
 	while (moved) {
 		moved = false;
 		MoveList move_list = get_valid_moves(current_state, true);
@@ -195,8 +192,6 @@ MoveList get_valid_moves(Game_state *current_state, bool is_auto){ // set the mo
     bool flag = true;
 
     for (int i = 0; i < rules_count && flag; i++){
-        // limita para o auto_moves para buscar apenas
-        // um movimento válido por vez.
         moveRule current_rule = rules[i];
        if (is_auto == current_rule.is_auto){
            for (int j = 0; j < current_state->pile_count && flag; j++){

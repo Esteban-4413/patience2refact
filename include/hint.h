@@ -8,6 +8,15 @@
 
 #define MAX_HINT_DEPTH 3
 
-Move generate_hints(Game_state *current_state);
+MoveList generate_hints(Game_state *current_state);
 
+Game_state clone_state(Game_state *current_state);
+
+void free_state(Game_state *state);
+
+void swap_hint(MoveEvaluation *moves, int a, int b);
+
+int partition(MoveEvaluation *moves, int N);
+
+void quickSort(MoveEvaluation *moves, int N);
 #endif
