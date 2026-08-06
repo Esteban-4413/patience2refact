@@ -54,7 +54,25 @@ bool is_move_valid(Game_state *current_state) {
 	Move mov = current_state->move;
 	Pile *src = current_state->table_piles[mov.src_pile];
 	Pile *dest = current_state->table_piles[mov.dest_pile];
-	uint32_t flags = current_state->definition->rules->flags;
+	// uint32_t flags = current_state->definition->rules->flags;
+	// int n = mov.card_count;
+	// Card *moving_card = peek_card_at(src, mov.column_out);
+
+	uint32_t flags = 0;
+	bool rule_found = false;
+
+	for (int i = 0; i < current_state->definition->rule_count; i++) {
+		moveRule rule = current_state->definition->rules[i];
+		if (strcmp(rule.src_pile, src->pile_class->name) == 0 && strcmp(rule.dest_pile, dest->pile_class->name) == 0) {
+			flags = rule.flags;
+			rule_found = true;
+			break;
+		}
+	}
+
+	if (!rule_found)
+		return false;
+
 	int n = mov.card_count;
 	Card *moving_card = peek_card_at(src, mov.column_out);
 
