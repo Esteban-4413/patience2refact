@@ -244,70 +244,119 @@ int get_suit_color(Suit suit) {
 	return 0;
 }
 
+void draw_empty_pile(WINDOW *win, int y, int x) {
+	mvwprintw(win, y, x, "┌────┐");
+	mvwprintw(win, y + 1, x, "│ ── │");
+	mvwprintw(win, y + 2, x, "└────┘");
+}
+
 void draw_card(WINDOW *win, int y, int x, Card *c, bool is_hidden) {
 	if (c == NULL)
 		return;
-	if (is_hidden)
-		mvwprintw(win, y, x, "[ ** ]");
-	else {
+	if (is_hidden) {
+		mvwprintw(win, y, x, "┌────┐");
+		mvwprintw(win, y + 1, x, "│░░░░│");
+		mvwprintw(win, y + 2, x, "└────┘");
+	} else {
 		int color_pair = get_suit_color(c->suit);
 		if (color_pair == 1)
 			wattron(win, COLOR_PAIR(color_pair));
 		char rank_str[4];
 		translate_rank(rank_str, c->rank);
-		mvwprintw(win, y, x, "[%2s%s]", rank_str, get_unicode_suit(c->suit));
+		mvwprintw(win, y, x, "┌────┐");
+		mvwprintw(win, y + 1, x, "│%2s%s │", rank_str, get_unicode_suit(c->suit));
+		mvwprintw(win, y + 2, x, "└────┘");
 		if (color_pair == 1)
-			wattroff(win, COLOR_PAIR(color_pair));
+			wattroff(win, COLOR_PAIR(1));
 	}
+}
+
+int draw_cascade_recursive(WINDOW *win, Card *c, int start_y, int start_x, PileClass *pclass, bool is_head,
+						   int current_index) {
+	if (c == NULL)
+		return start_y;
+	int current_y = draw_cascade_recursive(win, c->next, start_y, start_x, pclass, false, current_index - 1);
+	bool is_hidden = false;
+	if (pclass != NULL && pclass->visible_top_only)
+		is_hidden = !is_head;
+	draw_card(win, current_y, start_x, c, is_hidden);
+	if (!is_hidden) {
+		wattron(win, COLOR_PAIR(2));
+		mvwprintw(win, current_y + 1, start_x - 3, "%2d|", current_index);
+		wattroff(win, COLOR_PAIR(2));
+	}
+	return current_y + 2;
 }
 
 void draw_pile(WINDOW *win, Pile *p, int start_y, int start_x, bool cascade_down) {
 	if (p == NULL || p->num_cards == 0) {
-		mvwprintw(win, start_y, start_x, "[ -- ]");
+		draw_empty_pile(win, start_y, start_x);
 		return;
 	}
 	Card *current = p->head;
 	int current_y = start_y;
 	int index = 0;
-	while (current != NULL) {
+	if (!cascade_down) {
+		Card *top_card = p->head;
 		bool hidden = false;
-		if (p->pile_class != NULL && p->pile_class->visible_top_only)
-			hidden = (current->next != NULL);
-		draw_card(win, current_y, start_x, current, hidden);
-		if (cascade_down)
-			current_y++;
-		current = current->next;
-		index++;
-	}
+		if (p->pile_class != NULL && strstr(p->pile_class->name, "STOCK") != NULL)
+			hidden = true;
+		else if (p->pile_class != NULL && p->pile_class->visible_top_only)
+			hidden = false;
+		draw_card(win, start_y, start_x, p->head, hidden);
+	} else
+		draw_cascade_recursive(win, p->head, start_y, start_x, p->pile_class, true, p->num_cards);
 }
 
 void draw_game_board(WINDOW *win, Game_state *state) {
-	int spacing_x = 11;
-	int top_x = 2;
-	int bottom_x = 2;
+	int spacing_x = 10;
+	int top_x = 4;
+	int bottom_x = 4;
 	for (int i = 0; i < state->pile_count; i++) {
 		Pile *p = state->table_piles[i];
-		if (p == NULL)
-			continue;
-		int current_x, start_y;
-		bool cascade = true;
-		if (strstr(p->pile_class->name, "STOCK") != NULL || strstr(p->pile_class->name, "DESCARTE") != NULL ||
-			strstr(p->pile_class->name, "FUND") != NULL) {
-			current_x = top_x;
-			start_y = 3;
-			cascade = false;
+		if (p && p->pile_class && strstr(p->pile_class->name, "STOCK") != NULL) {
+			mvwprintw(win, 1, top_x, "%.8s", p->pile_class->name);
+			mvwprintw(win, 2, top_x, "%d(%d)", i + 1, p->num_cards);
+			draw_pile(win, p, 3, top_x, false);
 			top_x += spacing_x;
-			if (strstr(p->pile_class->name, "DESCARTE") != NULL)
-				top_x += spacing_x;
-		} else {
-			current_x = bottom_x;
-			start_y = 7;
-			cascade = true;
+			break;
+		}
+	}
+
+	for (int i = 0; i < state->pile_count; i++) {
+		Pile *p = state->table_piles[i];
+		if (p && p->pile_class && strstr(p->pile_class->name, "DESCARTE") != NULL) {
+			mvwprintw(win, 1, top_x, "%.8s", p->pile_class->name);
+			mvwprintw(win, 2, top_x, "%d(%d)", i + 1, p->num_cards);
+			draw_pile(win, p, 3, top_x, false);
+			top_x += spacing_x + 3;
+			break;
+		}
+	}
+
+	for (int i = 0; i < state->pile_count; i++) {
+		Pile *p = state->table_piles[i];
+		if (p && p->pile_class && strstr(p->pile_class->name, "FUND") != NULL) {
+			mvwprintw(win, 1, top_x, "%.8s", p->pile_class->name);
+			mvwprintw(win, 2, top_x, "%d(%d)", i + 1, p->num_cards);
+			draw_pile(win, p, 3, top_x, false);
+			top_x += spacing_x;
+			// break;
+		}
+	}
+
+	int start_y_bottom = 7;
+	for (int i = 0; i < state->pile_count; i++) {
+		Pile *p = state->table_piles[i];
+		if (!p || !p->pile_class)
+			continue;
+		if (strstr(p->pile_class->name, "STOCK") == NULL && strstr(p->pile_class->name, "DESCARTE") == NULL &&
+			strstr(p->pile_class->name, "FUND") == NULL) {
+			mvwprintw(win, start_y_bottom, bottom_x, "%.8s", p->pile_class->name);
+			mvwprintw(win, start_y_bottom + 1, bottom_x, "%d(%d)", i + 1, p->num_cards);
+			draw_pile(win, p, start_y_bottom + 2, bottom_x, true);
 			bottom_x += spacing_x;
 		}
-		mvwprintw(win, start_y - 2, current_x, "%.8s", p->pile_class->name);
-		mvwprintw(win, start_y - 1, current_x, "%d(%d)", i + 1, p->num_cards);
-		draw_pile(win, p, start_y, current_x, cascade);
 	}
 }
 
