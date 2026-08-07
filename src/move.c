@@ -182,7 +182,7 @@ MoveList get_valid_moves(Game_state *current_state, bool is_auto) { // set the m
 	MoveList move_list;
 	move_list.count = 0;
 
-	moveRule *rules = current_state->definition->rules;
+	// moveRule *rules = current_state->definition->rules;
 	int rules_count = current_state->definition->rule_count;
 
 	GameCommand cmd;
@@ -190,7 +190,8 @@ MoveList get_valid_moves(Game_state *current_state, bool is_auto) { // set the m
 	bool flag = true;
 
 	for (int i = 0; i < rules_count && flag; i++) {
-		moveRule current_rule = rules[i];
+	    // moveRule current_rule = rules[i];
+		moveRule current_rule = current_state->definition->rules[i];
 		if (is_auto == current_rule.is_auto) {
 			for (int j = 0; j < current_state->pile_count && flag; j++) {
 				if (current_state->table_piles[j]->num_cards > 0 &&

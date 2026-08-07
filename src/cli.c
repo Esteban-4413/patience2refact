@@ -95,6 +95,9 @@ GameCommand parse_command_cli(InputBuffer *input_buffer) {
 		cmd.type = CMD_UNDO;
 	else if (strcmp(keyword, "save") == 0) {
 		cmd.type = CMD_SAVE;
+	}
+	else if(strcmp(keyword, "hint") == 0){
+	    cmd.type = CMD_HINT;
 	} else
 		cmd.type = CMD_UNRECOGNIZED;
 	return cmd;
@@ -306,6 +309,10 @@ void run_cli() {
 				save_game(current_state);
 			}
 			break;
+		case CMD_HINT:
+            MoveList move_list = generate_hints(current_state);
+            if (move_list.count > 0) {print_move_list(&move_list);}
+            break;
 		case CMD_UNRECOGNIZED:
 			printf("Command unrecognized: '%s'\n", input_buffer->buffer);
 			break;

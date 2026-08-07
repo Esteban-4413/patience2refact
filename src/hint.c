@@ -145,8 +145,8 @@ void print_move_list(const MoveList *move_list) {
 
     for (int i = 0; i < move_list->count; i++) {
         const Move *m = &move_list->moves[i].move;
-        printf("[%d] sp = %d, c = %d, d = %d, card_count = %d\n",
-               i, m->src_pile, m->column_out, m->dest_pile, m->card_count);
+        printf("[%d] sp = %d, c = %d, d = %d, card_count = %d, win_score = %d\n",
+               i, m->src_pile, m->column_out, m->dest_pile, m->card_count, move_list->moves[i].win_score);
     }
 
     printf("----------------------------\n");
