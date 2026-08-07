@@ -21,6 +21,8 @@ MoveList generate_hints(Game_state *current_state) {
 			} else {
 				copy.move = current_move.move;
 				do_move(&copy);
+				// faz sentido chamar a auto_moves aqui,
+				// assim o cálculo da win_condition seria mais accurate
 				current_move.win_score = win_codition(&copy);
 			}
 			free_state(&copy);
@@ -95,17 +97,34 @@ Game_state clone_state(Game_state *current_state) {
 
 void free_state(Game_state *state) {
 	for (int i = 0; i < state->pile_count; i++) {
-		for (int j = 0; j < state->table_piles[i]->num_cards; j++) {
-			Card *curr = state->table_piles[i]->head;
-			while (curr != NULL) {
-				Card *temp = curr;
-				curr = curr->next;
-				free(temp);
-			}
-			// Card *c = pop(state->table_piles[i]);
-			// free(c);
-		}
+        Card *curr = state->table_piles[i]->head;
+        if(state->table_piles[i]->num_cards > 0){
+            while (curr != NULL) {
+          		Card *temp = curr;
+          		curr = curr->next;
+          		free(temp);
+           	}
+        }
+
+		// for (int j = 0; j < state->table_piles[i]->num_cards; j++) {
+
+		// 	// Card *c = pop(state->table_piles[i]);
+		// 	// free(c);
+		// }
 		free(state->table_piles[i]);
 	}
 	free(state->table_piles);
+}
+
+
+void print_move_list(const MoveList *move_list) {
+    printf("--- MoveList (Count: %d) ---\n", move_list->count);
+
+    for (int i = 0; i < move_list->count; i++) {
+        const Move *m = &move_list->moves[i].move;
+        printf("[%d] sp = %d, c = %d, d = %d, card_count = %d\n",
+               i, m->src_pile, m->column_out, m->dest_pile, m->card_count);
+    }
+
+    printf("----------------------------\n");
 }
