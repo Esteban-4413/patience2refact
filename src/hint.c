@@ -14,12 +14,18 @@ int evaluate_score(Game_state *state, int src_idx, int dest_idx, int card_count)
 
 	if (strstr(dest_name, "FUND") != NULL)
 		return 10 * card_count;
+	else if (strstr(src_name, "TAB") != NULL && strstr(dest_name, "DESCARTE") != NULL)
+		return 10 * card_count;
 	else if ((strstr(src_name, "STOCK") != NULL || strstr(src_name, "DESCARTE") != NULL) &&
 			 strstr(dest_name, "TAB") != NULL)
 		return 5;
+	else if (strstr(src_name, "CELL") != NULL && strstr(dest_name, "TAB") != NULL)
+		return 3;
 
 	else if (strstr(src_name, "TAB") != NULL && strstr(dest_name, "TAB") != NULL)
 		return 1;
+	else if (strstr(src_name, "STOCK") != NULL && strstr(dest_name, "DESCARTE") != NULL)
+		return 0;
 
 	else if (strstr(src_name, "FUND") != NULL)
 		return -15 * card_count;
@@ -141,13 +147,13 @@ void free_state(Game_state *state) {
 
 
 void print_move_list(const MoveList *move_list) {
-    printf("--- MoveList (Count: %d) ---\n", move_list->count);
+	printf("--- MoveList (Count: %d) ---\n", move_list->count);
 
-    for (int i = 0; i < move_list->count; i++) {
-        const Move *m = &move_list->moves[i].move;
-        printf("[%d] sp = %d, c = %d, d = %d, card_count = %d, win_score = %d\n",
-               i, m->src_pile, m->column_out, m->dest_pile, m->card_count, move_list->moves[i].win_score);
-    }
+	for (int i = 0; i < move_list->count; i++) {
+		const Move *m = &move_list->moves[i].move;
+		printf("[%d] sp = %d, c = %d, d = %d, card_count = %d, win_score = %d\n", i, m->src_pile, m->column_out,
+			   m->dest_pile, m->card_count, move_list->moves[i].win_score);
+	}
 
-    printf("----------------------------\n");
+	printf("----------------------------\n");
 }

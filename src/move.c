@@ -121,11 +121,11 @@ bool flag_checker(uint32_t flags, Move mov, Pile *src, Pile *dest, Card *moving_
 			return false;
 	}
 	if (flags & F_BOTTOM_ACE) {
-		if ( moving_card->rank != RANK_ACE)
+		if (moving_card->rank != RANK_ACE)
 			return false;
 	}
 	if (flags & F_BOTTOM_KING) {
-		if (moving_card->rank  != RANK_KING)
+		if (moving_card->rank != RANK_KING)
 			return false;
 	}
 	if (flags & F_TOP_KING) {
@@ -137,6 +137,8 @@ bool flag_checker(uint32_t flags, Move mov, Pile *src, Pile *dest, Card *moving_
 
 bool is_move_valid(Game_state *current_state) {
 	Move mov = current_state->move;
+	if (mov.src_pile == mov.dest_pile)
+		return false;
 	Pile *src = current_state->table_piles[mov.src_pile];
 	Pile *dest = current_state->table_piles[mov.dest_pile];
 	// uint32_t flags = current_state->definition->rules->flags;
@@ -190,7 +192,7 @@ MoveList get_valid_moves(Game_state *current_state, bool is_auto) { // set the m
 	bool flag = true;
 
 	for (int i = 0; i < rules_count && flag; i++) {
-	    // moveRule current_rule = rules[i];
+		// moveRule current_rule = rules[i];
 		moveRule current_rule = current_state->definition->rules[i];
 		if (is_auto == current_rule.is_auto) {
 			for (int j = 0; j < current_state->pile_count && flag; j++) {
@@ -201,9 +203,12 @@ MoveList get_valid_moves(Game_state *current_state, bool is_auto) { // set the m
 						cmd.card_index_input = k + 1;
 						for (int l = 0; l < current_state->pile_count && flag; l++) {
 							if (strcmp(current_state->table_piles[l]->pile_class->name, current_rule.dest_pile) == 0) {
+								if (j == l)
+									continue;
 								cmd.dest = l + 1;
 								fill_move(current_state, &cmd);
-								if (is_move_valid(current_state) && (!is_duplicate_move(&move_list, current_state->move))) {
+								if (is_move_valid(current_state) &&
+									(!is_duplicate_move(&move_list, current_state->move))) {
 									move_list.moves[move_list.count].move = current_state->move;
 									move_list.moves[move_list.count].win_score = (-1);
 									move_list.count++;
@@ -224,16 +229,15 @@ MoveList get_valid_moves(Game_state *current_state, bool is_auto) { // set the m
 	return move_list;
 }
 
-bool is_duplicate_move(MoveList *move_list, Move move){
-    for(int i = 0; i < move_list->count; i++){
-        Move current_move = move_list->moves[i].move;
-        if((current_move.src_pile == move.src_pile) &&
-        (current_move.column_out == move.column_out) &&
-        (current_move.dest_pile == move.dest_pile)) {
-            return true;
-        }
-    }
-    return false;
+bool is_duplicate_move(MoveList *move_list, Move move) {
+	for (int i = 0; i < move_list->count; i++) {
+		Move current_move = move_list->moves[i].move;
+		if ((current_move.src_pile == move.src_pile) && (current_move.column_out == move.column_out) &&
+			(current_move.dest_pile == move.dest_pile)) {
+			return true;
+		}
+	}
+	return false;
 }
 
 void undo_move(Game_state *state) {
@@ -248,7 +252,7 @@ void undo_move(Game_state *state) {
 		state->move.dest_pile = m.src_pile;
 		state->move.card_count = m.card_count;
 		Pile *source = state->table_piles[m.dest_pile];
-		state->move.column_out = (m.column_out == 0) ? 0 : source->num_cards - m.card_count;
+		state->move.column_out = m.card_count - 1;
 		state->move.is_auto = true;
 		do_move(state);
 	}

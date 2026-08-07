@@ -333,8 +333,16 @@ void draw_pile(WINDOW *win, Pile *p, int start_y, int start_x, bool cascade_down
 
 void draw_game_board(WINDOW *win, Game_state *state) {
 	int spacing_x = 10;
+
 	int top_x = 4;
+	int top_y_name = 1;
+	int top_y_count = 2;
+	int top_y_cards = 3;
+
 	int bottom_x = 4;
+	int bottom_y_name = 7;
+	int bottom_y_count = 8;
+	int bottom_y_cards = 9;
 
 	int h_src = (state->stats != NULL) ? state->stats->hint_src_pile : -1;
 	int h_dest = (state->stats != NULL) ? state->stats->hint_dest_pile : -1;
@@ -343,48 +351,27 @@ void draw_game_board(WINDOW *win, Game_state *state) {
 
 	for (int i = 0; i < state->pile_count; i++) {
 		Pile *p = state->table_piles[i];
-		if (p && p->pile_class && strstr(p->pile_class->name, "STOCK") != NULL) {
-			mvwprintw(win, 1, top_x, "%.8s", p->pile_class->name);
-			mvwprintw(win, 2, top_x, "%d(%d)", i + 1, p->num_cards);
-			draw_pile(win, p, 3, top_x, false, (i == h_src), (i == h_dest), h_count);
-			top_x += spacing_x;
-			break;
-		}
-	}
-
-	for (int i = 0; i < state->pile_count; i++) {
-		Pile *p = state->table_piles[i];
-		if (p && p->pile_class && strstr(p->pile_class->name, "DESCARTE") != NULL) {
-			mvwprintw(win, 1, top_x, "%.8s", p->pile_class->name);
-			mvwprintw(win, 2, top_x, "%d(%d)", i + 1, p->num_cards);
-			draw_pile(win, p, 3, top_x, false, (i == h_src), (i == h_dest), h_count);
-			top_x += spacing_x + 3;
-			break;
-		}
-	}
-
-	for (int i = 0; i < state->pile_count; i++) {
-		Pile *p = state->table_piles[i];
-		if (p && p->pile_class && strstr(p->pile_class->name, "FUND") != NULL) {
-			mvwprintw(win, 1, top_x, "%.8s", p->pile_class->name);
-			mvwprintw(win, 2, top_x, "%d(%d)", i + 1, p->num_cards);
-			draw_pile(win, p, 3, top_x, false, (i == h_src), (i == h_dest), h_count);
-			top_x += spacing_x;
-			// break;
-		}
-	}
-
-	int start_y_bottom = 7;
-	for (int i = 0; i < state->pile_count; i++) {
-		Pile *p = state->table_piles[i];
 		if (!p || !p->pile_class)
 			continue;
-		if (strstr(p->pile_class->name, "STOCK") == NULL && strstr(p->pile_class->name, "DESCARTE") == NULL &&
-			strstr(p->pile_class->name, "FUND") == NULL) {
-			mvwprintw(win, start_y_bottom, bottom_x, "%.8s", p->pile_class->name);
-			mvwprintw(win, start_y_bottom + 1, bottom_x, "%d(%d)", i + 1, p->num_cards);
-			draw_pile(win, p, start_y_bottom + 2, bottom_x, true, (i == h_src), (i == h_dest), h_count);
+		bool is_higlighted_src = (i == h_src);
+		bool is_highlighted_dest = (i == h_dest);
+		if (p->pile_class->visible_all) {
+			mvwprintw(win, bottom_y_name, bottom_x, "%.8s", p->pile_class->name);
+			mvwprintw(win, bottom_y_count, bottom_x, "%d(%d)", i + 1, p->num_cards);
+
+			draw_pile(win, p, bottom_y_cards, bottom_x, true, is_higlighted_src, is_highlighted_dest, h_count);
+
 			bottom_x += spacing_x;
+		} else {
+			mvwprintw(win, top_y_name, top_x, "%.8s", p->pile_class->name);
+			mvwprintw(win, top_y_count, top_x, "%d(%d)", i + 1, p->num_cards);
+
+			draw_pile(win, p, top_y_cards, top_x, false, is_higlighted_src, is_highlighted_dest, h_count);
+
+			if (p->pile_class->visible_none)
+				top_x += spacing_x + 3;
+			else
+				top_x += spacing_x;
 		}
 	}
 }
