@@ -1,5 +1,7 @@
 #include "../include/gui.h"
+#include <stdbool.h>
 #include <string.h>
+#include <time.h>
 
 int get_patience_file(char files[][64], int max_files, char *folder_name, char *extension) {
 	DIR *d;
@@ -244,15 +246,24 @@ int get_suit_color(Suit suit) {
 	return 0;
 }
 
-void draw_empty_pile(WINDOW *win, int y, int x) {
+void draw_empty_pile(WINDOW *win, int y, int x, bool is_higlighted) {
+	if (is_higlighted)
+		wattron(win, A_REVERSE | COLOR_PAIR(2));
 	mvwprintw(win, y, x, "┌────┐");
 	mvwprintw(win, y + 1, x, "│ ── │");
 	mvwprintw(win, y + 2, x, "└────┘");
+	if (is_higlighted)
+		wattroff(win, A_REVERSE | COLOR_PAIR(2));
 }
 
-void draw_card(WINDOW *win, int y, int x, Card *c, bool is_hidden) {
+void draw_card(WINDOW *win, int y, int x, Card *c, bool is_hidden, bool is_highlighted) {
 	if (c == NULL)
 		return;
+	int color_pair = is_highlighted ? 2 : get_suit_color(c->suit);
+	if (is_highlighted)
+		wattron(win, A_REVERSE | COLOR_PAIR(color_pair));
+	else if (color_pair == 1)
+		wattron(win, COLOR_PAIR(color_pair));
 	if (is_hidden) {
 		mvwprintw(win, y, x, "┌────┐");
 		mvwprintw(win, y + 1, x, "│░░░░│");
@@ -269,17 +280,27 @@ void draw_card(WINDOW *win, int y, int x, Card *c, bool is_hidden) {
 		if (color_pair == 1)
 			wattroff(win, COLOR_PAIR(1));
 	}
+	if (is_highlighted)
+		wattroff(win, A_REVERSE | COLOR_PAIR(color_pair));
+	else if (color_pair == 1)
+		wattroff(win, COLOR_PAIR(color_pair));
 }
 
 int draw_cascade_recursive(WINDOW *win, Card *c, int start_y, int start_x, PileClass *pclass, bool is_head,
-						   int current_index) {
+						   int current_index, int total_cards, bool is_src_hint, bool is_dest_hint, int hint_count) {
 	if (c == NULL)
 		return start_y;
-	int current_y = draw_cascade_recursive(win, c->next, start_y, start_x, pclass, false, current_index - 1);
+	int current_y = draw_cascade_recursive(win, c->next, start_y, start_x, pclass, false, current_index - 1,
+										   total_cards, is_src_hint, is_dest_hint, hint_count);
 	bool is_hidden = false;
 	if (pclass != NULL && pclass->visible_top_only)
 		is_hidden = !is_head;
-	draw_card(win, current_y, start_x, c, is_hidden);
+	bool highlight_this = false;
+	if (is_dest_hint)
+		highlight_this = true;
+	else if (is_src_hint && current_index > (total_cards - hint_count))
+		highlight_this = true;
+	draw_card(win, current_y, start_x, c, is_hidden, highlight_this);
 	if (!is_hidden) {
 		wattron(win, COLOR_PAIR(2));
 		mvwprintw(win, current_y + 1, start_x - 3, "%2d|", current_index);
@@ -288,9 +309,10 @@ int draw_cascade_recursive(WINDOW *win, Card *c, int start_y, int start_x, PileC
 	return current_y + 2;
 }
 
-void draw_pile(WINDOW *win, Pile *p, int start_y, int start_x, bool cascade_down) {
+void draw_pile(WINDOW *win, Pile *p, int start_y, int start_x, bool cascade_down, bool is_src_hint, bool is_dest_hint,
+			   int hint_count) {
 	if (p == NULL || p->num_cards == 0) {
-		draw_empty_pile(win, start_y, start_x);
+		draw_empty_pile(win, start_y, start_x, is_dest_hint || is_src_hint);
 		return;
 	}
 	Card *current = p->head;
@@ -303,21 +325,28 @@ void draw_pile(WINDOW *win, Pile *p, int start_y, int start_x, bool cascade_down
 			hidden = true;
 		else if (p->pile_class != NULL && p->pile_class->visible_top_only)
 			hidden = false;
-		draw_card(win, start_y, start_x, p->head, hidden);
+		draw_card(win, start_y, start_x, p->head, hidden, is_src_hint || is_dest_hint);
 	} else
-		draw_cascade_recursive(win, p->head, start_y, start_x, p->pile_class, true, p->num_cards);
+		draw_cascade_recursive(win, p->head, start_y, start_x, p->pile_class, true, p->num_cards, p->num_cards,
+							   is_src_hint, is_dest_hint, hint_count);
 }
 
 void draw_game_board(WINDOW *win, Game_state *state) {
 	int spacing_x = 10;
 	int top_x = 4;
 	int bottom_x = 4;
+
+	int h_src = (state->stats != NULL) ? state->stats->hint_src_pile : -1;
+	int h_dest = (state->stats != NULL) ? state->stats->hint_dest_pile : -1;
+	int h_count = (state->stats != NULL) ? state->stats->hint_card_count : 0;
+
+
 	for (int i = 0; i < state->pile_count; i++) {
 		Pile *p = state->table_piles[i];
 		if (p && p->pile_class && strstr(p->pile_class->name, "STOCK") != NULL) {
 			mvwprintw(win, 1, top_x, "%.8s", p->pile_class->name);
 			mvwprintw(win, 2, top_x, "%d(%d)", i + 1, p->num_cards);
-			draw_pile(win, p, 3, top_x, false);
+			draw_pile(win, p, 3, top_x, false, (i == h_src), (i == h_dest), h_count);
 			top_x += spacing_x;
 			break;
 		}
@@ -328,7 +357,7 @@ void draw_game_board(WINDOW *win, Game_state *state) {
 		if (p && p->pile_class && strstr(p->pile_class->name, "DESCARTE") != NULL) {
 			mvwprintw(win, 1, top_x, "%.8s", p->pile_class->name);
 			mvwprintw(win, 2, top_x, "%d(%d)", i + 1, p->num_cards);
-			draw_pile(win, p, 3, top_x, false);
+			draw_pile(win, p, 3, top_x, false, (i == h_src), (i == h_dest), h_count);
 			top_x += spacing_x + 3;
 			break;
 		}
@@ -339,7 +368,7 @@ void draw_game_board(WINDOW *win, Game_state *state) {
 		if (p && p->pile_class && strstr(p->pile_class->name, "FUND") != NULL) {
 			mvwprintw(win, 1, top_x, "%.8s", p->pile_class->name);
 			mvwprintw(win, 2, top_x, "%d(%d)", i + 1, p->num_cards);
-			draw_pile(win, p, 3, top_x, false);
+			draw_pile(win, p, 3, top_x, false, (i == h_src), (i == h_dest), h_count);
 			top_x += spacing_x;
 			// break;
 		}
@@ -354,10 +383,54 @@ void draw_game_board(WINDOW *win, Game_state *state) {
 			strstr(p->pile_class->name, "FUND") == NULL) {
 			mvwprintw(win, start_y_bottom, bottom_x, "%.8s", p->pile_class->name);
 			mvwprintw(win, start_y_bottom + 1, bottom_x, "%d(%d)", i + 1, p->num_cards);
-			draw_pile(win, p, start_y_bottom + 2, bottom_x, true);
+			draw_pile(win, p, start_y_bottom + 2, bottom_x, true, (i == h_src), (i == h_dest), h_count);
 			bottom_x += spacing_x;
 		}
 	}
+}
+
+void read_command_timer(WINDOW *win, char *input_str, int max_len, Game_state *state) {
+	int pos = 0;
+	input_str[0] = '\0';
+	wtimeout(win, 1000);
+
+	int yMax, xMax;
+	getmaxyx(win, yMax, xMax);
+
+	while (1) {
+		time_t current = time(NULL);
+		int elapsed = (int)difftime(current, state->stats->start_time);
+		int mins = elapsed / 60;
+		int secs = elapsed % 60;
+
+		wattron(win, A_BOLD);
+		mvwprintw(win, 0, xMax - 40, " Time: %02d:%02d | Moves: %3d | Score: %4d", mins, secs,
+				  state->stats->moves_count, state->stats->score);
+		wattroff(win, A_BOLD);
+
+		wmove(win, yMax - 1, 12 + pos);
+		wrefresh(win);
+
+		int ch = wgetch(win);
+
+		if (ch == ERR)
+			continue;
+
+		if (ch == '\n' || ch == '\r') {
+			input_str[pos] = '\0';
+			break;
+		} else if (ch == KEY_BACKSPACE || ch == 127 || ch == '\b') {
+			if (pos > 0) {
+				pos--;
+				mvwprintw(win, yMax - 1, 12 + pos, " ");
+				wmove(win, yMax - 1, 12 + pos);
+			}
+		} else if (pos < max_len - 1 && ch >= 32 && ch <= 126) {
+			input_str[pos++] = ch;
+			wprintw(win, "%c", ch);
+		}
+	}
+	wtimeout(win, -1);
 }
 
 void run_ncurses_gui(Game_state *state) {
@@ -381,6 +454,16 @@ void run_ncurses_gui(Game_state *state) {
 	char input_str[80];
 	char feedback_msg[128] = "Game started! Type 'hint' if you feel lost.";
 	int ch;
+
+	state->stats = malloc(sizeof(GameStats));
+	state->stats->start_time = time(NULL);
+	state->stats->moves_count = 0;
+	state->stats->score = 0;
+	state->stats->hint_src_pile = -1;
+	state->stats->hint_dest_pile = -1;
+	state->stats->hint_card_count = 0;
+
+
 	while (playing) {
 		werase(game_win);
 		box(game_win, 0, 0);
@@ -398,14 +481,21 @@ void run_ncurses_gui(Game_state *state) {
 
 		echo();
 		curs_set(1);
-		wmove(game_win, yMax - 1, 12);
-		wgetnstr(game_win, input_str, 79);
-		noecho();
+
+		read_command_timer(game_win, input_str, 79, state);
+		// wmove(game_win, yMax - 1, 12);
+		// wgetnstr(game_win, input_str, 79);
+		// noecho();
 		curs_set(0);
 
 		GameCommand cmd = parse_command(input_str);
+		if (cmd.src > 0 && cmd.dest > 0) {
+			state->stats->moves_count++;
+			// TODO: ADDING POINTS;
+		}
 		playing = execute_command(state, cmd, feedback_msg);
 	}
 	delwin(game_win);
+	free(state->stats);
 	endwin();
 }

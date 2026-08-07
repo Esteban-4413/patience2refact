@@ -105,6 +105,17 @@ bool execute_command(Game_state *state, GameCommand cmd, char *feedback_msg) {
 		strcpy(feedback_msg, "Error: No game was loaded");
 		return true;
 	}
+
+	bool used_hint = false;
+	if (cmd.type != CMD_HINT && state->stats != NULL) {
+		if (cmd.type == CMD_MOVE && (cmd.src - 1) == state->stats->hint_src_pile &&
+			(cmd.dest - 1) == state->stats->hint_dest_pile)
+			used_hint = true;
+		state->stats->hint_dest_pile = -1;
+		state->stats->hint_src_pile = -1;
+		state->stats->hint_card_count = 0;
+	}
+
 	switch (cmd.type) {
 	case CMD_QUIT:
 		strcpy(feedback_msg, "Bye byeeee...");
@@ -122,8 +133,16 @@ bool execute_command(Game_state *state, GameCommand cmd, char *feedback_msg) {
 					state->move.is_auto = false;
 					current_turn.sub_moves[current_turn.count] = state->move;
 					current_turn.count++;
+					int src = state->move.src_pile;
+					int dest = state->move.dest_pile;
+					int count = state->move.card_count;
 
 					do_move(state);
+					// state->moves_count++;
+					if (!used_hint) {
+						update_score(state, src, dest, count);
+					} else
+						sprintf(feedback_msg, "Move succesful! (0 points: Hint used)");
 					auto_moves(state, &current_turn);
 					push_history(state->history, &current_turn);
 
@@ -142,7 +161,23 @@ bool execute_command(Game_state *state, GameCommand cmd, char *feedback_msg) {
 		strcpy(feedback_msg, "Your game was saved");
 		break;
 	case CMD_HINT:
-		strcpy(feedback_msg, "In development...");
+		MoveList ml = generate_hints(state);
+
+		if (ml.count > 0) {
+			Move best = ml.moves[0].move;
+			if (state->stats != NULL) {
+				state->stats->hint_src_pile = best.src_pile;
+				state->stats->hint_dest_pile = best.dest_pile;
+				state->stats->hint_card_count = best.card_count;
+			}
+			if (best.card_count > 1)
+				snprintf(feedback_msg, 128, "Hint: Move a sequence of %d cards from pile %d to %d", best.card_count,
+						 best.src_pile + 1, best.dest_pile + 1);
+			else
+				snprintf(feedback_msg, 128, "Hint: Move top card cards from pile %d to %d", best.src_pile + 1,
+						 best.dest_pile + 1);
+		} else
+			strcpy(feedback_msg, "No valid moves. You are stuck!");
 		break;
 	case CMD_UNRECOGNIZED:
 		strcpy(feedback_msg, "Command not recognized... Try: mv, undo, save, hint, or quit");

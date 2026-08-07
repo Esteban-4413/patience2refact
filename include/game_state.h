@@ -6,7 +6,17 @@
 #include "stack.h"
 #include "undo.h"
 #include <string.h>
+#include <time.h>
 
+typedef struct GameStats {
+	int score;
+	int moves_count;
+	time_t start_time;
+
+	int hint_src_pile;
+	int hint_dest_pile;
+	int hint_card_count;
+} GameStats;
 
 typedef struct {
 	GameDefinition *definition;
@@ -17,6 +27,7 @@ typedef struct {
 	History *history;
 
 	Move move;
+	GameStats *stats;
 
 } Game_state;
 
@@ -26,5 +37,6 @@ void shuffle_pile(Pile *p);
 void swap(Card *deck_arr, int a, int b);
 Pile *arr2llist(Card **deck, int num_cards);
 
-int win_codition(Game_state *current_state);
+bool win_codition(Game_state *current_state);
+void update_score(Game_state *state, int src_idx, int dest_idx, int card_count);
 #endif

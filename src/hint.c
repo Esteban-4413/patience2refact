@@ -1,38 +1,63 @@
 #include "../include/hint.h"
 
+int evaluate_score(Game_state *state, int src_idx, int dest_idx, int card_count) {
+	if (src_idx < 0 || dest_idx < 0)
+		return 0;
+	Pile *src = state->table_piles[src_idx];
+	Pile *dest = state->table_piles[dest_idx];
+
+	if (!src->pile_class || !dest->pile_class || !src || !dest)
+		return 0;
+
+	char *src_name = src->pile_class->name;
+	char *dest_name = dest->pile_class->name;
+
+	if (strstr(dest_name, "FUND") != NULL)
+		return 10 * card_count;
+	else if ((strstr(src_name, "STOCK") != NULL || strstr(src_name, "DESCARTE") != NULL) &&
+			 strstr(dest_name, "TAB") != NULL)
+		return 5;
+
+	else if (strstr(src_name, "TAB") != NULL && strstr(dest_name, "TAB") != NULL)
+		return 1;
+
+	else if (strstr(src_name, "FUND") != NULL)
+		return -15 * card_count;
+	return 0;
+}
+
+void update_score(Game_state *state, int src_idx, int dest_idx, int card_count) {
+	if (state->stats == NULL)
+		return;
+	int points_earned = evaluate_score(state, src_idx, dest_idx, card_count);
+
+	state->stats->score += points_earned;
+	if (state->stats->score < 0)
+		state->stats->score = 0;
+}
 
 MoveList generate_hints(Game_state *current_state) {
-	Move mv;
 	MoveList move_list = get_valid_moves(current_state, false);
 	Game_state copy;
+	if (move_list.count <= 0)
+		return move_list;
+	int best_score = -999999;
+	int best_index = 0;
 
-	if (move_list.count <= 0) {
-		mv.src_pile = (-1);
-		// não tem movimentos possíveis nesse estado de jogo
-	} else {
-		for (int i = 0; i < move_list.count; i++) {
-			copy = clone_state(current_state);
-			MoveEvaluation current_move = move_list.moves[i];
-			bool isn_visible = false;
-			isn_visible = current_state->table_piles[current_move.move.src_pile]->pile_class->visible_none;
-
-			if (isn_visible) {
-				current_move.win_score = win_codition(current_state);
-			} else {
-				copy.move = current_move.move;
-				do_move(&copy);
-				// faz sentido chamar a auto_moves aqui,
-				// assim o cálculo da win_condition seria mais accurate
-				current_move.win_score = win_codition(&copy);
-			}
-			free_state(&copy);
+	for (int i = 0; i < move_list.count; i++) {
+		MoveEvaluation *current_move = &move_list.moves[i];
+		current_move->win_score = evaluate_score(current_state, current_move->move.src_pile,
+												 current_move->move.dest_pile, current_move->move.card_count);
+		if (current_move->win_score > best_score) {
+			best_score = current_move->win_score;
+			best_index = i;
 		}
-
-		quickSort(move_list.moves, move_list.count);
-		mv = move_list.moves[0].move;
 	}
-
-
+	if (best_index != 0) {
+		MoveEvaluation temp = move_list.moves[0];
+		move_list.moves[0] = move_list.moves[best_index];
+		move_list.moves[best_index] = temp;
+	}
 	return move_list;
 }
 
@@ -66,6 +91,9 @@ Game_state clone_state(Game_state *current_state) {
 	Game_state copy;
 	copy = *current_state;
 
+	copy.stats = NULL;
+	copy.history = NULL;
+
 	copy.table_piles = malloc((current_state->pile_count + 1) * sizeof(Pile *));
 
 	for (int i = 0; i < copy.pile_count; i++) {
@@ -97,20 +125,15 @@ Game_state clone_state(Game_state *current_state) {
 
 void free_state(Game_state *state) {
 	for (int i = 0; i < state->pile_count; i++) {
-        Card *curr = state->table_piles[i]->head;
-        if(state->table_piles[i]->num_cards > 0){
-            while (curr != NULL) {
-          		Card *temp = curr;
-          		curr = curr->next;
-          		free(temp);
-           	}
-        }
 
-		// for (int j = 0; j < state->table_piles[i]->num_cards; j++) {
-
-		// 	// Card *c = pop(state->table_piles[i]);
-		// 	// free(c);
-		// }
+		Card *curr = state->table_piles[i]->head;
+		while (curr != NULL) {
+			Card *temp = curr;
+			curr = curr->next;
+			free(temp);
+		}
+		// Card *c = pop(state->table_piles[i]);
+		// free(c);
 		free(state->table_piles[i]);
 	}
 	free(state->table_piles);

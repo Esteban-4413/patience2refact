@@ -19,4 +19,5 @@ void swap_hint(MoveEvaluation *moves, int a, int b);
 int partition(MoveEvaluation *moves, int N);
 
 void quickSort(MoveEvaluation *moves, int N);
+void print_move_list(const MoveList *move_list);
 #endif
