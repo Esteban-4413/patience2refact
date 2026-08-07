@@ -1,5 +1,6 @@
 #include "../include/move.h"
 #include "../include/cli.h"
+#include <stdbool.h>
 
 void print_move(Game_state *state) {
 	Move m = state->move;
@@ -201,7 +202,7 @@ MoveList get_valid_moves(Game_state *current_state, bool is_auto) { // set the m
 							if (strcmp(current_state->table_piles[l]->pile_class->name, current_rule.dest_pile) == 0) {
 								cmd.dest = l + 1;
 								fill_move(current_state, &cmd);
-								if (is_move_valid(current_state)) {
+								if (is_move_valid(current_state) && (!is_duplicate_move(&move_list, current_state->move))) {
 									move_list.moves[move_list.count].move = current_state->move;
 									move_list.moves[move_list.count].win_score = (-1);
 									move_list.count++;
@@ -220,6 +221,18 @@ MoveList get_valid_moves(Game_state *current_state, bool is_auto) { // set the m
 	set_move(current_state);
 
 	return move_list;
+}
+
+bool is_duplicate_move(MoveList *move_list, Move move){
+    for(int i = 0; i < move_list->count; i++){
+        Move current_move = move_list->moves[i].move;
+        if((current_move.src_pile == move.src_pile) &&
+        (current_move.column_out == move.column_out) &&
+        (current_move.dest_pile == move.dest_pile)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void undo_move(Game_state *state) {
