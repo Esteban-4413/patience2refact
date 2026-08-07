@@ -5,8 +5,23 @@
 #include <stdlib.h>
 #include <string.h>
 // #include <stdbool.h>
+//
+#define MAX_MOVES_PER_STATE 64
+
+typedef struct MoveEvaluation{
+    Move move;
+    int win_score;
+}MoveEvaluation;
+
+typedef struct MoveList{
+    MoveEvaluation moves[MAX_MOVES_PER_STATE];
+    int count;
+}MoveList;
+
 
 typedef struct GameCommand GameCommand;
+
+MoveList get_valid_moves(Game_state *current_state, bool is_auto);
 
 void print_move(Game_state *state);
 

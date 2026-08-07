@@ -5,6 +5,7 @@
 #include "game_def.h"
 #include "stack.h"
 #include "undo.h"
+#include <string.h>
 
 
 typedef struct {
@@ -25,5 +26,5 @@ void shuffle_pile(Pile *p);
 void swap(Card *deck_arr, int a, int b);
 Pile *arr2llist(Card **deck, int num_cards);
 
-
+int win_codition(Game_state *current_state);
 #endif
