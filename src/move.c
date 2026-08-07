@@ -116,19 +116,19 @@ bool flag_checker(uint32_t flags, Move mov, Pile *src, Pile *dest, Card *moving_
 			return false;
 	}
 	if (flags & F_TOP_ACE) {
-		if (moving_card->rank != RANK_ACE)
-			return false;
-	}
-	if (flags & F_BOTTOM_ACE) {
 		if (src->head->rank != RANK_ACE)
 			return false;
 	}
+	if (flags & F_BOTTOM_ACE) {
+		if ( moving_card->rank != RANK_ACE)
+			return false;
+	}
 	if (flags & F_BOTTOM_KING) {
-		if (src->head->rank != RANK_KING)
+		if (moving_card->rank  != RANK_KING)
 			return false;
 	}
 	if (flags & F_TOP_KING) {
-		if (moving_card->rank != RANK_KING)
+		if (src->head->rank != RANK_KING)
 			return false;
 	}
 	return true;
