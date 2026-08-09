@@ -278,7 +278,7 @@ void run_cli() {
 						printf("Moving the card from the top of the pile %d to the pile %d\n", cmd.src, cmd.dest);
 					}
 					if (!is_move_valid(current_state)) {
-						printf("Move is not valid\n Try somthing else!");
+						printf("Move is not valid\n Try somthing else!\n");
 					} else {
 						Turn current_turn;
 						current_turn.count = 0;
@@ -287,6 +287,7 @@ void run_cli() {
 						current_turn.count++;
 						do_move(current_state);
 						auto_moves(current_state, &current_turn);
+						if (win_codition(current_state)) {printf("YOU WINNNN!!!");}
 						push_history(current_state->history, &current_turn);
 					}
 					print_board(current_state);

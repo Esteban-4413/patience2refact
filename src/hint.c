@@ -44,7 +44,7 @@ void update_score(Game_state *state, int src_idx, int dest_idx, int card_count) 
 
 MoveList generate_hints(Game_state *current_state) {
 	MoveList move_list = get_valid_moves(current_state, false);
-	Game_state copy;
+
 	if (move_list.count <= 0)
 		return move_list;
 	int best_score = -999999;

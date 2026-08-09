@@ -173,7 +173,7 @@ Game_state *load_game(char *save_file) {
     	state->table_piles[i]->head = NULL;
     	state->table_piles[i]->num_cards = 0;
     	state->table_piles[i]->pile_class = NULL;
-    	bool head = false;
+
     	for (int c = 0; c < current_def->class_count; c++) {
     		if (strcmp(current_def->pile_classes[c].name, current_def->inits[i].pile_name) == 0) {
     			state->table_piles[i]->pile_class = &(current_def->pile_classes[c]);

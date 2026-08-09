@@ -37,27 +37,27 @@ Crucially, we will **retain the custom DSL parser** that makes this engine gener
 - [x] Implement `loader.c`: Build the physical table (List of `pile`s) based on `GameDefinition` `INIT` commands.
 - [x] Complete `game_state.c`: Functions to initialize the dynamic board (`game_state`), populate the `STOCK` with 52 cards (`fill_deck`), and shuffle.
 
-### Phase 3: Movement & Engine Logic - [IN PROGRESS]
+### Phase 3: Movement & Engine Logic - [COMPLETE]
 
 - [x] Refactor `move.c`. Moving a stack of cards should now only involve changing the `next` pointer of the boundary cards.
-- [ ] Refactor `movAutos` to apply the automatics moves. (Now using the `current_state->move` instead of creating a new move).
-- [ ] Optimize `verifica_vitoria` to check the `target_card_count` inside `win_conditions`.
-- [ ] Map Bitwise Flags constraints to the new atomic validation functions (e.g., `if (rules & F_DESCENDING)`).
+- [x] Refactor `movAutos` to apply the automatics moves. (Now using the `current_state->move` instead of creating a new move).
+- [x] Optimize `verifica_vitoria` to check the `target_card_count` inside `win_conditions`.
+- [x] Map Bitwise Flags constraints to the new atomic validation functions (e.g., `if (rules & F_DESCENDING)`).
 
-### Phase 4: Save/Load & Undo Systems
+### Phase 4: Save/Load & Undo Systems - [COMPLETE]
 
-- [ ] Refactor `undo.c` using the circular buffer. Save `src_pile`, `dest_pile`, and `card_count` to easily revert pointer logic.
-- [ ] Refactor `save_game` to traverse the linked list from bottom to top and map Enums back to strings (`10S`, `AH`) for the `.txt` output.
+- [x] Refactor `undo.c` using the circular buffer. Save `src_pile`, `dest_pile`, and `card_count` to easily revert pointer logic.
+- [x] Refactor `save_game` to traverse the linked list from bottom to top and map Enums back to strings (`10S`, `AH`) for the `.txt` output.
 
 ### Phase 5: UI Integration & Debugging
 
-- [ ] Implemanting the move logic (`switch case (move.flag)`).
-- [ ] Update `printPilhas` in `display.c` to traverse the linked list for rendering instead of accessing `pilha[i]`.
+- [x] Implemanting the move logic (`switch case (move.flag)`).
+- [x] Update `printPilhas` in `display.c` to traverse the linked list for rendering instead of accessing `pilha[i]`.
 - [ ] Implement a debug mode in `main.c` with a fixed seed (`srand(123)`) to easily reproduce edge cases during testing.
 - [ ] Run Valgrind or AddressSanitizer to ensure no memory leaks occur with the new linked lists (ensure every `malloc` has a `free`).
 
-## 6. Immediate TO-DOs (Next Session)
+## 6. Immediate TO-DOs (Next Session) - [COMPLETE]
 
 - [x] Create `loader.c` to consume the `GameDefinition` pointer from the parser.
 - [x] Implement `fill_deck` and `shuffle` in `game_state.c` to generate the physical cards (`make_card`) before distributing them.
-- [ ] Connect the dynamic `game_state` with the parsed `.paciencia` logic.
+- [x] Connect the dynamic `game_state` with the parsed `.paciencia` logic.

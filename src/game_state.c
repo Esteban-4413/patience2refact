@@ -69,7 +69,6 @@ void print_deck_arr(Card *deck_arr) {
 bool win_codition(Game_state *current_state) {
 	WinCondition *win_cond = current_state->definition->win_condition;
 	int win_count = current_state->definition->win_cond_count;
-	int r = 0;
 	for (int i = 0; i < win_count; i++) {
 		WinCondition win = win_cond[i];
 		for (int j = 0; j < current_state->pile_count; j++) {
