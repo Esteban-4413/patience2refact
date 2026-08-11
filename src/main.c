@@ -6,31 +6,40 @@
 void start_cli_mode() { run_cli(); }
 
 void start_ncurses_mode() {
-	char chosen_file[128] = {0};
-	MenuChoice choice = start_menu(chosen_file);
-	if (choice == MENU_NEW_GAME) {
-		if (chosen_file[0] != NULL) {
-			char path[256];
-			snprintf(path, sizeof(path), "paciencias/%s", chosen_file);
-			GameDefinition *def = load_patience(path);
-			if (def != NULL && def->game_name[0] != '\0') {
-				Game_state *state = build_game_state(def);
-				run_ncurses_gui(state);
+	bool game_running = true;
+	while (game_running) {
+		char chosen_file[128] = {0};
+		MenuChoice choice = start_menu(chosen_file);
+		if (choice == MENU_QUIT) {
+			game_running = false;
+			break;
+		} else if (choice == MENU_NEW_GAME) {
+			if (chosen_file[0] != '\0') {
+				char path[256];
+				snprintf(path, sizeof(path), "paciencias/%s", chosen_file);
+				GameDefinition *def = load_patience(path);
+				if (def != NULL && def->game_name[0] != '\0') {
+					Game_state *state = build_game_state(def);
+					run_ncurses_gui(state);
+					free_state(state);
+					free(def);
+				} else
+					printf("Failed to load the game definition from %s.\n", path);
 			} else
-				printf("Failed to load the game definition from %s.\n", path);
-		} else
-			printf("No game was selected.\n");
-	} else if (choice == MENU_CONTINUE) {
-		if (chosen_file[0] != '\0') {
-			char path[256];
-			snprintf(path, sizeof(path), "saves/%s", chosen_file);
-			Game_state *state = load_game(path);
-			if (state != NULL)
-				run_ncurses_gui(state);
-			else
-				printf("Faile to load the save from %s.\n", path);
-		} else
-			printf("No save file was selected.\n");
+				printf("No game was selected.\n");
+		} else if (choice == MENU_CONTINUE) {
+			if (chosen_file[0] != '\0') {
+				char path[256];
+				snprintf(path, sizeof(path), "saves/%s", chosen_file);
+				Game_state *state = load_game(path);
+				if (state != NULL) {
+					run_ncurses_gui(state);
+					free_state(state);
+				} else
+					printf("Faile to load the save from %s.\n", path);
+			} else
+				printf("No save file was selected.\n");
+		}
 	}
 }
 

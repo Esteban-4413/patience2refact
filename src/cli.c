@@ -95,9 +95,8 @@ GameCommand parse_command_cli(InputBuffer *input_buffer) {
 		cmd.type = CMD_UNDO;
 	else if (strcmp(keyword, "save") == 0) {
 		cmd.type = CMD_SAVE;
-	}
-	else if(strcmp(keyword, "hint") == 0){
-	    cmd.type = CMD_HINT;
+	} else if (strcmp(keyword, "hint") == 0) {
+		cmd.type = CMD_HINT;
 	} else
 		cmd.type = CMD_UNRECOGNIZED;
 	return cmd;
@@ -121,7 +120,7 @@ bool execute_command(Game_state *state, GameCommand cmd, char *feedback_msg) {
 
 	switch (cmd.type) {
 	case CMD_QUIT:
-		strcpy(feedback_msg, "Bye byeeee...");
+		// strcpy(feedback_msg, "Bye byeeee...");
 		return false;
 	case CMD_MOVE:
 		if (cmd.src == -1 || cmd.dest == -1 || cmd.src > state->pile_count || cmd.dest > state->pile_count)
@@ -143,7 +142,13 @@ bool execute_command(Game_state *state, GameCommand cmd, char *feedback_msg) {
 					do_move(state);
 					// state->moves_count++;
 					if (!used_hint) {
-						update_score(state, src, dest, count);
+						int pts = update_score(state, src, dest, count);
+						if (pts >= 0)
+							sprintf(feedback_msg, "Moved %d card(s) from %d to (%d) (+%d pts)", count, cmd.src,
+									cmd.dest, pts);
+						else
+							sprintf(feedback_msg, "Moved %d card(s) from %d to %d (-%d pts)", count, cmd.src, cmd.dest,
+									pts);
 					} else
 						sprintf(feedback_msg, "Move succesful! (0 points: Hint used)");
 					auto_moves(state, &current_turn);
@@ -162,8 +167,8 @@ bool execute_command(Game_state *state, GameCommand cmd, char *feedback_msg) {
 	case CMD_SAVE:
 		save_game(state);
 		strcpy(feedback_msg, "Your game was saved");
-		break;
-	case CMD_HINT:
+		return false;
+	case CMD_HINT: {
 		MoveList ml = generate_hints(state);
 
 		if (ml.count > 0) {
@@ -185,6 +190,7 @@ bool execute_command(Game_state *state, GameCommand cmd, char *feedback_msg) {
 	case CMD_UNRECOGNIZED:
 		strcpy(feedback_msg, "Command not recognized... Try: mv, undo, save, hint, or quit");
 		break;
+	}
 	default:
 		strcpy(feedback_msg, "Command ignored");
 		break;
@@ -287,7 +293,9 @@ void run_cli() {
 						current_turn.count++;
 						do_move(current_state);
 						auto_moves(current_state, &current_turn);
-						if (win_codition(current_state)) {printf("YOU WINNNN!!!");}
+						if (win_codition(current_state)) {
+							printf("YOU WINNNN!!!");
+						}
 						push_history(current_state->history, &current_turn);
 					}
 					print_board(current_state);
@@ -311,9 +319,11 @@ void run_cli() {
 			}
 			break;
 		case CMD_HINT:
-            MoveList move_list = generate_hints(current_state);
-            if (move_list.count > 0) {print_move_list(&move_list);}
-            break;
+			MoveList move_list = generate_hints(current_state);
+			if (move_list.count > 0) {
+				print_move_list(&move_list);
+			}
+			break;
 		case CMD_UNRECOGNIZED:
 			printf("Command unrecognized: '%s'\n", input_buffer->buffer);
 			break;

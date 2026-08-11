@@ -38,5 +38,6 @@ void swap(Card *deck_arr, int a, int b);
 Pile *arr2llist(Card **deck, int num_cards);
 
 bool win_codition(Game_state *current_state);
-void update_score(Game_state *state, int src_idx, int dest_idx, int card_count);
+int update_score(Game_state *state, int src_idx, int dest_idx, int card_count);
+void free_state(Game_state *state);
 #endif

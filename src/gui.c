@@ -85,22 +85,33 @@ void draw_main_panel(WINDOW *win, int selected_menu, int active_option, int acti
 		}
 		break;
 	case 1:
-		wattron(win, A_BOLD | COLOR_PAIR(2));
-		mvwprintw(win, 2, 4, " === How to move ===");
-		wattroff(win, A_BOLD);
+		wattron(win, A_BOLD | COLOR_PAIR(3));
+		mvwprintw(win, 2, 4, "=== How to move ===");
+		wattroff(win, A_BOLD | COLOR_PAIR(3));
 
 		mvwprintw(win, 4, 4, "mv 1 2   : Move TOP card from pile 1 to pile 2");
 		mvwprintw(win, 5, 4, "mv 1|3 2 : Move SEQUENCE starting at index 3 from pile 1 to 2");
 
-		wattron(win, A_BOLD | COLOR_PAIR(2));
+		wattron(win, A_BOLD | COLOR_PAIR(3));
 		mvwprintw(win, 8, 4, "=== Rules glossary ===");
-		wattroff(win, A_BOLD | COLOR_PAIR(2));
+		wattroff(win, A_BOLD | COLOR_PAIR(3));
 
-		mvwprintw(win, 10, 4, "-1 Rnk / +1 Rnk : 1 rank lower/higher (e.g. 7 on 8)");
-		mvwprintw(win, 11, 4, "Adj.            : 1 rank lower OR higher");
-		mvwprintw(win, 12, 4, "Alt color.      : Opposite color (Red on Black)");
-		mvwprintw(win, 13, 4, "Same suit.      : Exact same suit (Heart on Heart)");
-		mvwprintw(win, 14, 4, "To empty.       : Destination must be an empty space");
+		wattron(win, A_UNDERLINE);
+		mvwprintw(win, 10, 4, "Moving to a Destination Pile:");
+		wattroff(win, A_UNDERLINE);
+		mvwprintw(win, 11, 4, "-1 Rnk.    : Source card must be 1 rank LOWER (e.g. 7 onto 8)");
+		mvwprintw(win, 12, 4, "+1 Rnk.    : Source card must be 1 rank HIGHER (e.g. 3 onto 2)");
+		mvwprintw(win, 13, 4, "Adj.       : Source card must be EXACTLY 1 rank lower or higher");
+		mvwprintw(win, 14, 4, "Alt color. : Source card must be opposite color of Destination");
+		mvwprintw(win, 15, 4, "Same suit. : Source card must be same suit as Destination");
+		mvwprintw(win, 16, 4, "To empty.  : Destination must be an empty space");
+		mvwprintw(win, 17, 4, "Kings to empty : Only Kings can be moved to an empty space");
+
+		wattron(win, A_UNDERLINE);
+		mvwprintw(win, 19, 4, "Moving a Sequence of Cards:");
+		wattroff(win, A_UNDERLINE);
+		mvwprintw(win, 20, 4, "If the game allows it, the sequence you select (e.g. mv 1|3 2)");
+		mvwprintw(win, 21, 4, "must be properly sorted BEFORE moving (e.g., same suit, -1 rnk).");
 		break;
 	case 2:
 		mvwprintw(win, 2, 2, "How to play");
@@ -132,24 +143,36 @@ MenuChoice start_menu(char *chosen_file_out) {
 	getmaxyx(stdscr, yMax, xMax);
 	clear();
 
-	const char *ascii_title[] = {" _____ _            ___      _   _                       _       _      ",
-								 "|_   _| |__  ___   | _ \\__ _| |_(_)___ _ _  __ ___ ___  | |   __| |__   ",
-								 "  | | | '_ \\/ -_)  |  _/ _` |  _| / -_) ' \\/ _/ -_)_-<  | |__/ _` | '_ \\ ",
-								 "  |_| |_||_\\___|   |_| \\__,_|\\__|_\\___|_||_\\__\\___/__/  |____\\__,_|_.__/ "};
+	const char *ascii_title[] = {".--------------------------------------------------------------.",
+								 "|                                                              |",
+								 "|  ____       _   _                     _       _       _      |",
+								 "| |  _ \\ __ _| |_(_) ___ _ __   ___ ___( )___  | | __ _| |__   |",
+								 "| | |_) / _` | __| |/ _ \\ '_ \\ / __/ _ \\// __| | |/ _` | '_ \\  |",
+								 "| |  __/ (_| | |_| |  __/ | | | (_|  __/ \\__ \\ | | (_| | |_) | |",
+								 "| |_|   \\__,_|\\__|_|\\___|_| |_|\\___\\___| |___/ |_|\\__,_|_.__/  |",
+								 "|                                                              |",
+								 "'--------------------------------------------------------------'"};
 
-	int title_height = 4;
-	int art_width = 76;
-	int start_y = (yMax / 4) - title_height - 2;
-	if (start_y < 0)
-		start_y = 0;
+	int title_height = 9;
+	int art_width = 64;
+
+	int start_y = 1;
+	int start_x = (xMax - art_width) / 2;
+	if (start_x < 0)
+		start_x = 0;
 
 	attron(COLOR_PAIR(3) | A_BOLD);
 	for (int i = 0; i < title_height; i++)
-		mvprintw(start_y + i, (xMax - title_height) / 2, "%s", ascii_title[i]);
-	attron(COLOR_PAIR(3) | A_BOLD);
+		mvprintw(start_y + i, start_x, "%s", ascii_title[i]);
+	attroff(COLOR_PAIR(3) | A_BOLD);
 	refresh();
 
-	WINDOW *win = newwin(yMax / 2, xMax / 2, yMax / 4, xMax / 4);
+	int win_y = start_y + title_height + 1;
+	int win_h = yMax - win_y - 2;
+	if (win_h < 10)
+		win_h = 10;
+
+	WINDOW *win = newwin(win_h, xMax / 2, win_y, xMax / 4);
 	box(win, 0, 0);
 
 	keypad(win, TRUE);
@@ -456,9 +479,9 @@ void draw_game_board(WINDOW *win, Game_state *state) {
 	if (show_sidebar) {
 		mvwvline(win, 1, sidebar_x, ACS_VLINE, yMax - 5);
 
-		wattron(win, A_BOLD | COLOR_PAIR(2));
-		mvwprintw(win, 2, sidebar_x + 2, " >>> QUICK QUIDE <<<");
-		wattroff(win, A_BOLD | COLOR_PAIR(2));
+		wattron(win, A_BOLD | COLOR_PAIR(3));
+		mvwprintw(win, 2, sidebar_x + 2, " ===   QUICK QUIDE   ===");
+		wattroff(win, A_BOLD | COLOR_PAIR(3));
 
 		mvwprintw(win, 4, sidebar_x + 2, "• mv [src] [dest]");
 		mvwprintw(win, 5, sidebar_x + 4, "Move the top card.");
@@ -472,22 +495,26 @@ void draw_game_board(WINDOW *win, Game_state *state) {
 		mvwprintw(win, 13, sidebar_x + 2, "• undo");
 		mvwprintw(win, 14, sidebar_x + 4, "Travel back in time.");
 
-		mvwprintw(win, 16, sidebar_x + 2, "• save / quit");
-		mvwprintw(win, 18, sidebar_x + 4, "Store your progress.");
+		mvwprintw(win, 16, sidebar_x + 2, "• save");
+		mvwprintw(win, 17, sidebar_x + 4, "Save progress & exit to menu");
 
-		wattron(win, A_BOLD | COLOR_PAIR(2));
-		mvwprintw(win, 19, sidebar_x + 2, "=== GAME INFO ===");
-		wattroff(win, A_BOLD | COLOR_PAIR(2));
+		mvwprintw(win, 19, sidebar_x + 2, "• quit");
+		mvwprintw(win, 20, sidebar_x + 4, "Return to main menu.");
 
-		int info_y = 21;
+		wattron(win, A_BOLD | COLOR_PAIR(3));
+		mvwprintw(win, 22, sidebar_x + 2, " ===   GAME INFO   ===");
+		wattroff(win, A_BOLD | COLOR_PAIR(3));
+
+		int info_y = 22;
 		int total_cards = state->definition->num_decks * 52;
 		mvwprintw(win, info_y++, sidebar_x + 2, "Cards: %d | Piles: %d", total_cards, state->pile_count);
 
 		info_y++;
-		wattron(win, A_BOLD);
-		mvwprintw(win, info_y++, sidebar_x + 2, " >>> GOAL <<<");
-		wattroff(win, A_BOLD);
+		wattron(win, A_BOLD | COLOR_PAIR(3));
+		mvwprintw(win, info_y++, sidebar_x + 2, " >>>   GOAL   <<<");
+		wattroff(win, A_BOLD | COLOR_PAIR(3));
 
+		info_y++;
 		for (int i = 0; i < state->definition->win_cond_count && i < 2; i++) {
 			WinCondition wc = state->definition->win_condition[i];
 			if (wc.target_card_count == 0)
@@ -497,10 +524,11 @@ void draw_game_board(WINDOW *win, Game_state *state) {
 		}
 
 		info_y++;
-		wattron(win, A_BOLD);
-		mvwprintw(win, info_y++, sidebar_x + 2, " >>> RULES <<<");
-		wattroff(win, A_BOLD);
+		wattron(win, A_BOLD | COLOR_PAIR(3));
+		mvwprintw(win, info_y++, sidebar_x + 2, " >>>   RULES   <<<");
+		wattroff(win, A_BOLD | COLOR_PAIR(3));
 
+		info_y++;
 		int printed_rules = 0;
 		for (int i = 0; i < state->definition->rule_count && printed_rules < 6; i++) {
 			moveRule r = state->definition->rules[i];
@@ -510,7 +538,7 @@ void draw_game_board(WINDOW *win, Game_state *state) {
 			char desc[50];
 			flags_interpreter(r.flags, desc);
 
-			mvwprintw(win, info_y++, sidebar_x + 2, "%3s->%3s: %.18s", r.src_pile, r.dest_pile, desc);
+			mvwprintw(win, info_y++, sidebar_x + 2, "%3s -> %3s: %.18s", r.src_pile, r.dest_pile, desc);
 			printed_rules++;
 		}
 	}
@@ -579,7 +607,6 @@ void run_ncurses_gui(Game_state *state) {
 	keypad(game_win, TRUE);
 	bool playing = true;
 	char input_str[80];
-	char feedback_msg[128] = "Game started! Type 'hint' if you feel lost.";
 	int ch;
 
 	state->stats = malloc(sizeof(GameStats));
@@ -590,6 +617,10 @@ void run_ncurses_gui(Game_state *state) {
 	state->stats->hint_dest_pile = -1;
 	state->stats->hint_card_count = 0;
 
+	char log_old[128] = "";
+	char log_new[128] = "Game started! Type 'hint' if you feel lost.";
+	char feedback_msg[128] = "";
+
 
 	while (playing) {
 		werase(game_win);
@@ -597,11 +628,16 @@ void run_ncurses_gui(Game_state *state) {
 		mvwprintw(game_win, 0, 2, "Playing: %s", state->definition->game_name);
 		draw_game_board(game_win, state);
 
-		wattron(game_win, COLOR_PAIR(2));
-		mvwprintw(game_win, yMax - 3, 2, "%s", feedback_msg);
-		wattroff(game_win, COLOR_PAIR(2));
+		if (strlen(log_old) > 0) {
+			wattron(game_win, A_DIM);
+			mvwprintw(game_win, yMax - 3, 2, "  %s", log_old);
+			wattroff(game_win, A_DIM);
+		}
 
-		mvwprintw(game_win, yMax - 2, 2, "Commands: mv <src> <dest>, undo, save, hint, quit");
+		wattron(game_win, COLOR_PAIR(2) | A_BOLD);
+		mvwprintw(game_win, yMax - 2, 2, ">> %s", log_new);
+		wattroff(game_win, COLOR_PAIR(2) | A_BOLD);
+
 		mvwprintw(game_win, yMax - 1, 2, "Command > ");
 
 		wrefresh(game_win);
@@ -610,19 +646,25 @@ void run_ncurses_gui(Game_state *state) {
 		curs_set(1);
 
 		read_command_timer(game_win, input_str, 79, state);
-		// wmove(game_win, yMax - 1, 12);
-		// wgetnstr(game_win, input_str, 79);
-		// noecho();
+
 		curs_set(0);
+
+		if (strlen(input_str) == 0)
+			continue;
 
 		GameCommand cmd = parse_command(input_str);
 		if (cmd.src > 0 && cmd.dest > 0) {
 			state->stats->moves_count++;
 			// TODO: ADDING POINTS;
 		}
+		feedback_msg[0] = '\0';
 		playing = execute_command(state, cmd, feedback_msg);
+
+		if (strlen(feedback_msg) > 0) {
+			strcpy(log_old, log_new);
+			strcpy(log_new, feedback_msg);
+		}
 	}
 	delwin(game_win);
-	free(state->stats);
 	endwin();
 }

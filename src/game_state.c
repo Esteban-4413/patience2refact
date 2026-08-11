@@ -82,3 +82,32 @@ bool win_codition(Game_state *current_state) {
 
 	return true;
 }
+void free_state(Game_state *state) {
+	if (state == NULL)
+		return;
+
+	if (state->table_piles != NULL) {
+		for (int i = 0; i < state->pile_count; i++) {
+			if (state->table_piles[i] != NULL) {
+				Card *current = state->table_piles[i]->head;
+				while (current != NULL) {
+					Card *next_card = current->next;
+					free(current);
+					current = next_card;
+				}
+				free(state->table_piles[i]);
+			}
+		}
+		free(state->table_piles);
+	}
+
+	if (state->history != NULL) {
+		free(state->history);
+	}
+
+	if (state->stats != NULL) {
+		free(state->stats);
+	}
+
+	free(state);
+}

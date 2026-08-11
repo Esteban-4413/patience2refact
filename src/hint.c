@@ -3,43 +3,72 @@
 int evaluate_score(Game_state *state, int src_idx, int dest_idx, int card_count) {
 	if (src_idx < 0 || dest_idx < 0)
 		return 0;
+
 	Pile *src = state->table_piles[src_idx];
 	Pile *dest = state->table_piles[dest_idx];
 
-	if (!src->pile_class || !dest->pile_class || !src || !dest)
+	if (!src || !dest || !src->pile_class || !dest->pile_class)
 		return 0;
 
-	char *src_name = src->pile_class->name;
-	char *dest_name = dest->pile_class->name;
+	PileClass *src_class = src->pile_class;
+	PileClass *dest_class = dest->pile_class;
 
-	if (strstr(dest_name, "FUND") != NULL)
-		return 10 * card_count;
-	else if (strstr(src_name, "TAB") != NULL && strstr(dest_name, "DESCARTE") != NULL)
-		return 10 * card_count;
-	else if ((strstr(src_name, "STOCK") != NULL || strstr(src_name, "DESCARTE") != NULL) &&
-			 strstr(dest_name, "TAB") != NULL)
-		return 5;
-	else if (strstr(src_name, "CELL") != NULL && strstr(dest_name, "TAB") != NULL)
-		return 3;
+	bool dest_is_fill_goal = false;
+	bool dest_is_empty_goal = false;
+	bool src_is_fill_goal = false;
+	bool src_is_empty_goal = false;
 
-	else if (strstr(src_name, "TAB") != NULL && strstr(dest_name, "TAB") != NULL)
-		return 1;
-	else if (strstr(src_name, "STOCK") != NULL && strstr(dest_name, "DESCARTE") != NULL)
-		return 0;
+	for (int i = 0; i < state->definition->win_cond_count; i++) {
+		WinCondition wc = state->definition->win_condition[i];
 
-	else if (strstr(src_name, "FUND") != NULL)
-		return -15 * card_count;
-	return 0;
+		if (strcmp(dest_class->name, wc.name_condition) == 0) {
+			if (wc.target_card_count > 0)
+				dest_is_fill_goal = true;
+			if (wc.target_card_count == 0)
+				dest_is_empty_goal = true;
+		}
+		if (strcmp(src_class->name, wc.name_condition) == 0) {
+			if (wc.target_card_count > 0)
+				src_is_fill_goal = true;
+			if (wc.target_card_count == 0)
+				src_is_empty_goal = true;
+		}
+	}
+
+	int base_score = 0;
+
+	if (dest_is_fill_goal) {
+		base_score = 10;
+	} else if (src_is_fill_goal) {
+		base_score = -15;
+	} else if (src_is_empty_goal && !dest_is_empty_goal) {
+		base_score = 10;
+	} else if (!src_is_empty_goal && dest_is_empty_goal) {
+		base_score = -15;
+	} else {
+		if (src_class->max_one_card && !dest_class->max_one_card) {
+			base_score = 3;
+		} else if (!src_class->max_one_card && dest_class->max_one_card) {
+			base_score = 0;
+		} else if (!src_class->visible_all && dest_class->visible_all) {
+			base_score = 5;
+		} else if (src_class->visible_all && dest_class->visible_all) {
+			base_score = 1;
+		}
+	}
+
+	return base_score * card_count;
 }
 
-void update_score(Game_state *state, int src_idx, int dest_idx, int card_count) {
+int update_score(Game_state *state, int src_idx, int dest_idx, int card_count) {
 	if (state->stats == NULL)
-		return;
+		return 0;
 	int points_earned = evaluate_score(state, src_idx, dest_idx, card_count);
 
 	state->stats->score += points_earned;
 	if (state->stats->score < 0)
 		state->stats->score = 0;
+	return points_earned;
 }
 
 MoveList generate_hints(Game_state *current_state) {
