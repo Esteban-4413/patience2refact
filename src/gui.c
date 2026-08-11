@@ -36,6 +36,7 @@ void menu_bar_draw(MenuBar *mb) {
 void draw_main_panel(WINDOW *win, int selected_menu, int active_option, int active_pane, int right_option,
 					 char patience_files[][64], int num_files, int yMax, int xMax, char saved_files[][64],
 					 int num_saved_files) {
+
 	for (int y = 1; y < yMax / 2 - 1; y++) {
 		for (int x = 1; x < xMax / 2 - 1; x++) {
 			mvwprintw(win, y, x, " ");
@@ -45,6 +46,7 @@ void draw_main_panel(WINDOW *win, int selected_menu, int active_option, int acti
 	case 0:
 		int split_x = (xMax / 2) / 3;
 		mvwvline(win, 1, split_x, ACS_VLINE, yMax / 2 - 2);
+
 		if (active_pane == 0 && active_option == 0)
 			wattron(win, A_REVERSE);
 		mvwprintw(win, 2, 2, "  New game  ");
@@ -55,8 +57,9 @@ void draw_main_panel(WINDOW *win, int selected_menu, int active_option, int acti
 		mvwprintw(win, 3, 2, "  Continue  ");
 		if (active_pane == 0 && active_option == 1)
 			wattroff(win, A_REVERSE);
+
 		if (active_option == 0) {
-			mvwprintw(win, 1, split_x + 2, "Avaiable games:");
+			mvwprintw(win, 1, split_x + 2, "Available games:");
 			for (int i = 0; i < num_files; i++) {
 				if (active_pane == 1 && right_option == i)
 					wattron(win, A_REVERSE);
@@ -82,16 +85,22 @@ void draw_main_panel(WINDOW *win, int selected_menu, int active_option, int acti
 		}
 		break;
 	case 1:
-		if (active_option == 0)
-			wattron(win, A_REVERSE);
-		mvwprintw(win, 2, 2, "  Option 1  ");
-		if (active_option == 0)
-			wattroff(win, A_REVERSE);
-		if (active_option == 1)
-			wattron(win, A_REVERSE);
-		mvwprintw(win, 3, 2, "  Option 2  ");
-		if (active_option == 1)
-			wattroff(win, A_REVERSE);
+		wattron(win, A_BOLD | COLOR_PAIR(2));
+		mvwprintw(win, 2, 4, " === How to move ===");
+		wattroff(win, A_BOLD);
+
+		mvwprintw(win, 4, 4, "mv 1 2   : Move TOP card from pile 1 to pile 2");
+		mvwprintw(win, 5, 4, "mv 1|3 2 : Move SEQUENCE starting at index 3 from pile 1 to 2");
+
+		wattron(win, A_BOLD | COLOR_PAIR(2));
+		mvwprintw(win, 8, 4, "=== Rules glossary ===");
+		wattroff(win, A_BOLD | COLOR_PAIR(2));
+
+		mvwprintw(win, 10, 4, "-1 Rnk / +1 Rnk : 1 rank lower/higher (e.g. 7 on 8)");
+		mvwprintw(win, 11, 4, "Adj.            : 1 rank lower OR higher");
+		mvwprintw(win, 12, 4, "Alt color.      : Opposite color (Red on Black)");
+		mvwprintw(win, 13, 4, "Same suit.      : Exact same suit (Heart on Heart)");
+		mvwprintw(win, 14, 4, "To empty.       : Destination must be an empty space");
 		break;
 	case 2:
 		mvwprintw(win, 2, 2, "How to play");
@@ -112,14 +121,40 @@ MenuChoice start_menu(char *chosen_file_out) {
 	keypad(stdscr, TRUE);
 	curs_set(0);
 
+	if (has_colors()) {
+		start_color();
+		use_default_colors();
+		init_pair(3, COLOR_CYAN, -1);
+		init_pair(2, COLOR_YELLOW, -1);
+	}
+
 	int yMax, xMax;
 	getmaxyx(stdscr, yMax, xMax);
+	clear();
+
+	const char *ascii_title[] = {" _____ _            ___      _   _                       _       _      ",
+								 "|_   _| |__  ___   | _ \\__ _| |_(_)___ _ _  __ ___ ___  | |   __| |__   ",
+								 "  | | | '_ \\/ -_)  |  _/ _` |  _| / -_) ' \\/ _/ -_)_-<  | |__/ _` | '_ \\ ",
+								 "  |_| |_||_\\___|   |_| \\__,_|\\__|_\\___|_||_\\__\\___/__/  |____\\__,_|_.__/ "};
+
+	int title_height = 4;
+	int art_width = 76;
+	int start_y = (yMax / 4) - title_height - 2;
+	if (start_y < 0)
+		start_y = 0;
+
+	attron(COLOR_PAIR(3) | A_BOLD);
+	for (int i = 0; i < title_height; i++)
+		mvprintw(start_y + i, (xMax - title_height) / 2, "%s", ascii_title[i]);
+	attron(COLOR_PAIR(3) | A_BOLD);
+	refresh();
+
 	WINDOW *win = newwin(yMax / 2, xMax / 2, yMax / 4, xMax / 4);
 	box(win, 0, 0);
 
 	keypad(win, TRUE);
 
-	Menu menus[] = {{2, 'h', "Patience menu"}, {18, 'l', "Options"}, {28, '?', "Help"}};
+	Menu menus[] = {{2, 'h', "Patience menu"}, {28, '?', "Help"}};
 	int total_menus = sizeof(menus) / sizeof(menus[0]);
 	MenuBar mb;
 	mb.win = win;
@@ -128,7 +163,7 @@ MenuChoice start_menu(char *chosen_file_out) {
 
 	mb.selected = 0;
 	int active_option = 0;
-	int num_options_per_tab[] = {2, 2, 0};
+	int num_options_per_tab[] = {2, 0};
 
 	char patience_files[20][64];
 	int num_files = get_patience_file(patience_files, 20, "paciencias", ".paciencia");
@@ -331,18 +366,59 @@ void draw_pile(WINDOW *win, Pile *p, int start_y, int start_x, bool cascade_down
 							   is_src_hint, is_dest_hint, hint_count);
 }
 
+void flags_interpreter(uint32_t flags, char *out_desc) {
+	out_desc[0] = '\0';
+
+	if (flags == F_NONE) {
+		strcpy(out_desc, "Any valid card");
+		return;
+	}
+
+	if ((flags & F_EMPTY_DEST) && ((flags & F_TOP_KING) || (flags & F_BOTTOM_KING))) {
+		strcpy(out_desc, "Kings to empty");
+		return;
+	}
+
+	if (flags & F_VAL_ADJACENT)
+		strcat(out_desc, "Adj. ");
+	else if (flags & F_VAL_LOWER)
+		strcat(out_desc, "-1 Rnk. ");
+	else if (flags & F_VAL_HIGHER)
+		strcat(out_desc, "+1 Rnk. ");
+
+	if ((flags & F_COLOR_ALT_SEQ) || (flags & F_COLOR_DIFF_DST))
+		strcat(out_desc, "Alt color. ");
+	if ((flags & F_SUIT_SAME_SEQ) || (flags & F_SUIT_SAME_DST))
+		strcat(out_desc, "Same suit. ");
+
+	if (flags & F_EMPTY_DEST)
+		strcat(out_desc, "To empty.");
+}
 void draw_game_board(WINDOW *win, Game_state *state) {
-	int spacing_x = 10;
+	int yMax, xMax;
+	getmaxyx(win, yMax, xMax);
+
+	int sidebar_width = 35;
+	int sidebar_x = xMax - sidebar_width;
+
+	bool show_sidebar = (xMax >= 105);
+	if (!show_sidebar)
+		sidebar_x = xMax;
+
+	int available_x = sidebar_x - 6;
+
+
+	int spacing_x = available_x / state->pile_count;
+	if (spacing_x > 10)
+		spacing_x = 10;
+	if (spacing_x < 7)
+		spacing_x = 7;
 
 	int top_x = 4;
-	int top_y_name = 1;
-	int top_y_count = 2;
-	int top_y_cards = 3;
+	int top_y_name = 1, top_y_count = 2, top_y_cards = 3;
 
 	int bottom_x = 4;
-	int bottom_y_name = 7;
-	int bottom_y_count = 8;
-	int bottom_y_cards = 9;
+	int bottom_y_name = 7, bottom_y_count = 8, bottom_y_cards = 9;
 
 	int h_src = (state->stats != NULL) ? state->stats->hint_src_pile : -1;
 	int h_dest = (state->stats != NULL) ? state->stats->hint_dest_pile : -1;
@@ -353,8 +429,10 @@ void draw_game_board(WINDOW *win, Game_state *state) {
 		Pile *p = state->table_piles[i];
 		if (!p || !p->pile_class)
 			continue;
+
 		bool is_higlighted_src = (i == h_src);
 		bool is_highlighted_dest = (i == h_dest);
+
 		if (p->pile_class->visible_all) {
 			mvwprintw(win, bottom_y_name, bottom_x, "%.8s", p->pile_class->name);
 			mvwprintw(win, bottom_y_count, bottom_x, "%d(%d)", i + 1, p->num_cards);
@@ -372,6 +450,68 @@ void draw_game_board(WINDOW *win, Game_state *state) {
 				top_x += spacing_x + 3;
 			else
 				top_x += spacing_x;
+		}
+	}
+
+	if (show_sidebar) {
+		mvwvline(win, 1, sidebar_x, ACS_VLINE, yMax - 5);
+
+		wattron(win, A_BOLD | COLOR_PAIR(2));
+		mvwprintw(win, 2, sidebar_x + 2, " >>> QUICK QUIDE <<<");
+		wattroff(win, A_BOLD | COLOR_PAIR(2));
+
+		mvwprintw(win, 4, sidebar_x + 2, "• mv [src] [dest]");
+		mvwprintw(win, 5, sidebar_x + 4, "Move the top card.");
+
+		mvwprintw(win, 7, sidebar_x + 2, "• mv [src]|[idx] [dest]");
+		mvwprintw(win, 8, sidebar_x + 4, "Move a sequence of cards.");
+
+		mvwprintw(win, 10, sidebar_x + 2, "• hint");
+		mvwprintw(win, 11, sidebar_x + 4, "Ask for hint (0 pts)");
+
+		mvwprintw(win, 13, sidebar_x + 2, "• undo");
+		mvwprintw(win, 14, sidebar_x + 4, "Travel back in time.");
+
+		mvwprintw(win, 16, sidebar_x + 2, "• save / quit");
+		mvwprintw(win, 18, sidebar_x + 4, "Store your progress.");
+
+		wattron(win, A_BOLD | COLOR_PAIR(2));
+		mvwprintw(win, 19, sidebar_x + 2, "=== GAME INFO ===");
+		wattroff(win, A_BOLD | COLOR_PAIR(2));
+
+		int info_y = 21;
+		int total_cards = state->definition->num_decks * 52;
+		mvwprintw(win, info_y++, sidebar_x + 2, "Cards: %d | Piles: %d", total_cards, state->pile_count);
+
+		info_y++;
+		wattron(win, A_BOLD);
+		mvwprintw(win, info_y++, sidebar_x + 2, " >>> GOAL <<<");
+		wattroff(win, A_BOLD);
+
+		for (int i = 0; i < state->definition->win_cond_count && i < 2; i++) {
+			WinCondition wc = state->definition->win_condition[i];
+			if (wc.target_card_count == 0)
+				mvwprintw(win, info_y++, sidebar_x + 2, "• Empty all %s pile", wc.name_condition);
+			else
+				mvwprintw(win, info_y++, sidebar_x + 2, "• Fill %s to %d", wc.name_condition, wc.target_card_count);
+		}
+
+		info_y++;
+		wattron(win, A_BOLD);
+		mvwprintw(win, info_y++, sidebar_x + 2, " >>> RULES <<<");
+		wattroff(win, A_BOLD);
+
+		int printed_rules = 0;
+		for (int i = 0; i < state->definition->rule_count && printed_rules < 6; i++) {
+			moveRule r = state->definition->rules[i];
+			if (r.is_auto)
+				continue;
+
+			char desc[50];
+			flags_interpreter(r.flags, desc);
+
+			mvwprintw(win, info_y++, sidebar_x + 2, "%3s->%3s: %.18s", r.src_pile, r.dest_pile, desc);
+			printed_rules++;
 		}
 	}
 }
