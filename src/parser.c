@@ -13,7 +13,10 @@ uint32_t parse_move_flags(char *flags_str) {
 			flags |= F_SEQUENCE;
 			break;
 		case '[':
-			flags |= F_ASCENDING;
+			flags |= F_DESCENDING;
+			break;
+		case ']':
+		    flags |= F_ASCENDING;
 			break;
 		case '<':
 			flags |= F_VAL_LOWER;

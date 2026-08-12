@@ -61,11 +61,11 @@ bool flag_checker(uint32_t flags, Move mov, Pile *src, Pile *dest, Card *moving_
 		if (!(flags & F_SEQUENCE))
 			return false;
 		if (flags & F_DESCENDING) {
-			if (!is_seq_descending(src->head, n))
+			if (!is_seq_ascending(src->head, n))
 				return false;
 		}
-		if (!(flags & F_ASCENDING)) {
-			if (!is_seq_ascending(src->head, n))
+		if (flags & F_ASCENDING) {
+			if (!is_seq_descending(src->head, n))
 				return false;
 		}
 		if (flags & F_SUIT_SAME_SEQ) {
