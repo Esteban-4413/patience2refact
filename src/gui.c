@@ -304,12 +304,54 @@ int get_suit_color(Suit suit) {
 	return 0;
 }
 
+// void draw_empty_pile(WINDOW *win, int y, int x, bool is_higlighted) {
+// 	if (is_higlighted)
+// 		wattron(win, A_REVERSE | COLOR_PAIR(2));
+// 	mvwprintw(win, y, x, "┌────┐");
+// 	mvwprintw(win, y + 1, x, "│ ── │");
+// 	mvwprintw(win, y + 2, x, "└────┘");
+// 	if (is_higlighted)
+// 		wattroff(win, A_REVERSE | COLOR_PAIR(2));
+// }
+
+// void draw_card(WINDOW *win, int y, int x, Card *c, bool is_hidden, bool is_highlighted) {
+// 	if (c == NULL)
+// 		return;
+// 	int color_pair = is_highlighted ? 2 : get_suit_color(c->suit);
+// 	if (is_highlighted)
+// 		wattron(win, A_REVERSE | COLOR_PAIR(color_pair));
+// 	else if (color_pair == 1)
+// 		wattron(win, COLOR_PAIR(color_pair));
+// 	if (is_hidden) {
+// 		mvwprintw(win, y, x, "┌────┐");
+// 		mvwprintw(win, y + 1, x, "│░░░░│");
+// 		mvwprintw(win, y + 2, x, "└────┘");
+// 	} else {
+// 		int color_pair = get_suit_color(c->suit);
+// 		if (color_pair == 1)
+// 			wattron(win, COLOR_PAIR(color_pair));
+// 		char rank_str[4];
+// 		translate_rank(rank_str, c->rank);
+// 		mvwprintw(win, y, x, "┌────┐");
+// 		mvwprintw(win, y + 1, x, "│%2s%s │", rank_str, get_unicode_suit(c->suit));
+// 		mvwprintw(win, y + 2, x, "└────┘");
+// 		if (color_pair == 1)
+// 			wattroff(win, COLOR_PAIR(1));
+// 	}
+// 	if (is_highlighted)
+// 		wattroff(win, A_REVERSE | COLOR_PAIR(color_pair));
+// 	else if (color_pair == 1)
+// 		wattroff(win, COLOR_PAIR(color_pair));
+// }
+
 void draw_empty_pile(WINDOW *win, int y, int x, bool is_higlighted) {
 	if (is_higlighted)
 		wattron(win, A_REVERSE | COLOR_PAIR(2));
-	mvwprintw(win, y, x, "┌────┐");
-	mvwprintw(win, y + 1, x, "│ ── │");
-	mvwprintw(win, y + 2, x, "└────┘");
+	mvwprintw(win, y, x, "┌─────┐");
+	mvwprintw(win, y + 1, x, "│%5s│", " ");
+	mvwprintw(win, y + 2, x, "│ ─── │");
+	mvwprintw(win, y + 3, x, "│%5s│", " ");
+	mvwprintw(win, y + 4, x, "└─────┘");
 	if (is_higlighted)
 		wattroff(win, A_REVERSE | COLOR_PAIR(2));
 }
@@ -322,22 +364,31 @@ void draw_card(WINDOW *win, int y, int x, Card *c, bool is_hidden, bool is_highl
 		wattron(win, A_REVERSE | COLOR_PAIR(color_pair));
 	else if (color_pair == 1)
 		wattron(win, COLOR_PAIR(color_pair));
+
 	if (is_hidden) {
-		mvwprintw(win, y, x, "┌────┐");
-		mvwprintw(win, y + 1, x, "│░░░░│");
-		mvwprintw(win, y + 2, x, "└────┘");
+		mvwprintw(win, y, x, "┌─────┐");
+		mvwprintw(win, y + 1, x, "│%5s│", " ");
+		mvwprintw(win, y + 2, x, "│░░░░░│");
+		mvwprintw(win, y + 3, x, "│%5s│", " ");
+		mvwprintw(win, y + 4, x, "└─────┘");
 	} else {
 		int color_pair = get_suit_color(c->suit);
 		if (color_pair == 1)
 			wattron(win, COLOR_PAIR(color_pair));
+
 		char rank_str[4];
 		translate_rank(rank_str, c->rank);
-		mvwprintw(win, y, x, "┌────┐");
-		mvwprintw(win, y + 1, x, "│%2s%s │", rank_str, get_unicode_suit(c->suit));
-		mvwprintw(win, y + 2, x, "└────┘");
+
+		mvwprintw(win, y, x, "┌─────┐");
+		mvwprintw(win, y + 1, x, "│%-2s   │", rank_str);
+		mvwprintw(win, y + 2, x, "│  %s  │", get_unicode_suit(c->suit));
+		mvwprintw(win, y + 3, x, "│   %2s│", rank_str);
+		mvwprintw(win, y + 4, x, "└─────┘");
+
 		if (color_pair == 1)
 			wattroff(win, COLOR_PAIR(1));
 	}
+
 	if (is_highlighted)
 		wattroff(win, A_REVERSE | COLOR_PAIR(color_pair));
 	else if (color_pair == 1)
@@ -364,7 +415,7 @@ int draw_cascade_recursive(WINDOW *win, Card *c, int start_y, int start_x, PileC
 		mvwprintw(win, current_y + 1, start_x - 3, "%2d|", current_index);
 		wattroff(win, COLOR_PAIR(2));
 	}
-	return current_y + 2;
+	return current_y + 3;
 }
 
 void draw_pile(WINDOW *win, Pile *p, int start_y, int start_x, bool cascade_down, bool is_src_hint, bool is_dest_hint,
@@ -432,10 +483,10 @@ void draw_game_board(WINDOW *win, Game_state *state) {
 
 
 	int spacing_x = available_x / state->pile_count;
-	if (spacing_x > 10)
-		spacing_x = 10;
-	if (spacing_x < 7)
-		spacing_x = 7;
+	if (spacing_x > 11)
+		spacing_x = 11;
+	if (spacing_x < 8)
+		spacing_x = 8;
 
 	int top_x = 4;
 	int top_y_name = 1, top_y_count = 2, top_y_cards = 3;
@@ -587,6 +638,51 @@ void read_command_timer(WINDOW *win, char *input_str, int max_len, Game_state *s
 	}
 	wtimeout(win, -1);
 }
+void draw_victory_screen(WINDOW *win, Game_state *state) {
+	int yMax, xMax;
+	getmaxyx(win, yMax, xMax);
+
+	werase(win);
+	box(win, 0, 0);
+
+	wattron(win, COLOR_PAIR(3) | A_BOLD);
+	const char *ascii_win[] = {" __   __  _______  __   __    _     _  ___   __    _  __ ",
+							   "|  | |  ||       ||  | |  |  | | _ | ||   | |  |  | ||  |",
+							   "|  |_|  ||   _   ||  | |  |  | || || ||   | |   |_| ||  |",
+							   "|       ||  | |  ||  |_|  |  |       ||   | |       ||  |",
+							   "|_     _||  |_|  ||       |  |       ||   | |  _    ||__|",
+							   "  |   |  |       ||       |  |   _   ||   | | | |   | __ ",
+							   "  |___|  |_______||_______|  |__| |__||___| |_|  |__||__|"};
+	int art_height = 7;
+	int art_width = 59;
+	int start_y = (yMax / 2) - (art_height / 2) - 3;
+	int start_x = (xMax - art_width) / 2;
+
+	for (int i = 0; i < art_height; i++) {
+		mvwprintw(win, start_y + i, start_x, "%s", ascii_win[i]);
+	}
+	wattroff(win, COLOR_PAIR(2) | A_BOLD);
+
+	time_t current = time(NULL);
+	int elapsed = (int)difftime(current, state->stats->start_time);
+	int mins = elapsed / 60;
+	int secs = elapsed % 60;
+
+	wattron(win, COLOR_PAIR(3) | A_BOLD);
+	mvwprintw(win, start_y + art_height + 2, (xMax - 30) / 2, "Final Score: %4d", state->stats->score);
+	mvwprintw(win, start_y + art_height + 3, (xMax - 30) / 2, "Time: %02d:%02d | Moves: %3d", mins, secs,
+			  state->stats->moves_count);
+	wattroff(win, COLOR_PAIR(3) | A_BOLD);
+
+	wattron(win, A_BLINK);
+	mvwprintw(win, yMax - 3, (xMax - 36) / 2, "Press ANY KEY to return to Menu...");
+	wattroff(win, A_BLINK);
+
+	wrefresh(win);
+
+	wtimeout(win, -1);
+	wgetch(win);
+}
 
 void run_ncurses_gui(Game_state *state) {
 	initscr();
@@ -653,16 +749,17 @@ void run_ncurses_gui(Game_state *state) {
 			continue;
 
 		GameCommand cmd = parse_command(input_str);
-		if (cmd.src > 0 && cmd.dest > 0) {
-			state->stats->moves_count++;
-			// TODO: ADDING POINTS;
-		}
 		feedback_msg[0] = '\0';
 		playing = execute_command(state, cmd, feedback_msg);
 
 		if (strlen(feedback_msg) > 0) {
 			strcpy(log_old, log_new);
 			strcpy(log_new, feedback_msg);
+		}
+
+		if (win_codition(state)) {
+			draw_victory_screen(game_win, state);
+			playing = false;
 		}
 	}
 	delwin(game_win);
