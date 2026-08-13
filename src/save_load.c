@@ -1,6 +1,8 @@
 #include "../include/save_load.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 void mkdir_saves() {
 #ifdef _WIN32
@@ -8,7 +10,6 @@ void mkdir_saves() {
 #else
 	mkdir("saves", S_IRWXU);
 #endif
-	// S_IRWXU = Read, Write, Execute for User
 }
 
 bool save_game(Game_state *current_state) {
@@ -33,6 +34,15 @@ bool save_game(Game_state *current_state) {
 		return false;
 
 	fprintf(f, "%s\n", name);
+
+	if (current_state->stats != NULL) {
+		time_t current_time = time(NULL);
+		long elapsed = (long)difftime(current_time, current_state->stats->start_time);
+		fprintf(f, "STATS %ld %d %d\n", elapsed, current_state->stats->moves_count, current_state->stats->score);
+
+	} else {
+		fprintf(f, "STATS 0 0 0\n");
+	}
 
 	for (int i = 0; i < current_state->pile_count; i++) {
 		if (current_state->table_piles[i]->num_cards > 0) {
@@ -152,7 +162,7 @@ Game_state *load_game(char *save_file) {
 	if (len > 0 && buffer[len - 1] == '\n')
 		buffer[len - 1] = '\0';
 	char path[256];
-	snprintf(path, sizeof(path), "paciencias/%s", buffer);
+	snprintf(path, sizeof(path), "paciencias/%s.paciencia", buffer);
 
 	GameDefinition *current_def = load_patience(path);
 	state->definition = current_def;
@@ -160,7 +170,28 @@ Game_state *load_game(char *save_file) {
 		printf("Game Definition set!\n");
 	}
 
-	// inicializa table_pile
+	state->stats = malloc(sizeof(*state->stats));
+	state->stats->start_time = time(NULL);
+	state->stats->moves_count = 0;
+	state->stats->score = 0;
+	state->stats->hint_src_pile = -1;
+	state->stats->hint_dest_pile = -1;
+	state->stats->hint_card_count = 0;
+
+	long pos_before_stats = ftell(f);
+	if (fgets(buffer, sizeof(buffer), f) != NULL) {
+		if (strncmp(buffer, "STATS", 5) == 0) {
+			long elapsed = 0;
+			int moves = 0, score = 0;
+			sscanf(buffer, "STATS %ld %d %d", &elapsed, &moves, &score);
+
+			state->stats->start_time = time(NULL) - elapsed;
+			state->stats->moves_count = moves;
+			state->stats->score = score;
+		} else
+			fseek(f, pos_before_stats, SEEK_SET);
+	}
+
 	state->pile_count = current_def->init_count;
 	state->table_piles = malloc((state->pile_count + 1) * sizeof(Pile *));
 
@@ -169,40 +200,40 @@ Game_state *load_game(char *save_file) {
 	printf("Loading %d piles...\n", state->pile_count);
 	int i = 0;
 	while (i < state->pile_count) {
-        state->table_piles[i] = malloc(sizeof(Pile));
-    	state->table_piles[i]->head = NULL;
-    	state->table_piles[i]->num_cards = 0;
-    	state->table_piles[i]->pile_class = NULL;
+		state->table_piles[i] = malloc(sizeof(Pile));
+		state->table_piles[i]->head = NULL;
+		state->table_piles[i]->num_cards = 0;
+		state->table_piles[i]->pile_class = NULL;
 
-    	for (int c = 0; c < current_def->class_count; c++) {
-    		if (strcmp(current_def->pile_classes[c].name, current_def->inits[i].pile_name) == 0) {
-    			state->table_piles[i]->pile_class = &(current_def->pile_classes[c]);
-    			break;
-    		}
-    	}
+		for (int c = 0; c < current_def->class_count; c++) {
+			if (strcmp(current_def->pile_classes[c].name, current_def->inits[i].pile_name) == 0) {
+				state->table_piles[i]->pile_class = &(current_def->pile_classes[c]);
+				break;
+			}
+		}
 		if (fgets(buffer, sizeof(buffer), f) != NULL) {
-    		int len = strlen(buffer);
-    		if (len > 0 && buffer[len - 1] == '\n')
-    			buffer[len - 1] = '\0';
+			int len = strlen(buffer);
+			if (len > 0 && buffer[len - 1] == '\n')
+				buffer[len - 1] = '\0';
 
-    		if (buffer[0] != '\0') {
-    			char token[4];
-    			int pos = 0;
-    			int read = 0;
-    			while (sscanf(buffer + pos, "%s%n", token, &read) == 1) {
-    				if (read <= 0)
-    					break;
-    				Card *c = read_card(token);
-    				// if(!head) {state->table_piles[i]->head = c; head = true;}
-    				// push(state->table_piles[i], c);
-    				unshift(state->table_piles[i], c);
-    				pos += read;
-    				read = 0;
-    			}
-    			printf("Pile %d- cards: %d\n", i, state->table_piles[i]->num_cards);
-    		} else {
-    			printf("buffer é 0 \n");
-    		}
+			if (buffer[0] != '\0') {
+				char token[4];
+				int pos = 0;
+				int read = 0;
+				while (sscanf(buffer + pos, "%s%n", token, &read) == 1) {
+					if (read <= 0)
+						break;
+					Card *c = read_card(token);
+					// if(!head) {state->table_piles[i]->head = c; head = true;}
+					// push(state->table_piles[i], c);
+					unshift(state->table_piles[i], c);
+					pos += read;
+					read = 0;
+				}
+				printf("Pile %d- cards: %d\n", i, state->table_piles[i]->num_cards);
+			} else {
+				printf("buffer é 0 \n");
+			}
 		}
 		i++;
 	}

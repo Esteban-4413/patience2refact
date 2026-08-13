@@ -730,10 +730,12 @@ void run_ncurses_gui(Game_state *state) {
 	char input_str[80];
 	int ch;
 
-	state->stats = malloc(sizeof(GameStats));
-	state->stats->start_time = time(NULL);
-	state->stats->moves_count = 0;
-	state->stats->score = 0;
+	if (state->stats == NULL) {
+		state->stats = malloc(sizeof(GameStats));
+		state->stats->start_time = time(NULL);
+		state->stats->moves_count = 0;
+		state->stats->score = 0;
+	}
 	state->stats->hint_src_pile = -1;
 	state->stats->hint_dest_pile = -1;
 	state->stats->hint_card_count = 0;

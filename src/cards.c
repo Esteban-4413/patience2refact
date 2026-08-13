@@ -31,7 +31,7 @@ bool is_seq_ascending(Card *parent, int n) {
 		Card *child = parent->next;
 		if (child == NULL)
 			return false;
-		if (parent->rank != child->rank - 1)
+		if (parent->rank != child->rank + 1)
 			return false;
 		parent = child;
 	}
@@ -43,7 +43,7 @@ bool is_seq_descending(Card *parent, int n) {
 		Card *child = parent->next;
 		if (child == NULL)
 			return false;
-		if (parent->rank != child->rank + 1)
+		if (parent->rank != child->rank - 1)
 			return false;
 		parent = child;
 	}

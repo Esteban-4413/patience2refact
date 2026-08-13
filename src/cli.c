@@ -318,12 +318,13 @@ void run_cli() {
 				save_game(current_state);
 			}
 			break;
-		case CMD_HINT:
+		case CMD_HINT: {
 			MoveList move_list = generate_hints(current_state);
 			if (move_list.count > 0) {
 				print_move_list(&move_list);
 			}
 			break;
+		}
 		case CMD_UNRECOGNIZED:
 			printf("Command unrecognized: '%s'\n", input_buffer->buffer);
 			break;

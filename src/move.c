@@ -61,11 +61,11 @@ bool flag_checker(uint32_t flags, Move mov, Pile *src, Pile *dest, Card *moving_
 		if (!(flags & F_SEQUENCE))
 			return false;
 		if (flags & F_DESCENDING) {
-			if (!is_seq_ascending(src->head, n))
+			if (!is_seq_descending(src->head, n))
 				return false;
 		}
 		if (flags & F_ASCENDING) {
-			if (!is_seq_descending(src->head, n))
+			if (!is_seq_ascending(src->head, n))
 				return false;
 		}
 		if (flags & F_SUIT_SAME_SEQ) {
@@ -86,9 +86,7 @@ bool flag_checker(uint32_t flags, Move mov, Pile *src, Pile *dest, Card *moving_
 		}
 	}
 
-	// flags que comparam as cartas da src_pile com as cartas do dest_pile
-	// se a dest_pile não tiver cartas então não vale a pena entrar ai
-	if (dest->head != NULL) { // neste bloque if lowkey não sei se usar moving_card instead of src_head
+	if (dest->head != NULL) {
 		if (flags & F_VAL_LOWER) {
 			if (moving_card->rank != dest->head->rank - 1)
 				return false;
