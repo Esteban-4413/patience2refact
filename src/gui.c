@@ -37,15 +37,13 @@ void draw_main_panel(WINDOW *win, int selected_menu, int active_option, int acti
 					 char patience_files[][64], int num_files, int yMax, int xMax, char saved_files[][64],
 					 int num_saved_files) {
 
-	for (int y = 1; y < yMax / 2 - 1; y++) {
-		for (int x = 1; x < xMax / 2 - 1; x++) {
-			mvwprintw(win, y, x, " ");
-		}
-	}
+	int h = yMax;
+	int w = xMax;
+
 	switch (selected_menu) {
 	case 0:
-		int split_x = (xMax / 2) / 3;
-		mvwvline(win, 1, split_x, ACS_VLINE, yMax / 2 - 2);
+		int split_x = w / 3;
+		mvwvline(win, 1, split_x, ACS_VLINE, h - 2);
 
 		if (active_pane == 0 && active_option == 0)
 			wattron(win, A_REVERSE);
@@ -60,12 +58,16 @@ void draw_main_panel(WINDOW *win, int selected_menu, int active_option, int acti
 
 		if (active_option == 0) {
 			mvwprintw(win, 1, split_x + 2, "Available games:");
-			for (int i = 0; i < num_files; i++) {
-				if (active_pane == 1 && right_option == i)
-					wattron(win, A_REVERSE);
-				mvwprintw(win, 3 + i, split_x + 2, " %d.%s ", i + 1, patience_files[i]);
-				if (active_pane == 1 && right_option == i)
-					wattroff(win, A_REVERSE);
+			if (num_files == 0)
+				mvwprintw(win, 3, split_x + 2, "   (No files found)   ");
+			else {
+				for (int i = 0; i < num_files && (3 + i) < (h - 1); i++) {
+					if (active_pane == 1 && right_option == i)
+						wattron(win, A_REVERSE);
+					mvwprintw(win, 3 + i, split_x + 2, " %d.%s ", i + 1, patience_files[i]);
+					if (active_pane == 1 && right_option == i)
+						wattroff(win, A_REVERSE);
+				}
 			}
 			if (num_files == 0)
 				mvwprintw(win, 3, split_x + 2, "  (No files found)  ");
@@ -74,7 +76,7 @@ void draw_main_panel(WINDOW *win, int selected_menu, int active_option, int acti
 			if (num_saved_files == 0)
 				mvwprintw(win, 3, split_x + 2, "  (No saved games)  ");
 			else {
-				for (int i = 0; i < num_saved_files; i++) {
+				for (int i = 0; i < num_saved_files && (3 + i) < (h - 1); i++) {
 					if (active_pane == 1 && right_option == i)
 						wattron(win, A_REVERSE);
 					mvwprintw(win, 3 + i, split_x + 2, " %d.%s ", i + 1, saved_files[i]);
@@ -124,6 +126,53 @@ void draw_main_panel(WINDOW *win, int selected_menu, int active_option, int acti
 	}
 }
 
+#define MAX_DROPS 80
+
+const char *get_unicode_suit(Suit suit) {
+	switch (suit) {
+	case SUIT_HEART:
+		return "\u2665";
+	case SUIT_SPADE:
+		return "\u2660";
+	case SUIT_CLUB:
+		return "\u2663";
+	case SUIT_DIAMOND:
+		return "\u2666";
+	default:
+		return "?";
+	}
+}
+
+typedef struct {
+	int x, y;
+	int speed;
+	Suit suit;
+} RainDrop;
+
+void init_rain(RainDrop drops[], int max_x, int max_y) {
+	for (int i = 0; i < MAX_DROPS; i++) {
+		drops[i].x = rand() % max_x;
+		drops[i].y = rand() % max_y;
+		drops[i].speed = (rand() % 2) + 1;
+		drops[i].suit = rand() % 4;
+	}
+}
+
+void draw_rain(WINDOW *win, RainDrop drops[], int max_x, int max_y) {
+	for (int i = 0; i < MAX_DROPS; i++) {
+		drops[i].y += drops[i].speed;
+		if (drops[i].y >= max_y) {
+			drops[i].y = 0;
+			drops[i].x = rand() % max_x;
+			drops[i].suit = rand() % 4;
+		}
+		int color = (drops[i].suit == SUIT_HEART || drops[i].suit == SUIT_DIAMOND) ? 1 : 3;
+		wattron(win, COLOR_PAIR(color) | A_BOLD);
+		mvwprintw(win, drops[i].y, drops[i].x, "%s", get_unicode_suit(drops[i].suit));
+		wattroff(win, COLOR_PAIR(color) | A_BOLD);
+	}
+}
+
 MenuChoice start_menu(char *chosen_file_out) {
 	MenuChoice choice;
 	initscr();
@@ -135,6 +184,7 @@ MenuChoice start_menu(char *chosen_file_out) {
 	if (has_colors()) {
 		start_color();
 		use_default_colors();
+		init_pair(1, COLOR_RED, -1);
 		init_pair(3, COLOR_CYAN, -1);
 		init_pair(2, COLOR_YELLOW, -1);
 	}
@@ -197,15 +247,39 @@ MenuChoice start_menu(char *chosen_file_out) {
 	int active_pane = 0;
 	int right_option = 0;
 
-	menu_bar_draw(&mb);
-	draw_main_panel(win, mb.selected, active_option, active_pane, right_option, patience_files, num_files, yMax, xMax,
-					saved_files, num_saved_files);
-	wrefresh(win);
+	RainDrop drops[MAX_DROPS];
+	init_rain(drops, xMax, yMax);
 
 	int ch;
 	bool running = true;
 
-	while (running && (ch = wgetch(win))) {
+	timeout(50);
+	wtimeout(win, 50);
+
+	while (running) {
+		erase();
+		draw_rain(stdscr, drops, xMax, yMax);
+
+		attron(COLOR_PAIR(3) | A_BOLD);
+		for (int i = 0; i < title_height; i++)
+			mvprintw(start_y + i, start_x, "%s", ascii_title[i]);
+		attroff(COLOR_PAIR(3) | A_BOLD);
+		wnoutrefresh(stdscr);
+
+		werase(win);
+		box(win, 0, 0);
+
+		menu_bar_draw(&mb);
+		draw_main_panel(win, mb.selected, active_option, active_pane, right_option, patience_files, num_files, win_h,
+						xMax / 2, saved_files, num_saved_files);
+		wnoutrefresh(win);
+
+		doupdate();
+
+		ch = wgetch(win);
+		if (ch == ERR)
+			continue;
+
 		int current_limit = (active_option == 0) ? num_files : num_saved_files;
 		switch (ch) {
 		case 'l':
@@ -272,77 +346,21 @@ MenuChoice start_menu(char *chosen_file_out) {
 			running = false;
 			break;
 		}
-
-		menu_bar_draw(&mb);
-		draw_main_panel(win, mb.selected, active_option, active_pane, right_option, patience_files, num_files, yMax,
-						xMax, saved_files, num_saved_files);
-		wrefresh(win);
 	}
+	timeout(-1);
+	wtimeout(win, -1);
+
 	delwin(win);
 	endwin();
 	return choice;
 }
 
-const char *get_unicode_suit(Suit suit) {
-	switch (suit) {
-	case SUIT_HEART:
-		return "\u2665";
-	case SUIT_SPADE:
-		return "\u2660";
-	case SUIT_CLUB:
-		return "\u2663";
-	case SUIT_DIAMOND:
-		return "\u2666";
-	default:
-		return "?";
-	}
-}
 
 int get_suit_color(Suit suit) {
 	if (suit == SUIT_HEART || suit == SUIT_DIAMOND)
 		return 1;
 	return 0;
 }
-
-// void draw_empty_pile(WINDOW *win, int y, int x, bool is_higlighted) {
-// 	if (is_higlighted)
-// 		wattron(win, A_REVERSE | COLOR_PAIR(2));
-// 	mvwprintw(win, y, x, "┌────┐");
-// 	mvwprintw(win, y + 1, x, "│ ── │");
-// 	mvwprintw(win, y + 2, x, "└────┘");
-// 	if (is_higlighted)
-// 		wattroff(win, A_REVERSE | COLOR_PAIR(2));
-// }
-
-// void draw_card(WINDOW *win, int y, int x, Card *c, bool is_hidden, bool is_highlighted) {
-// 	if (c == NULL)
-// 		return;
-// 	int color_pair = is_highlighted ? 2 : get_suit_color(c->suit);
-// 	if (is_highlighted)
-// 		wattron(win, A_REVERSE | COLOR_PAIR(color_pair));
-// 	else if (color_pair == 1)
-// 		wattron(win, COLOR_PAIR(color_pair));
-// 	if (is_hidden) {
-// 		mvwprintw(win, y, x, "┌────┐");
-// 		mvwprintw(win, y + 1, x, "│░░░░│");
-// 		mvwprintw(win, y + 2, x, "└────┘");
-// 	} else {
-// 		int color_pair = get_suit_color(c->suit);
-// 		if (color_pair == 1)
-// 			wattron(win, COLOR_PAIR(color_pair));
-// 		char rank_str[4];
-// 		translate_rank(rank_str, c->rank);
-// 		mvwprintw(win, y, x, "┌────┐");
-// 		mvwprintw(win, y + 1, x, "│%2s%s │", rank_str, get_unicode_suit(c->suit));
-// 		mvwprintw(win, y + 2, x, "└────┘");
-// 		if (color_pair == 1)
-// 			wattroff(win, COLOR_PAIR(1));
-// 	}
-// 	if (is_highlighted)
-// 		wattroff(win, A_REVERSE | COLOR_PAIR(color_pair));
-// 	else if (color_pair == 1)
-// 		wattroff(win, COLOR_PAIR(color_pair));
-// }
 
 void draw_empty_pile(WINDOW *win, int y, int x, bool is_higlighted) {
 	if (is_higlighted)
@@ -642,10 +660,9 @@ void draw_victory_screen(WINDOW *win, Game_state *state) {
 	int yMax, xMax;
 	getmaxyx(win, yMax, xMax);
 
-	werase(win);
-	box(win, 0, 0);
+	RainDrop drops[MAX_DROPS];
+	init_rain(drops, xMax, yMax);
 
-	wattron(win, COLOR_PAIR(3) | A_BOLD);
 	const char *ascii_win[] = {" __   __  _______  __   __    _     _  ___   __    _  __ ",
 							   "|  | |  ||       ||  | |  |  | | _ | ||   | |  |  | ||  |",
 							   "|  |_|  ||   _   ||  | |  |  | || || ||   | |   |_| ||  |",
@@ -658,30 +675,37 @@ void draw_victory_screen(WINDOW *win, Game_state *state) {
 	int start_y = (yMax / 2) - (art_height / 2) - 3;
 	int start_x = (xMax - art_width) / 2;
 
-	for (int i = 0; i < art_height; i++) {
-		mvwprintw(win, start_y + i, start_x, "%s", ascii_win[i]);
-	}
-	wattroff(win, COLOR_PAIR(2) | A_BOLD);
-
 	time_t current = time(NULL);
 	int elapsed = (int)difftime(current, state->stats->start_time);
 	int mins = elapsed / 60;
 	int secs = elapsed % 60;
 
-	wattron(win, COLOR_PAIR(3) | A_BOLD);
-	mvwprintw(win, start_y + art_height + 2, (xMax - 30) / 2, "Final Score: %4d", state->stats->score);
-	mvwprintw(win, start_y + art_height + 3, (xMax - 30) / 2, "Time: %02d:%02d | Moves: %3d", mins, secs,
-			  state->stats->moves_count);
-	wattroff(win, COLOR_PAIR(3) | A_BOLD);
+	wtimeout(win, 50);
 
-	wattron(win, A_BLINK);
-	mvwprintw(win, yMax - 3, (xMax - 36) / 2, "Press ANY KEY to return to Menu...");
-	wattroff(win, A_BLINK);
+	int ch;
+	while ((ch = wgetch(win)) == ERR) {
+		werase(win);
+		draw_rain(win, drops, xMax, yMax);
+		box(win, 0, 0);
+		wattron(win, COLOR_PAIR(2) | A_BOLD);
+		for (int i = 0; i < art_height; i++) {
+			mvwprintw(win, start_y + i, start_x, "%s", ascii_win[i]);
+		}
+		wattroff(win, COLOR_PAIR(2) | A_BOLD);
 
-	wrefresh(win);
+		wattron(win, COLOR_PAIR(3) | A_BOLD);
+		mvwprintw(win, start_y + art_height + 2, (xMax - 30) / 2, "Final Score: %4d", state->stats->score);
+		mvwprintw(win, start_y + art_height + 3, (xMax - 30) / 2, "Time: %02d:%02d | Moves: %3d", mins, secs,
+				  state->stats->moves_count);
+		wattroff(win, COLOR_PAIR(3) | A_BOLD);
 
+		wattron(win, A_BLINK);
+		mvwprintw(win, yMax - 3, (xMax - 36) / 2, "Press ANY KEY to return to Menu...");
+		wattroff(win, A_BLINK);
+
+		wrefresh(win);
+	}
 	wtimeout(win, -1);
-	wgetch(win);
 }
 
 void run_ncurses_gui(Game_state *state) {
@@ -696,6 +720,7 @@ void run_ncurses_gui(Game_state *state) {
 		use_default_colors();
 		init_pair(1, COLOR_RED, -1);
 		init_pair(2, COLOR_YELLOW, -1);
+		init_pair(3, COLOR_CYAN, -1);
 	}
 	int yMax, xMax;
 	getmaxyx(stdscr, yMax, xMax);

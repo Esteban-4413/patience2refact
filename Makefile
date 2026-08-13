@@ -10,7 +10,7 @@ else
 endif
 
 SRCS = $(wildcard src/*.c)
-OBJS = $(wildcard src/%.c, %.o, $(SRCS))
+OBJS = $(SRCS:.c=.o)
 
 TARGET = jogo
 
@@ -19,7 +19,7 @@ all: $(TARGET)
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDLIBS)
 
-*.o: src/*.c
+src/%.o: src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
