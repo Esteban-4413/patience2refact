@@ -33,6 +33,67 @@ void menu_bar_draw(MenuBar *mb) {
 	wrefresh(mb->win);
 }
 
+void draw_game_description(WINDOW *win, const char *filename, int y, int x, int max_w) {
+	wattron(win, A_BOLD | COLOR_PAIR(3));
+
+	if (strstr(filename, "klondike") != NULL || strstr(filename, "Klondike") != NULL) {
+		mvwprintw(win, y++, x, "=== KLONDIKE ===");
+		wattroff(win, A_BOLD | COLOR_PAIR(3));
+		mvwprintw(win, y++, x, "The classic Solitaire experience.");
+		mvwprintw(win, y++, x, "Goal: Move all cards to the 4 foundations.");
+		y++;
+		wattron(win, A_UNDERLINE);
+		mvwprintw(win, y++, x, "Rules:");
+		wattroff(win, A_UNDERLINE);
+		mvwprintw(win, y++, x, "1. Tableaus build DOWN by ALTERNATE COLOR.");
+		mvwprintw(win, y++, x, "2. Foundations build UP by SUIT.");
+		mvwprintw(win, y++, x, "3. Only KINGS can be placed on empty columns.");
+
+	} else if (strstr(filename, "freeCell") != NULL || strstr(filename, "FreeCell") != NULL) {
+		mvwprintw(win, y++, x, "=== FREECELL ===");
+		wattroff(win, A_BOLD | COLOR_PAIR(3));
+		mvwprintw(win, y++, x, "A highly strategic, open-card game.");
+		mvwprintw(win, y++, x, "Goal: Move all cards to the foundations.");
+		y++;
+		wattron(win, A_UNDERLINE);
+		mvwprintw(win, y++, x, "Rules:");
+		wattroff(win, A_UNDERLINE);
+		mvwprintw(win, y++, x, "1. Tableaus build DOWN by ALTERNATE COLOR.");
+		mvwprintw(win, y++, x, "2. You have 4 'Free Cells' to hold any 1 card.");
+		mvwprintw(win, y++, x, "3. Moving sequences depends on empty cells available.");
+
+	} else if (strstr(filename, "golf") != NULL || strstr(filename, "Golf") != NULL) {
+		mvwprintw(win, y++, x, "=== GOLF ===");
+		wattroff(win, A_BOLD | COLOR_PAIR(3));
+		mvwprintw(win, y++, x, "Fast-paced sequencing.");
+		mvwprintw(win, y++, x, "Goal: Clear the entire tableau into the waste pile.");
+		y++;
+		wattron(win, A_UNDERLINE);
+		mvwprintw(win, y++, x, "Rules:");
+		wattroff(win, A_UNDERLINE);
+		mvwprintw(win, y++, x, "1. Play cards 1 rank HIGHER or LOWER than the waste.");
+		mvwprintw(win, y++, x, "2. Suits and colors do NOT matter.");
+		mvwprintw(win, y++, x, "3. Kings cannot wrap to Aces.");
+
+	} else if (strstr(filename, "simpleSimon") != NULL || strstr(filename, "SimpleSimon") != NULL) {
+		mvwprintw(win, y++, x, "=== SIMPLE SIMON ===");
+		wattroff(win, A_BOLD | COLOR_PAIR(3));
+		mvwprintw(win, y++, x, "A spider-like variant.");
+		mvwprintw(win, y++, x, "Goal: Build 4 full descending sequences in suit.");
+		y++;
+		wattron(win, A_UNDERLINE);
+		mvwprintw(win, y++, x, "Rules:");
+		wattroff(win, A_UNDERLINE);
+		mvwprintw(win, y++, x, "1. Tableaus build DOWN regardless of suit.");
+		mvwprintw(win, y++, x, "2. You can ONLY move sequences of the SAME SUIT.");
+
+	} else {
+		mvwprintw(win, y++, x, "=== %s ===", filename);
+		wattroff(win, A_BOLD | COLOR_PAIR(3));
+		mvwprintw(win, y++, x, "Select this game to read the auto-generated rules!");
+	}
+}
+
 void draw_main_panel(WINDOW *win, int selected_menu, int active_option, int active_pane, int right_option,
 					 char patience_files[][64], int num_files, int yMax, int xMax, char saved_files[][64],
 					 int num_saved_files) {
@@ -173,6 +234,8 @@ void draw_rain(WINDOW *win, RainDrop drops[], int max_x, int max_y) {
 	}
 }
 
+typedef enum { STATE_MAIN, STATE_PLAY, STATE_HELP } MenuState;
+
 MenuChoice start_menu(char *chosen_file_out) {
 	MenuChoice choice;
 	initscr();
@@ -180,13 +243,14 @@ MenuChoice start_menu(char *chosen_file_out) {
 	noecho();
 	keypad(stdscr, TRUE);
 	curs_set(0);
+	timeout(50);
 
 	if (has_colors()) {
 		start_color();
 		use_default_colors();
 		init_pair(1, COLOR_RED, -1);
-		init_pair(3, COLOR_CYAN, -1);
 		init_pair(2, COLOR_YELLOW, -1);
+		init_pair(3, COLOR_CYAN, -1);
 	}
 
 	int yMax, xMax;
@@ -206,155 +270,207 @@ MenuChoice start_menu(char *chosen_file_out) {
 	int title_height = 9;
 	int art_width = 64;
 
-	int start_y = 1;
-	int start_x = (xMax - art_width) / 2;
-	if (start_x < 0)
-		start_x = 0;
-
-	attron(COLOR_PAIR(3) | A_BOLD);
-	for (int i = 0; i < title_height; i++)
-		mvprintw(start_y + i, start_x, "%s", ascii_title[i]);
-	attroff(COLOR_PAIR(3) | A_BOLD);
-	refresh();
-
-	int win_y = start_y + title_height + 1;
-	int win_h = yMax - win_y - 2;
-	if (win_h < 10)
-		win_h = 10;
-
-	WINDOW *win = newwin(win_h, xMax / 2, win_y, xMax / 4);
-	box(win, 0, 0);
-
-	keypad(win, TRUE);
-
-	Menu menus[] = {{2, 'h', "Patience menu"}, {28, '?', "Help"}};
-	int total_menus = sizeof(menus) / sizeof(menus[0]);
-	MenuBar mb;
-	mb.win = win;
-	mb.menus = menus;
-	mb.num_menus = total_menus;
-
-	mb.selected = 0;
-	int active_option = 0;
-	int num_options_per_tab[] = {2, 0};
-
 	char patience_files[20][64];
 	int num_files = get_patience_file(patience_files, 20, "paciencias", ".paciencia");
-
 	char saved_files[20][64];
 	int num_saved_files = get_patience_file(saved_files, 20, "saves", ".txt");
-
-	int active_pane = 0;
-	int right_option = 0;
 
 	RainDrop drops[MAX_DROPS];
 	init_rain(drops, xMax, yMax);
 
+	MenuState current_state = STATE_MAIN;
+	int main_sel = 0;
+	int play_tab = 0;
+	int list_sel = 0;
+
 	int ch;
 	bool running = true;
 
-	timeout(50);
-	wtimeout(win, 50);
-
 	while (running) {
-		erase();
+		werase(stdscr);
 		draw_rain(stdscr, drops, xMax, yMax);
+
+		int start_y = yMax * 0.15;
+		int start_x = (xMax - art_width) / 2;
+		if (start_x < 0)
+			start_x = 0;
 
 		attron(COLOR_PAIR(3) | A_BOLD);
 		for (int i = 0; i < title_height; i++)
 			mvprintw(start_y + i, start_x, "%s", ascii_title[i]);
 		attroff(COLOR_PAIR(3) | A_BOLD);
+
+		WINDOW *popup_win = NULL;
+
+
+		if (current_state == STATE_MAIN) {
+			const char *options[] = {" PLAY ", " HELP ", " QUIT "};
+			int opt_y = start_y + title_height + 4;
+			for (int i = 0; i < 3; i++) {
+				if (i == main_sel)
+					attron(A_REVERSE | COLOR_PAIR(3) | A_BOLD);
+				mvprintw(opt_y + (i * 2), (xMax - 6) / 2, "%s", options[i]);
+				if (i == main_sel)
+					attroff(A_REVERSE | COLOR_PAIR(3) | A_BOLD);
+			}
+			mvprintw(yMax - 2, 2, "Use [j/k] to navigate, [Enter] to select");
+
+		} else if (current_state == STATE_PLAY || current_state == STATE_HELP) {
+			int box_w = xMax * 0.6;
+			if (box_w < 60)
+				box_w = 60;
+			int box_h = yMax * 0.6;
+			if (box_h < 15)
+				box_h = 15;
+			int box_y = start_y + title_height + 2;
+			int box_x = (xMax - box_w) / 2;
+
+			popup_win = newwin(box_h, box_w, box_y, box_x);
+			box(popup_win, 0, 0);
+
+			if (current_state == STATE_PLAY) {
+				mvwprintw(popup_win, 0, 2, "┌ tab ┐");
+				wattron(popup_win, A_BOLD);
+				if (play_tab == 0)
+					wattron(popup_win, COLOR_PAIR(3));
+				mvwprintw(popup_win, 0, 10, " 1.New Game ");
+				if (play_tab == 0)
+					wattroff(popup_win, COLOR_PAIR(3));
+
+				if (play_tab == 1)
+					wattron(popup_win, COLOR_PAIR(3));
+				mvwprintw(popup_win, 0, 23, " 2.Continue ");
+				if (play_tab == 1)
+					wattroff(popup_win, COLOR_PAIR(3));
+				wattroff(popup_win, A_BOLD);
+
+				int split_x = box_w / 2;
+				mvwvline(popup_win, 1, split_x, ACS_VLINE, box_h - 2);
+				mvwprintw(popup_win, 0, split_x, "┬");
+				mvwprintw(popup_win, box_h - 1, split_x, "┴");
+
+				int limit = (play_tab == 0) ? num_files : num_saved_files;
+				char (*current_list)[64] = (play_tab == 0) ? patience_files : saved_files;
+
+				for (int i = 0; i < limit && i < box_h - 2; i++) {
+					if (i == list_sel)
+						wattron(popup_win, A_REVERSE | A_BOLD | COLOR_PAIR(3));
+					mvwprintw(popup_win, 2 + i, 2, " %s ", current_list[i]);
+					if (i == list_sel)
+						wattroff(popup_win, A_REVERSE | A_BOLD | COLOR_PAIR(3));
+				}
+				if (limit == 0)
+					mvwprintw(popup_win, 2, 2, " (No files found) ");
+
+				if (limit > 0) {
+					draw_game_description(popup_win, current_list[list_sel], 2, split_x + 3, box_w - split_x - 4);
+				}
+
+				mvwprintw(popup_win, box_h - 1, 2, " [q] Back  [1/2] Tabs  [Enter] Start ");
+			} else if (current_state == STATE_HELP) {
+				mvwprintw(popup_win, 0, 2, "┌ Help ┐");
+				wattron(popup_win, A_BOLD | COLOR_PAIR(3));
+				mvwprintw(popup_win, 2, 4, "=== How to move ===");
+				wattroff(popup_win, A_BOLD | COLOR_PAIR(3));
+
+				mvwprintw(popup_win, 4, 4, "mv 1 2   : Move TOP card from pile 1 to pile 2");
+				mvwprintw(popup_win, 5, 4, "mv 1|3 2 : Move SEQUENCE starting at index 3 from pile 1 to 2");
+
+				wattron(popup_win, A_BOLD | COLOR_PAIR(3));
+				mvwprintw(popup_win, 8, 4, "=== Rules glossary ===");
+				wattroff(popup_win, A_BOLD | COLOR_PAIR(3));
+
+				wattron(popup_win, A_UNDERLINE);
+				mvwprintw(popup_win, 10, 4, "Moving to a Destination Pile:");
+				wattroff(popup_win, A_UNDERLINE);
+				mvwprintw(popup_win, 11, 4, "-1 Rnk.    : Source card must be 1 rank LOWER (e.g. 7 onto 8)");
+				mvwprintw(popup_win, 12, 4, "+1 Rnk.    : Source card must be 1 rank HIGHER (e.g. 3 onto 2)");
+				mvwprintw(popup_win, 13, 4, "Adj.       : Source card must be EXACTLY 1 rank lower or higher");
+				mvwprintw(popup_win, 14, 4, "Alt color. : Source card must be opposite color of Destination");
+				mvwprintw(popup_win, 15, 4, "Same suit. : Source card must be same suit as Destination");
+				mvwprintw(popup_win, 16, 4, "To empty.  : Destination must be an empty space");
+				mvwprintw(popup_win, 17, 4, "Kings to empty : Only Kings can be moved to an empty space");
+
+				wattron(popup_win, A_UNDERLINE);
+				mvwprintw(popup_win, 19, 4, "Moving a Sequence of Cards:");
+				wattroff(popup_win, A_UNDERLINE);
+				mvwprintw(popup_win, 20, 4, "If the game allows it, the sequence you select (e.g. mv 1|3 2)");
+				mvwprintw(popup_win, 21, 4, "must be properly sorted BEFORE moving (e.g., same suit, -1 rnk).");
+			}
+		}
+
 		wnoutrefresh(stdscr);
-
-		werase(win);
-		box(win, 0, 0);
-
-		menu_bar_draw(&mb);
-		draw_main_panel(win, mb.selected, active_option, active_pane, right_option, patience_files, num_files, win_h,
-						xMax / 2, saved_files, num_saved_files);
-		wnoutrefresh(win);
-
+		if (popup_win != NULL) {
+			wnoutrefresh(popup_win);
+		}
 		doupdate();
 
-		ch = wgetch(win);
-		if (ch == ERR)
-			continue;
+		if (popup_win != NULL) {
+			keypad(popup_win, TRUE);
+			wtimeout(popup_win, 50);
+			ch = wgetch(popup_win);
+			delwin(popup_win);
+		} else {
+			ch = wgetch(stdscr);
+		}
 
-		int current_limit = (active_option == 0) ? num_files : num_saved_files;
-		switch (ch) {
-		case 'l':
-		case KEY_RIGHT:
-			if (mb.selected == 0 && active_pane == 0 && current_limit > 0)
-				active_pane = 1;
-			else {
-				mb.selected = (mb.selected + 1) % mb.num_menus;
-				active_pane = 0;
-				active_option = 0;
-			}
-			break;
-		case 'j':
-		case KEY_DOWN:
-			if (active_pane == 0) {
-				if (num_options_per_tab[mb.selected] > 0)
-					active_option = (active_option + 1) % num_options_per_tab[mb.selected];
-				right_option = 0;
-			} else if (active_pane == 1) {
-				if (current_limit > 0)
-					right_option = (right_option + 1) % current_limit;
-			}
-			break;
-		case 'h':
-		case KEY_LEFT:
-			if (active_pane == 1)
-				active_pane = 0;
-			else {
-				mb.selected = (mb.selected - 1 + mb.num_menus) % mb.num_menus;
-				active_pane = 0;
-				active_option = 0;
-			}
-			break;
-		case 'k':
-		case KEY_UP:
-			if (active_pane == 0) {
-				if (num_options_per_tab[mb.selected] > 0)
-					active_option =
-						(active_option - 1 + num_options_per_tab[mb.selected]) % num_options_per_tab[mb.selected];
-				right_option = 0;
-			} else if (active_pane == 1) {
-				if (num_files > 0)
-					right_option = (right_option - 1 + current_limit) % current_limit;
-			}
-			break;
-
-		case '\n':
-			if (mb.selected == 0) {
-				if (active_pane == 0) {
-					if (active_option == 0 && num_files > 0)
-						active_pane = 1;
-				} else if (active_pane == 1) {
-					choice = (active_option == 0) ? MENU_NEW_GAME : MENU_CONTINUE;
-					if (active_option == 0)
-						strcpy(chosen_file_out, patience_files[right_option]);
-					else
-						strcpy(chosen_file_out, saved_files[right_option]);
+		if (ch != ERR) {
+			if (ch == 'q' || ch == 27) {
+				if (current_state == STATE_PLAY || current_state == STATE_HELP) {
+					current_state = STATE_MAIN;
+				} else if (current_state == STATE_MAIN) {
+					choice = MENU_QUIT;
 					running = false;
 				}
+			} else if (ch == '\n' || ch == '\r') {
+				if (current_state == STATE_MAIN) {
+					if (main_sel == 0) {
+						current_state = STATE_PLAY;
+						list_sel = 0;
+					} else if (main_sel == 1)
+						current_state = STATE_HELP;
+					else if (main_sel == 2) {
+						choice = MENU_QUIT;
+						running = false;
+					}
+				} else if (current_state == STATE_PLAY) {
+					int limit = (play_tab == 0) ? num_files : num_saved_files;
+					if (limit > 0) {
+						choice = (play_tab == 0) ? MENU_NEW_GAME : MENU_CONTINUE;
+						strcpy(chosen_file_out, (play_tab == 0) ? patience_files[list_sel] : saved_files[list_sel]);
+						running = false;
+					}
+				}
+			} else if (ch == '1' && current_state == STATE_PLAY) {
+				play_tab = 0;
+				list_sel = 0;
+			} else if (ch == '2' && current_state == STATE_PLAY) {
+				play_tab = 1;
+				list_sel = 0;
+			} else if (ch == 'j' || ch == KEY_DOWN) {
+				if (current_state == STATE_MAIN)
+					main_sel = (main_sel + 1) % 3;
+				else if (current_state == STATE_PLAY) {
+					int limit = (play_tab == 0) ? num_files : num_saved_files;
+					if (limit > 0)
+						list_sel = (list_sel + 1) % limit;
+				}
+			} else if (ch == 'k' || ch == KEY_UP) {
+				if (current_state == STATE_MAIN)
+					main_sel = (main_sel + 2) % 3;
+				else if (current_state == STATE_PLAY) {
+					int limit = (play_tab == 0) ? num_files : num_saved_files;
+					if (limit > 0)
+						list_sel = (list_sel + limit - 1) % limit;
+				}
 			}
-			break;
-		case 'q':
-			choice = MENU_QUIT;
-			running = false;
-			break;
 		}
 	}
-	timeout(-1);
-	wtimeout(win, -1);
 
-	delwin(win);
+	timeout(-1);
 	endwin();
 	return choice;
 }
-
 
 int get_suit_color(Suit suit) {
 	if (suit == SUIT_HEART || suit == SUIT_DIAMOND)
