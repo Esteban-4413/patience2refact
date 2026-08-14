@@ -140,7 +140,7 @@ bool execute_command(Game_state *state, GameCommand cmd, char *feedback_msg) {
 					int count = state->move.card_count;
 
 					do_move(state);
-					// state->moves_count++;
+					state->stats->moves_count++;
 					if (!used_hint) {
 						int pts = update_score(state, src, dest, count);
 						if (pts >= 0)
