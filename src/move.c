@@ -213,6 +213,7 @@ MoveList get_valid_moves(Game_state *current_state, bool is_auto) { // set the m
 									if (is_auto == true && move_list.count == 1) {
 										flag = false;
 									}
+									if (move_list.count == 64) {flag = false;}
 								}
 							}
 						}
