@@ -38,6 +38,7 @@ void draw_game_description(WINDOW *win, const char *filename, int y, int x, int 
 
 	if (strstr(filename, "klondike") != NULL || strstr(filename, "Klondike") != NULL) {
 		mvwprintw(win, y++, x, "=== KLONDIKE ===");
+		y++;
 		wattroff(win, A_BOLD | COLOR_PAIR(3));
 		mvwprintw(win, y++, x, "The classic Solitaire experience.");
 		mvwprintw(win, y++, x, "Goal: Move all cards to the 4 foundations.");
@@ -45,12 +46,14 @@ void draw_game_description(WINDOW *win, const char *filename, int y, int x, int 
 		wattron(win, A_UNDERLINE);
 		mvwprintw(win, y++, x, "Rules:");
 		wattroff(win, A_UNDERLINE);
+		y++;
 		mvwprintw(win, y++, x, "1. Tableaus build DOWN by ALTERNATE COLOR.");
 		mvwprintw(win, y++, x, "2. Foundations build UP by SUIT.");
 		mvwprintw(win, y++, x, "3. Only KINGS can be placed on empty columns.");
 
 	} else if (strstr(filename, "freeCell") != NULL || strstr(filename, "FreeCell") != NULL) {
 		mvwprintw(win, y++, x, "=== FREECELL ===");
+		y++;
 		wattroff(win, A_BOLD | COLOR_PAIR(3));
 		mvwprintw(win, y++, x, "A highly strategic, open-card game.");
 		mvwprintw(win, y++, x, "Goal: Move all cards to the foundations.");
@@ -58,12 +61,14 @@ void draw_game_description(WINDOW *win, const char *filename, int y, int x, int 
 		wattron(win, A_UNDERLINE);
 		mvwprintw(win, y++, x, "Rules:");
 		wattroff(win, A_UNDERLINE);
-		mvwprintw(win, y++, x, "1. Tableaus build DOWN by ALTERNATE COLOR.");
+		y++;
+		mvwprintw(win, y++ , x, "1. Tableaus build DOWN by ALTERNATE COLOR.");
 		mvwprintw(win, y++, x, "2. You have 4 'Free Cells' to hold any 1 card.");
 		mvwprintw(win, y++, x, "3. Moving sequences depends on empty cells available.");
 
 	} else if (strstr(filename, "golf") != NULL || strstr(filename, "Golf") != NULL) {
 		mvwprintw(win, y++, x, "=== GOLF ===");
+		y++;
 		wattroff(win, A_BOLD | COLOR_PAIR(3));
 		mvwprintw(win, y++, x, "Fast-paced sequencing.");
 		mvwprintw(win, y++, x, "Goal: Clear the entire tableau into the waste pile.");
@@ -71,12 +76,14 @@ void draw_game_description(WINDOW *win, const char *filename, int y, int x, int 
 		wattron(win, A_UNDERLINE);
 		mvwprintw(win, y++, x, "Rules:");
 		wattroff(win, A_UNDERLINE);
+		y++;
 		mvwprintw(win, y++, x, "1. Play cards 1 rank HIGHER or LOWER than the waste.");
 		mvwprintw(win, y++, x, "2. Suits and colors do NOT matter.");
 		mvwprintw(win, y++, x, "3. Kings cannot wrap to Aces.");
 
 	} else if (strstr(filename, "simpleSimon") != NULL || strstr(filename, "SimpleSimon") != NULL) {
 		mvwprintw(win, y++, x, "=== SIMPLE SIMON ===");
+		y++;
 		wattroff(win, A_BOLD | COLOR_PAIR(3));
 		mvwprintw(win, y++, x, "A spider-like variant.");
 		mvwprintw(win, y++, x, "Goal: Build 4 full descending sequences in suit.");
@@ -84,11 +91,13 @@ void draw_game_description(WINDOW *win, const char *filename, int y, int x, int 
 		wattron(win, A_UNDERLINE);
 		mvwprintw(win, y++, x, "Rules:");
 		wattroff(win, A_UNDERLINE);
+		y++;
 		mvwprintw(win, y++, x, "1. Tableaus build DOWN regardless of suit.");
 		mvwprintw(win, y++, x, "2. You can ONLY move sequences of the SAME SUIT.");
 
 	} else {
 		mvwprintw(win, y++, x, "=== %s ===", filename);
+		y++;
 		wattroff(win, A_BOLD | COLOR_PAIR(3));
 		mvwprintw(win, y++, x, "Select this game to read the auto-generated rules!");
 	}

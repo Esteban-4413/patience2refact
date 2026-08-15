@@ -14,5 +14,4 @@ int update_score(Game_state *state, int src_idx, int dest_idx, int card_count);
 
 MoveList generate_hints(Game_state *current_state);
 
-void print_move_list(const MoveList *move_list);
 #endif

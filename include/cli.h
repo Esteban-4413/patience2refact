@@ -39,17 +39,17 @@ typedef struct GameCommand {
 } GameCommand;
 
 
-InputBuffer *new_input_buffer();
-void print_deck_arr(Card *deck_arr);
-void print_prompt();
-void read_input(InputBuffer *input_buffer);
-void close_input_buffer(InputBuffer *input_buffer);
-GameCommand parse_command_cli(InputBuffer *input_buffer);
+// InputBuffer *new_input_buffer();
+// void print_deck_arr(Card *deck_arr); - está definida no game_state.c
+// // void print_prompt();
+// void read_input(InputBuffer *input_buffer);
+// void close_input_buffer(InputBuffer *input_buffer);
+// GameCommand parse_command_cli(InputBuffer *input_buffer);
 GameCommand parse_command(char *input_text);
 bool execute_command(Game_state *state, GameCommand cmd, char *feedback_msg);
-void run_cli();
+// void run_cli();
 
-void menu(GameDefinition **current_def, Game_state **current_state);
-int input_menu();
+// void menu(GameDefinition **current_def, Game_state **current_state);
+// int input_menu();
 
 #endif

@@ -2,20 +2,12 @@
 #include "../include/cli.h"
 #include <stdbool.h>
 
-void print_move(Game_state *state) {
-	Move m = state->move;
-	printf("Pile src: %d | Column: %d | Pile dest: %d | num: %d | Flag: %d"
-		   "\n",
-		   m.src_pile, m.column_out, m.dest_pile, m.card_count, m.is_move_valid);
-}
 
 bool fill_move(Game_state *current_state, GameCommand *cmd) {
 	int src = cmd->src - 1;
 	int dest = cmd->dest - 1;
 	Pile *src_pile = current_state->table_piles[src];
 	int column_input = (cmd->card_index_input == -1) ? 0 : cmd->card_index_input;
-
-	int cards_to_move = src_pile->num_cards - column_input;
 
 	current_state->move.src_pile = src;
 	current_state->move.dest_pile = dest;
@@ -250,7 +242,7 @@ void undo_move(Game_state *state) {
 		state->move.src_pile = m.dest_pile;
 		state->move.dest_pile = m.src_pile;
 		state->move.card_count = m.card_count;
-		Pile *source = state->table_piles[m.dest_pile];
+		// Pile *source = state->table_piles[m.dest_pile]; - [UNUSED VARIABLE]
 		state->move.column_out = m.card_count - 1;
 		state->move.is_auto = true;
 		do_move(state);

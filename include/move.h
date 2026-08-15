@@ -25,8 +25,6 @@ MoveList get_valid_moves(Game_state *current_state, bool is_auto);
 
 bool is_duplicate_move(MoveList *move_list, Move move);
 
-void print_move(Game_state *state);
-
 bool fill_move(Game_state *current_state, GameCommand *cmd);
 
 void do_move(Game_state *current_state);

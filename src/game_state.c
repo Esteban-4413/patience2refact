@@ -57,14 +57,14 @@ Pile *arr2llist(Card **deck_arr, int num_cards) {
 	return deck_list;
 }
 
-void print_deck_arr(Card *deck_arr) {
-	for (int i = 0; i < 52; i++) {
-		printf(" |%d %d| ", deck_arr[i].suit, deck_arr[i].rank);
-		if (i != 0 && i % 13 == 0)
-			printf("\n");
-	}
-	printf("\nDone!\n");
-}
+// void print_deck_arr(Card *deck_arr) {
+// 	for (int i = 0; i < 52; i++) {
+// 		printf(" |%d %d| ", deck_arr[i].suit, deck_arr[i].rank);
+// 		if (i != 0 && i % 13 == 0)
+// 			printf("\n");
+// 	}
+// 	printf("\nDone!\n");
+// }
 
 bool win_codition(Game_state *current_state) {
 	WinCondition *win_cond = current_state->definition->win_condition;
