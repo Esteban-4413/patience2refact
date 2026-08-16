@@ -12,7 +12,7 @@ endif
 SRCS = $(wildcard src/*.c)
 OBJS = $(SRCS:.c=.o)
 
-TARGET = jogo
+TARGET = patience
 
 all: $(TARGET)
 

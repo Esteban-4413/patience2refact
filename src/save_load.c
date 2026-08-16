@@ -38,10 +38,11 @@ bool save_game(Game_state *current_state) {
 	if (current_state->stats != NULL) {
 		time_t current_time = time(NULL);
 		long elapsed = (long)difftime(current_time, current_state->stats->start_time);
-		fprintf(f, "STATS %ld %d %d\n", elapsed, current_state->stats->moves_count, current_state->stats->score);
+		fprintf(f, "STATS %ld %d %d %d\n", elapsed, current_state->stats->moves_count, current_state->stats->score,
+				current_state->stats->hints_used);
 
 	} else {
-		fprintf(f, "STATS 0 0 0\n");
+		fprintf(f, "STATS 0 0 0 0\n");
 	}
 
 	for (int i = 0; i < current_state->pile_count; i++) {
@@ -166,9 +167,6 @@ Game_state *load_game(char *save_file) {
 
 	GameDefinition *current_def = load_patience(path);
 	state->definition = current_def;
-	if (current_def != NULL) {
-		// printf("Game Definition set!\n");
-	}
 
 	state->stats = malloc(sizeof(*state->stats));
 	state->stats->start_time = time(NULL);
@@ -177,17 +175,19 @@ Game_state *load_game(char *save_file) {
 	state->stats->hint_src_pile = -1;
 	state->stats->hint_dest_pile = -1;
 	state->stats->hint_card_count = 0;
+	state->stats->hints_used = 0;
 
 	long pos_before_stats = ftell(f);
 	if (fgets(buffer, sizeof(buffer), f) != NULL) {
 		if (strncmp(buffer, "STATS", 5) == 0) {
 			long elapsed = 0;
-			int moves = 0, score = 0;
-			sscanf(buffer, "STATS %ld %d %d", &elapsed, &moves, &score);
+			int moves = 0, score = 0, hints = 0;
+			sscanf(buffer, "STATS %ld %d %d %d", &elapsed, &moves, &score, &hints);
 
 			state->stats->start_time = time(NULL) - elapsed;
 			state->stats->moves_count = moves;
 			state->stats->score = score;
+			state->stats->hints_used = hints;
 		} else
 			fseek(f, pos_before_stats, SEEK_SET);
 	}
@@ -222,8 +222,6 @@ Game_state *load_game(char *save_file) {
 					if (read <= 0)
 						break;
 					Card *c = read_card(token);
-					// if(!head) {state->table_piles[i]->head = c; head = true;}
-					// push(state->table_piles[i], c);
 					unshift(state->table_piles[i], c);
 					pos += read;
 					read = 0;

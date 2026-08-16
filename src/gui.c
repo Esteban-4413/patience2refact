@@ -765,7 +765,7 @@ void read_command_timer(WINDOW *win, char *input_str, int max_len, Game_state *s
 				  state->stats->moves_count, state->stats->score, 3 - state->stats->hints_used);
 		wattroff(win, A_BOLD);
 
-		wmove(win, yMax - 2, 12 + pos);
+		wmove(win, yMax - 2, 5 + pos);
 		wrefresh(win);
 
 		int ch = wgetch(win);
@@ -780,10 +780,10 @@ void read_command_timer(WINDOW *win, char *input_str, int max_len, Game_state *s
 			if (pos > 0) {
 				pos--;
 				input_str[0] = '\0';
-				wmove(win, yMax - 2, 12 + pos);
+				wmove(win, yMax - 2, 5 + pos);
 				wclrtoeol(win);
 
-				wmove(win, yMax - 2, 12 + pos);
+				wmove(win, yMax - 2, 5 + pos);
 			}
 		} else if (pos < max_len - 1 && ch >= 32 && ch <= 126) {
 			input_str[pos++] = ch;
@@ -899,11 +899,11 @@ void run_ncurses_gui(Game_state *state) {
 		}
 
 		wattron(game_win, COLOR_PAIR(2) | A_BOLD);
-		mvwprintw(game_win, yMax - 3, 2, ">> %s", log_new);
+		mvwprintw(game_win, yMax - 3, 2, "| %s", log_new);
 		wattroff(game_win, COLOR_PAIR(2) | A_BOLD);
 
 		// wmove(game_win, yMax - 2, 2);
-		mvwprintw(game_win, yMax - 2, 2, "Command > ");
+		mvwprintw(game_win, yMax - 2, 2, ">> ");
 		wrefresh(game_win);
 
 		echo();
