@@ -33,36 +33,37 @@ void menu_bar_draw(MenuBar *mb) {
 	wrefresh(mb->win);
 }
 
-void draw_game_description(WINDOW *win, const char *filename, int y, int x, int max_w) {
+void draw_game_description(WINDOW *win, const char *filename, int y, int x, int max_w, int max_h) {
 	wattron(win, A_BOLD | COLOR_PAIR(3));
+
 
 	if (strstr(filename, "klondike") != NULL || strstr(filename, "Klondike") != NULL) {
 		mvwprintw(win, y++, x, "=== KLONDIKE ===");
 		y++;
 		wattroff(win, A_BOLD | COLOR_PAIR(3));
-		mvwprintw(win, y++, x, "The classic Solitaire experience.");
+		mvwprintw(win, y++, x, "The classic Solitaire.");
 		mvwprintw(win, y++, x, "Goal: Move all cards to the 4 foundations.");
 		y++;
 		wattron(win, A_UNDERLINE);
 		mvwprintw(win, y++, x, "Rules:");
 		wattroff(win, A_UNDERLINE);
 		y++;
-		mvwprintw(win, y++, x, "1. Tableaus build DOWN by ALTERNATE COLOR.");
-		mvwprintw(win, y++, x, "2. Foundations build UP by SUIT.");
-		mvwprintw(win, y++, x, "3. Only KINGS can be placed on empty columns.");
+		mvwprintw(win, y++, x, "1. Tableaus build down by alternate color.");
+		mvwprintw(win, y++, x, "2. Foundations build up by suit.");
+		mvwprintw(win, y++, x, "3. Only kings can be placed on empty columns.");
 
 	} else if (strstr(filename, "freeCell") != NULL || strstr(filename, "FreeCell") != NULL) {
 		mvwprintw(win, y++, x, "=== FREECELL ===");
 		y++;
 		wattroff(win, A_BOLD | COLOR_PAIR(3));
-		mvwprintw(win, y++, x, "A highly strategic, open-card game.");
+		mvwprintw(win, y++, x, "A strategic, open-card game.");
 		mvwprintw(win, y++, x, "Goal: Move all cards to the foundations.");
 		y++;
 		wattron(win, A_UNDERLINE);
 		mvwprintw(win, y++, x, "Rules:");
 		wattroff(win, A_UNDERLINE);
 		y++;
-		mvwprintw(win, y++ , x, "1. Tableaus build DOWN by ALTERNATE COLOR.");
+		mvwprintw(win, y++, x, "1. Tableaus build down by alternate color.");
 		mvwprintw(win, y++, x, "2. You have 4 'Free Cells' to hold any 1 card.");
 		mvwprintw(win, y++, x, "3. Moving sequences depends on empty cells available.");
 
@@ -71,14 +72,14 @@ void draw_game_description(WINDOW *win, const char *filename, int y, int x, int 
 		y++;
 		wattroff(win, A_BOLD | COLOR_PAIR(3));
 		mvwprintw(win, y++, x, "Fast-paced sequencing.");
-		mvwprintw(win, y++, x, "Goal: Clear the entire tableau into the waste pile.");
+		mvwprintw(win, y++, x, "Goal: Clear the tableau using the waste pile.");
 		y++;
 		wattron(win, A_UNDERLINE);
 		mvwprintw(win, y++, x, "Rules:");
 		wattroff(win, A_UNDERLINE);
 		y++;
-		mvwprintw(win, y++, x, "1. Play cards 1 rank HIGHER or LOWER than the waste.");
-		mvwprintw(win, y++, x, "2. Suits and colors do NOT matter.");
+		mvwprintw(win, y++, x, "1. Play cards 1 rank higher or lower than the waste.");
+		mvwprintw(win, y++, x, "2. Suits and colors do not matter.");
 		mvwprintw(win, y++, x, "3. Kings cannot wrap to Aces.");
 
 	} else if (strstr(filename, "simpleSimon") != NULL || strstr(filename, "SimpleSimon") != NULL) {
@@ -92,8 +93,8 @@ void draw_game_description(WINDOW *win, const char *filename, int y, int x, int 
 		mvwprintw(win, y++, x, "Rules:");
 		wattroff(win, A_UNDERLINE);
 		y++;
-		mvwprintw(win, y++, x, "1. Tableaus build DOWN regardless of suit.");
-		mvwprintw(win, y++, x, "2. You can ONLY move sequences of the SAME SUIT.");
+		mvwprintw(win, y++, x, "1. Tableaus build down regardless of suit.");
+		mvwprintw(win, y++, x, "2. You can only move sequences of the same suit.");
 
 	} else {
 		mvwprintw(win, y++, x, "=== %s ===", filename);
@@ -325,9 +326,9 @@ MenuChoice start_menu(char *chosen_file_out) {
 			mvprintw(yMax - 2, 2, "Use [j/k] to navigate, [Enter] to select");
 
 		} else if (current_state == STATE_PLAY || current_state == STATE_HELP) {
-			int box_w = xMax * 0.6;
-			if (box_w < 60)
-				box_w = 60;
+			int box_w = xMax * 0.8;
+			if (box_w < 76)
+				box_w = 76;
 			int box_h = yMax * 0.6;
 			if (box_h < 15)
 				box_h = 15;
@@ -372,7 +373,8 @@ MenuChoice start_menu(char *chosen_file_out) {
 					mvwprintw(popup_win, 2, 2, " (No files found) ");
 
 				if (limit > 0) {
-					draw_game_description(popup_win, current_list[list_sel], 2, split_x + 3, box_w - split_x - 4);
+					draw_game_description(popup_win, current_list[list_sel], 2, split_x + 3, box_w - split_x - 4,
+										  box_h);
 				}
 
 				mvwprintw(popup_win, box_h - 1, 2, " [q] Back  [1/2] Tabs  [Enter] Start ");
@@ -753,11 +755,11 @@ void read_command_timer(WINDOW *win, char *input_str, int max_len, Game_state *s
 		int secs = elapsed % 60;
 
 		wattron(win, A_BOLD);
-		mvwprintw(win, 0, xMax - 40, " Time: %02d:%02d | Moves: %3d | Score: %4d", mins, secs,
-				  state->stats->moves_count, state->stats->score);
+		mvwprintw(win, 0, xMax - 52, " Time: %02d:%02d | Moves: %3d | Score: %4d | Hints: %d/3", mins, secs,
+				  state->stats->moves_count, state->stats->score, 3 - state->stats->hints_used);
 		wattroff(win, A_BOLD);
 
-		wmove(win, yMax - 1, 12 + pos);
+		wmove(win, yMax - 2, 12 + pos);
 		wrefresh(win);
 
 		int ch = wgetch(win);
@@ -771,12 +773,16 @@ void read_command_timer(WINDOW *win, char *input_str, int max_len, Game_state *s
 		} else if (ch == KEY_BACKSPACE || ch == 127 || ch == '\b') {
 			if (pos > 0) {
 				pos--;
-				mvwprintw(win, yMax - 1, 12 + pos, " ");
-				wmove(win, yMax - 1, 12 + pos);
+				input_str[0] = '\0';
+				wmove(win, yMax - 2, 12 + pos);
+				wclrtoeol(win);
+
+				wmove(win, yMax - 2, 12 + pos);
 			}
 		} else if (pos < max_len - 1 && ch >= 32 && ch <= 126) {
 			input_str[pos++] = ch;
-			wprintw(win, "%c", ch);
+			// input_str[0] = '\0';
+			// wprintw(win, "%c", ch);
 		}
 	}
 	wtimeout(win, -1);
@@ -878,16 +884,16 @@ void run_ncurses_gui(Game_state *state) {
 
 		if (strlen(log_old) > 0) {
 			wattron(game_win, A_DIM);
-			mvwprintw(game_win, yMax - 3, 2, "  %s", log_old);
+			mvwprintw(game_win, yMax - 4, 2, "  %s", log_old);
 			wattroff(game_win, A_DIM);
 		}
 
 		wattron(game_win, COLOR_PAIR(2) | A_BOLD);
-		mvwprintw(game_win, yMax - 2, 2, ">> %s", log_new);
+		mvwprintw(game_win, yMax - 3, 2, ">> %s", log_new);
 		wattroff(game_win, COLOR_PAIR(2) | A_BOLD);
 
-		mvwprintw(game_win, yMax - 1, 2, "Command > ");
-
+		// wmove(game_win, yMax - 2, 2);
+		mvwprintw(game_win, yMax - 2, 2, "Command > ");
 		wrefresh(game_win);
 
 		echo();

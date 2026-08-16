@@ -55,9 +55,9 @@ GameCommand parse_command(char *input_text) {
 		cmd.type = CMD_UNDO;
 	else if (strcmp(keyword, "save") == 0) {
 		cmd.type = CMD_SAVE;
-	} else if (strcmp(keyword, "hint") == 0)
+	} else if (strcmp(keyword, "hint") == 0) {
 		cmd.type = CMD_HINT;
-	else
+	} else
 		cmd.type = CMD_UNRECOGNIZED;
 	return cmd;
 }
@@ -171,12 +171,16 @@ bool execute_command(Game_state *state, GameCommand cmd, char *feedback_msg) {
 	case CMD_HINT: {
 		MoveList ml = generate_hints(state);
 
-		if (ml.count > 0) {
+		if (state->stats->hints_used >= 3) {
+			snprintf(feedback_msg, 127, "No hints used remaining! (Max used)");
+			return true;
+		} else if (ml.count > 0) {
 			Move best = ml.moves[0].move;
 			if (state->stats != NULL) {
 				state->stats->hint_src_pile = best.src_pile;
 				state->stats->hint_dest_pile = best.dest_pile;
 				state->stats->hint_card_count = best.card_count;
+				state->stats->hints_used++;
 			}
 			if (best.card_count > 1)
 				snprintf(feedback_msg, 128, "Hint: Move a sequence of %d cards from pile %d to %d", best.card_count,

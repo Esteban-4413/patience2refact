@@ -16,6 +16,7 @@ typedef struct GameStats {
 	int hint_src_pile;
 	int hint_dest_pile;
 	int hint_card_count;
+	int hints_used;
 } GameStats;
 
 typedef struct {
