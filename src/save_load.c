@@ -167,7 +167,7 @@ Game_state *load_game(char *save_file) {
 	GameDefinition *current_def = load_patience(path);
 	state->definition = current_def;
 	if (current_def != NULL) {
-		printf("Game Definition set!\n");
+		// printf("Game Definition set!\n");
 	}
 
 	state->stats = malloc(sizeof(*state->stats));
@@ -196,8 +196,6 @@ Game_state *load_game(char *save_file) {
 	state->table_piles = malloc((state->pile_count + 1) * sizeof(Pile *));
 
 	// load_cards
-	printf("Loading de game...\n");
-	printf("Loading %d piles...\n", state->pile_count);
 	int i = 0;
 	while (i < state->pile_count) {
 		state->table_piles[i] = malloc(sizeof(Pile));
@@ -230,9 +228,6 @@ Game_state *load_game(char *save_file) {
 					pos += read;
 					read = 0;
 				}
-				printf("Pile %d- cards: %d\n", i, state->table_piles[i]->num_cards);
-			} else {
-				printf("buffer é 0 \n");
 			}
 		}
 		i++;

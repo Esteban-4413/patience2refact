@@ -184,7 +184,7 @@ GameDefinition *load_patience(char *ficheiro) {
 	char buffer[255];
 
 	if (paciencia == NULL) {
-		printf("Erro: Ficheiro '%s' nao existe.\n", ficheiro);
+		// printf("Erro: Ficheiro '%s' nao existe.\n", ficheiro);
 		return def;
 	}
 

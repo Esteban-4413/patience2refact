@@ -8,13 +8,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-GameDefinition *choose_patience(Game_state **current_state, char *folder);
+// GameDefinition *choose_patience(Game_state **current_state, char *folder);
 
-GameDefinition *load_option(Game_state **current_state, char *folder, char files[][256], int option);
+// GameDefinition *load_option(Game_state **current_state, char *folder, char files[][256], int option);
 
-int list_options(DIR *d, char files[][256]);
+// int list_options(DIR *d, char files[][256]);
 
-int input_patience(int count);
+// int input_patience(int count);
 
 Game_state *build_game_state(GameDefinition *def);
 

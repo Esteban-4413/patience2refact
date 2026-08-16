@@ -95,15 +95,3 @@ MoveList generate_hints(Game_state *current_state) {
 	}
 	return move_list;
 }
-
-void print_move_list(const MoveList *move_list) {
-	printf("--- MoveList (Count: %d) ---\n", move_list->count);
-
-	for (int i = 0; i < move_list->count; i++) {
-		const Move *m = &move_list->moves[i].move;
-		printf("[%d] sp = %d, c = %d, d = %d, card_count = %d, win_score = %d\n", i, m->src_pile, m->column_out,
-			   m->dest_pile, m->card_count, move_list->moves[i].win_score);
-	}
-
-	printf("----------------------------\n");
-}
