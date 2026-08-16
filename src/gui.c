@@ -215,16 +215,20 @@ const char *get_unicode_suit(Suit suit) {
 }
 
 typedef struct {
-	int x, y;
-	int speed;
+	float x, y, speed;
 	Suit suit;
 } RainDrop;
 
 void init_rain(RainDrop drops[], int max_x, int max_y) {
+	int spacing = max_x / (MAX_DROPS > 0 ? MAX_DROPS : 1);
+	if (spacing < 1)
+		spacing = 1;
 	for (int i = 0; i < MAX_DROPS; i++) {
-		drops[i].x = rand() % max_x;
-		drops[i].y = rand() % max_y;
-		drops[i].speed = (rand() % 2) + 1;
+		drops[i].x = (i * spacing) + (rand() % spacing);
+		if (drops[i].x >= max_x)
+			drops[i].x = max_x - 1;
+		drops[i].y = (float)(rand() % max_y);
+		drops[i].speed = 0.40f + ((float)rand() / (float)RAND_MAX) * 0.30f;
 		drops[i].suit = rand() % 4;
 	}
 }
@@ -233,13 +237,14 @@ void draw_rain(WINDOW *win, RainDrop drops[], int max_x, int max_y) {
 	for (int i = 0; i < MAX_DROPS; i++) {
 		drops[i].y += drops[i].speed;
 		if (drops[i].y >= max_y) {
-			drops[i].y = 0;
+			drops[i].y = 0.0f;
 			drops[i].x = rand() % max_x;
 			drops[i].suit = rand() % 4;
+			drops[i].speed = 0.40f + ((float)rand() / (float)RAND_MAX) * 0.30f;
 		}
 		int color = (drops[i].suit == SUIT_HEART || drops[i].suit == SUIT_DIAMOND) ? 1 : 3;
 		wattron(win, COLOR_PAIR(color) | A_BOLD);
-		mvwprintw(win, drops[i].y, drops[i].x, "%s", get_unicode_suit(drops[i].suit));
+		mvwprintw(win, (int)drops[i].y, drops[i].x, "%s", get_unicode_suit(drops[i].suit));
 		wattroff(win, COLOR_PAIR(color) | A_BOLD);
 	}
 }
@@ -422,6 +427,7 @@ MenuChoice start_menu(char *chosen_file_out) {
 			ch = wgetch(popup_win);
 			delwin(popup_win);
 		} else {
+			timeout(50);
 			ch = wgetch(stdscr);
 		}
 
@@ -813,8 +819,10 @@ void draw_victory_screen(WINDOW *win, Game_state *state) {
 
 	wtimeout(win, 50);
 
-	int ch;
-	while ((ch = wgetch(win)) == ERR) {
+	while (1) {
+		int ch = wgetch(win);
+		if (ch != ERR)
+			break;
 		werase(win);
 		draw_rain(win, drops, xMax, yMax);
 		box(win, 0, 0);
@@ -845,6 +853,8 @@ void run_ncurses_gui(Game_state *state) {
 	noecho();
 	keypad(stdscr, TRUE);
 	curs_set(0);
+
+	srand(time(NULL));
 
 	if (has_colors()) {
 		start_color();

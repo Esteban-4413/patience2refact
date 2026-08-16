@@ -175,7 +175,9 @@ bool execute_command(Game_state *state, GameCommand cmd, char *feedback_msg) {
 			snprintf(feedback_msg, 127, "No hints used remaining! (Max used)");
 			return true;
 		} else if (ml.count > 0) {
-			Move best = ml.moves[0].move;
+			int bag_size = (ml.count >= 3) ? 3 : ml.count;
+			int rand_idx = rand() & bag_size;
+			Move best = ml.moves[rand_idx].move;
 			if (state->stats != NULL) {
 				state->stats->hint_src_pile = best.src_pile;
 				state->stats->hint_dest_pile = best.dest_pile;
